@@ -1,3 +1,5 @@
 ports:
-    - port: 8080
-      protocol: "http"
+- port: 8080
+  protocol: http
+tasks:
+- command: yarn && yarn start
