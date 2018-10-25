@@ -1,2 +1,3 @@
-# timeline-chart
-A timeline / gantt chart library for large data (e.g. traces)
+[![Gitpod - Code Now](https://img.shields.io/badge/Gitpod-code%20now-blue.svg?longCache=true)](https://gitpod.io#https://github.com/theia-ide/timeline-chart)
+# Time Graph
+A time graph / gantt chart library for large data (e.g. traces)
