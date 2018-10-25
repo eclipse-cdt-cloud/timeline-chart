@@ -1,11 +1,65 @@
-import { TimeLineChart } from "./timeline-chart";
-import { TimeAxis } from "./time-axis";
-import { TimelineView } from "./timeline-view";
+import { TimeGraph, TimeGraphEntry } from "./time-graph";
 
-const chart = new TimeLineChart('main');
-const timeAxis = new TimeAxis();
-const timelineView1 = new TimelineView();
-const timelineView2 = new TimelineView();
-timeAxis.addTimelineView('tlv1', timelineView1);
-timeAxis.addTimelineView('tlv2', timelineView2);
-chart.addTimeAxis('ta1', timeAxis);
+const timeGraphEntry: TimeGraphEntry = {
+    id: 'testEntry',
+    name: 'EntryTest',
+    range: {
+        startTime: 200,
+        endTime: 6000
+    },
+    rows: [
+        {
+            states: [
+                {
+                    label: 'state1',
+                    range: {
+                        startTime: 450,
+                        endTime: 550
+                    }
+                },
+                {
+                    label: 'state2',
+                    range: {
+                        startTime: 650,
+                        endTime: 1550
+                    }
+                },
+                {
+                    label: 'state3',
+                    range: {
+                        startTime: 2650,
+                        endTime: 4550
+                    }
+                }
+            ]
+        },
+        {
+            states: [
+                {
+                    label: 'state2.1',
+                    range: {
+                        startTime: 1450,
+                        endTime: 2550
+                    }
+                },
+                {
+                    label: 'state2.2',
+                    range: {
+                        startTime: 2650,
+                        endTime: 2750
+                    }
+                },
+                {
+                    label: 'state2.3',
+                    range: {
+                        startTime: 4650,
+                        endTime: 5550
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+const chart = new TimeGraph('main');
+chart.setEntry(timeGraphEntry);

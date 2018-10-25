@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: ['./src/index.ts'],
     devtool: "source-map",
     devServer: {
         contentBase: path.join(__dirname, 'example'),
