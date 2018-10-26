@@ -13,27 +13,27 @@ export class TimeGraphRowView extends TimeGraphComponent {
     protected width: number;
 
     constructor(
-        protected idx: number,
+        protected cid: string,
+        protected rowIdx: number,
         protected row: TimeGraphRow,
         protected range: TimeGraphRange
     ) {
-        super();
+        super(cid);
         this.height = 20;
-        this.ypos =(this.height * this.idx) + this.height/2;
+        this.ypos = (this.height * this.rowIdx) + this.height / 2;
         this.width = this.range.endTime - this.range.startTime;
     }
 
     render() {
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, this.ypos);
-        this.ctx.lineTo(this.width, this.ypos);
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-        this.ctx.stroke();
+        this.line({
+            start: { x: 0, y: this.ypos },
+            end: { x: this.width, y: this.ypos },
+            color: 'rgba(0,0,0,0.2)'
+        });
 
         this.row.states.forEach(state => {
-            const timeGraphState = new TimeGraphStateView(state, this.ypos, this.range);
-            timeGraphState.setContext(this.ctx);
+            const timeGraphState = new TimeGraphStateView(this.id + state.label + state.range.startTime, state, this.ypos, this.range);
+            timeGraphState.context = this._ctx;
             timeGraphState.render();
         });
     }

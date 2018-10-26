@@ -1,15 +1,15 @@
-import { TimeAxisController } from "./time-axis-controller";
+import { TimeGraphComponent } from "./time-graph-component";
 
-export class TimeAxis {
+export class TimeAxis extends TimeGraphComponent {
 
-    protected readonly _controller: TimeAxisController;
-
-    constructor() {
-        this._controller = new TimeAxisController(this);
-    }
-
-    get controller(): TimeAxisController {
-        return this._controller;
+    render() {
+        this.rect({
+            color: 'rgb(200,200,200)',
+            h: this._ctx.canvas.height,
+            w: 6000, // TODO magic number width of the time-graph
+            x: 0,
+            y: 0
+        });
     }
 
 }

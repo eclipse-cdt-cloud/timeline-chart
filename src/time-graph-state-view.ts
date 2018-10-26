@@ -13,8 +13,8 @@ export class TimeGraphStateView extends TimeGraphComponent {
     protected y: number;
     protected height: number;
 
-    constructor(protected state: TimeGraphState, yPosition: number, protected range: TimeGraphRange) {
-        super();
+    constructor(protected cid: string, protected state: TimeGraphState, yPosition: number, protected range: TimeGraphRange) {
+        super(cid);
 
         // TODO this calculation of the initial offset must be calculated differently later
         this.start = state.range.startTime - range.startTime;
@@ -27,7 +27,12 @@ export class TimeGraphStateView extends TimeGraphComponent {
     }
 
     render() {
-        this.ctx.fillStyle = 'rgb(200,0,0)';
-        this.ctx.fillRect(this.start, this.y, this.end-this.start, this.height);
+        this.rect({
+            color: 'rgb(200,0,0)',
+            x: this.start,
+            y: this.y,
+            w: this.end-this.start,
+            h: this.height
+        });
     }
 }
