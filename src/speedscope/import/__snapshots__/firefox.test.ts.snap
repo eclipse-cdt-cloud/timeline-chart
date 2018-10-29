@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`importFromFirefox 1`] = `
+Object {
+  "frames": Array [
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/simple.js",
+      "key": "a (file:///Users/jlfwong/code/speedscope/sample/simple.js:1)",
+      "line": 1,
+      "name": "a",
+      "selfWeight": 0,
+      "totalWeight": 31.992820999992546,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/simple.js",
+      "key": "b (file:///Users/jlfwong/code/speedscope/sample/simple.js:8)",
+      "line": 8,
+      "name": "b",
+      "selfWeight": 0,
+      "totalWeight": 20.971447000018088,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/simple.js",
+      "key": "d (file:///Users/jlfwong/code/speedscope/sample/simple.js:20)",
+      "line": 20,
+      "name": "d",
+      "selfWeight": 31.992820999992546,
+      "totalWeight": 31.992820999992546,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/simple.js",
+      "key": "c (file:///Users/jlfwong/code/speedscope/sample/simple.js:14)",
+      "line": 14,
+      "name": "c",
+      "selfWeight": 0,
+      "totalWeight": 11.021373999974458,
+    },
+  ],
+  "name": "simple-firefox.json",
+  "stacks": Array [
+    " 2.04ms",
+    "a;b;d 989.53µs",
+    "a;c;d 1.02ms",
+    "a;b;d 982.04µs",
+    "a;c;d 1.02ms",
+    "a;b;d 7.00ms",
+    "a;c;d 2.00ms",
+    "a;b;d 981.44µs",
+    "a;c;d 2.00ms",
+    "a;b;d 2.00ms",
+    "a;c;d 3.02ms",
+    "a;b;d 4.03ms",
+    "a;c;d 1.96ms",
+    "a;b;d 4.99ms",
+  ],
+}
+`;
+
+exports[`importFromFirefox ignore self-hosted 1`] = `
+Object {
+  "frames": Array [
+    Frame {
+      "col": undefined,
+      "file": "http://localhost:8000/simple.js:1",
+      "key": "alpha (http://localhost:8000/simple.js:1:14)",
+      "line": 14,
+      "name": "alpha",
+      "selfWeight": 0,
+      "totalWeight": 26.983816999942064,
+    },
+    Frame {
+      "col": undefined,
+      "file": "http://localhost:8000/simple.js:14",
+      "key": "delta (http://localhost:8000/simple.js:14:14)",
+      "line": 14,
+      "name": "delta",
+      "selfWeight": 0,
+      "totalWeight": 11.946324001066387,
+    },
+    Frame {
+      "col": undefined,
+      "file": "http://localhost:8000/simple.js:20",
+      "key": "gamma (http://localhost:8000/simple.js:20:14)",
+      "line": 14,
+      "name": "gamma",
+      "selfWeight": 26.983816999942064,
+      "totalWeight": 26.983816999942064,
+    },
+    Frame {
+      "col": undefined,
+      "file": "http://localhost:8000/simple.js:8",
+      "key": "beta (http://localhost:8000/simple.js:8:13)",
+      "line": 13,
+      "name": "beta",
+      "selfWeight": 0,
+      "totalWeight": 15.037492998875678,
+    },
+  ],
+  "name": "simple-firefox.json",
+  "stacks": Array [
+    " 4.61ms",
+    "alpha;delta;gamma 999.57µs",
+    "alpha;beta;gamma 2.01ms",
+    "alpha;delta;gamma 1.00ms",
+    "alpha;beta;gamma 995.68µs",
+    "alpha;delta;gamma 996.27µs",
+    "alpha;beta;gamma 4.01ms",
+    "alpha;delta;gamma 2.02ms",
+    "alpha;beta;gamma 959.44µs",
+    "alpha;delta;gamma 2.01ms",
+    "alpha;beta;gamma 4.01ms",
+    "alpha;delta;gamma 959.28µs",
+    "alpha;beta;gamma 2.03ms",
+    "alpha;delta;gamma 3.96ms",
+    "alpha;beta;gamma 1.02ms",
+  ],
+}
+`;
+
+exports[`importFromFirefox ignore self-hosted: indexToView 1`] = `0`;
+
+exports[`importFromFirefox ignore self-hosted: profileGroup.name 1`] = `"simple-firefox.json"`;
+
+exports[`importFromFirefox recursion 1`] = `
+Object {
+  "frames": Array [
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js",
+      "key": "main (file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js:31)",
+      "line": 31,
+      "name": "main",
+      "selfWeight": 1.1944820000207983,
+      "totalWeight": 11.149112000013702,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js",
+      "key": "alpha (file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js:1)",
+      "line": 1,
+      "name": "alpha",
+      "selfWeight": 0,
+      "totalWeight": 9.954629999992903,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js",
+      "key": "beta (file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js:10)",
+      "line": 10,
+      "name": "beta",
+      "selfWeight": 0,
+      "totalWeight": 8.962158999987878,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js",
+      "key": "delta (file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js:17)",
+      "line": 17,
+      "name": "delta",
+      "selfWeight": 0,
+      "totalWeight": 6.859736999962479,
+    },
+    Frame {
+      "col": undefined,
+      "file": "file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js",
+      "key": "gamma (file:///Users/jlfwong/code/speedscope/sample/programs/javascript/recursion.js:23)",
+      "line": 23,
+      "name": "gamma",
+      "selfWeight": 9.954629999992903,
+      "totalWeight": 9.954629999992903,
+    },
+  ],
+  "name": "recursion.json",
+  "stacks": Array [
+    " 1.71ms",
+    "main;alpha;beta;alpha;beta;alpha;beta;alpha;delta;gamma 998.89µs",
+    "main 1.19ms",
+    "main;alpha;beta;alpha;delta;gamma 1.83ms",
+    "main;alpha;beta;alpha;beta;alpha;beta;gamma 1.16ms",
+    "main;alpha;beta;alpha;delta;gamma 1.84ms",
+    "main;alpha;beta;alpha;beta;alpha;beta;alpha;gamma 964.81µs",
+    "main;alpha;beta;alpha;beta;alpha;beta;alpha;delta;gamma 1.19ms",
+    "main;alpha;beta;gamma 965.25µs",
+    "main;alpha;delta;gamma 992.47µs",
+  ],
+}
+`;
+
+exports[`importFromFirefox recursion: indexToView 1`] = `0`;
+
+exports[`importFromFirefox recursion: profileGroup.name 1`] = `"recursion.json"`;
+
+exports[`importFromFirefox: indexToView 1`] = `0`;
+
+exports[`importFromFirefox: profileGroup.name 1`] = `"simple-firefox.json"`;
