@@ -1,86 +1,123 @@
 import { TimeGraphRow, TimeGraphRowView } from "./time-graph-row-view";
-import { TimeAxis } from "./time-axis";
-import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeAxisScale } from "./time-axis-scale";
+import { TimeGraphController } from "./time-graph-controller";
+import * as PIXI from "pixi.js";
 
 export interface TimeGraphRange {
-    startTime: number
-    endTime: number
+    start: number
+    end: number
 }
 
-export interface TimeGraphEntry {
+export interface TimeGraphModel {
     id: string
     name: string
     range: TimeGraphRange
     rows: TimeGraphRow[]
 }
 
-export interface TimeGraphContext {
+export interface TimeGraphContextOptions {
     id: string
     width: number
     height: number
+    backgroundColor?: number
 }
+
+export type TimeGraphContainer = PIXI.Container
+export type TimeGraphApplication = PIXI.Application;
 
 export class TimeGraph {
 
     protected container?: HTMLElement;
+    protected timeGraphWidth: number;
+    protected containerWidth: number;
+    protected timeGraphController: TimeGraphController;
+    protected timeAxisApplication?: TimeGraphApplication;
+    protected timeGraphRowsApplication?: TimeGraphApplication;
+    protected timeAxis: TimeAxisScale;
 
-    protected timeGraphEntries: Map<string, TimeGraphEntry> = new Map();
-
-    constructor(id: string) {
+    constructor(id: string, protected model: TimeGraphModel) {
         this.container = document.getElementById(id) || undefined;
         if (!this.container) {
             throw (`No container with id ${id} available.`);
         }
+
+        this.timeGraphWidth = this.model.range.end;
+        this.containerWidth = this.container.clientWidth;
+        this.timeGraphController = new TimeGraphController(this.containerWidth, this.timeGraphWidth);
+
+        this.timeAxisApplication = this.getNewApplication({
+            id: 'timeAxis_' + this.model.id,
+            height: 30,
+            width: this.timeGraphWidth,
+            backgroundColor: 0xAA30f0
+        });
+        if (this.timeAxisApplication) {
+            this.timeAxis = new TimeAxisScale('timeAxis_' + this.model.id, this.timeAxisApplication, this.timeGraphController);
+        }
+
+        this.timeGraphRowsApplication = this.getNewApplication({
+            id: 'timeGraphRows_' + this.model.id,
+            width: this.timeGraphWidth,
+            height: 200,
+            backgroundColor: 0xFFFFFF
+        });
+
+        // let fw = true;
+        // setInterval(() => {
+        //     if (this.timeGraphController.zoomFactor < 2 && fw) {
+        //         this.timeGraphController.zoomFactor += 0.01;
+        //     } else {
+        //         fw = false;
+        //         if (this.timeGraphController.zoomFactor > 0.02) {
+        //             this.timeGraphController.zoomFactor -= 0.01;
+        //         } else {
+        //             fw = true;
+        //         }
+        //     }
+        //     this.render();
+        // }, 10);
+
+        this.timeGraphController.onZoomChanged(() => {
+            this.render();
+        });
+        this.timeGraphController.onPositionChanged(() => {
+            this.render();
+        });
     }
 
-    protected getNewContext(config: TimeGraphContext): CanvasRenderingContext2D | undefined {
+    protected getNewApplication(config: TimeGraphContextOptions): TimeGraphApplication | undefined {
         if (this.container) {
             const canvas: HTMLCanvasElement = document.createElement('canvas');
             canvas.width = config.width;
             canvas.height = config.height;
             canvas.id = config.id;
             canvas.className = 'time-graph-canvas';
+            const application = new PIXI.Application({
+                width: config.width,
+                height: config.height,
+                view: canvas,
+                backgroundColor: config.backgroundColor || 0x000000
+            });
             this.container.appendChild(canvas);
-            return canvas.getContext('2d') || undefined;
+            application.stage.height = config.height;
+            return application;
         }
     }
 
     render() {
-        // TODO does this belong to the example (index.ts)??
-        this.timeGraphEntries.forEach(timeGraphEntry => {
-            const timeGraphStateController = new TimeGraphStateController();
-            const w = timeGraphEntry.range.endTime;
-            const timeAxisContext = this.getNewContext({
-                id: 'timeAxis_' + timeGraphEntry.id,
-                height: 30,
-                width: w
-            });
-            if (timeAxisContext) {
-                const timeAxis = new TimeAxis('timeAxis_' + timeGraphEntry.id);
-                timeGraphStateController.addComponent(timeAxis);
-                // TODO components should be added automatically...maybe by injecting the controller in component and there we add it???
-                // Or - better - the component instance gets created in the controller. And then...World domination! HA HA HAAA
-                // the context should be created there, if a component should have its own context (Flag: ownContext: boolean)
-                timeAxis.context = timeAxisContext;
-                timeAxis.render();
-            }
-            const timeGraphRowsContext = this.getNewContext({
-                id: 'timeGraphRows_' + timeGraphEntry.id,
-                width: w,
-                height: 200
-            });
-            timeGraphEntry.rows.forEach((row: TimeGraphRow, idx: number) => {
-                const timeGraphRow = new TimeGraphRowView(timeGraphEntry.id + 'row' + idx, idx, row, timeGraphEntry.range);
-                timeGraphStateController.addComponent(timeGraphRow); // TODO components should be added automatically...maybe by injecting the controller in component and there we add it???
-                if (timeGraphRowsContext) {
-                    timeGraphRow.context = timeGraphRowsContext;
-                    timeGraphRow.render();
-                }
-            });
-        })
-    }
+        this.timeAxis.clear();
+        this.timeGraphController.addComponent(this.timeAxis);
+        this.timeAxis.render();
 
-    setEntry(timeGraphEntry: TimeGraphEntry) {
-        this.timeGraphEntries.set(timeGraphEntry.id, timeGraphEntry);
+        if(this.timeGraphRowsApplication){
+            this.timeGraphRowsApplication.stage.removeChildren();
+        }
+        this.model.rows.forEach((row: TimeGraphRow, idx: number) => {
+            if (this.timeGraphRowsApplication) {
+                const timeGraphRow = new TimeGraphRowView(this.model.id + 'row' + idx, this.timeGraphRowsApplication, idx, row, this.model.range, this.timeGraphController);
+                this.timeGraphController.addComponent(timeGraphRow);
+                timeGraphRow.render();
+            }
+        });
     }
 }

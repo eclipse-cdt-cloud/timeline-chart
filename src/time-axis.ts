@@ -1,15 +1,31 @@
-import { TimeGraphComponent } from "./time-graph-component";
+import { TimeGraphContextOptions, TimeGraphContainer } from "./time-graph";
 
-export class TimeAxis extends TimeGraphComponent {
+export class TimeAxis {
 
-    render() {
-        this.rect({
-            color: 'rgb(200,200,200)',
-            h: this._ctx.canvas.height,
-            w: 6000, // TODO magic number width of the time-graph
-            x: 0,
-            y: 0
-        });
+    protected application: PIXI.Application;
+
+    constructor(config: TimeGraphContextOptions) {
+            const canvas: HTMLCanvasElement = document.createElement('canvas');
+            canvas.width = config.width;
+            canvas.height = config.height;
+            canvas.id = config.id;
+            canvas.className = 'time-graph-canvas';
+            this.application = new PIXI.Application({
+                width: config.width,
+                height: config.height,
+                view: canvas,
+                backgroundColor: config.backgroundColor || 0x000000
+            });
+            
     }
+
+    getViewElement(): HTMLCanvasElement {
+        return this.application.view;
+    }
+
+    getStage(): TimeGraphContainer {
+        return this.application.stage;
+    }
+
 
 }

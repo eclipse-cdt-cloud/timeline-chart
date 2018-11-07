@@ -1,4 +1,4 @@
-import { TimeAxis } from "./time-axis";
+import { TimeAxisScale } from "./time-axis-scale";
 import { TimeGraphRange } from "./time-graph";
 
 export class TimeAxisController {
@@ -6,7 +6,7 @@ export class TimeAxisController {
     protected totalRange: TimeGraphRange;
     protected visibleRange: TimeGraphRange;
 
-    constructor(protected timeAxis: TimeAxis) {
+    constructor(protected timeAxis: TimeAxisScale) {
 
     }
 }

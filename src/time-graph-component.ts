@@ -1,12 +1,23 @@
-export interface TimeGraphRect {
-    color?: string
+import { TimeGraphContainer, TimeGraphApplication } from "./time-graph";
+import { TimeGraphController } from "./time-graph-controller";
+
+export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
+export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEvent) => void;
+export type TimeGraphInteractionHandlerMap = Map<TimeGraphInteractionType, TimeGraphInteractionHandler>
+
+export interface TimeGraphDisplayObject {
+    color?: number
+    opacity?: number
+}
+
+export interface TimeGraphRect extends TimeGraphDisplayObject {
     x: number
     y: number
     w: number
     h: number
 }
 
-export interface TimeGraphLine {
+export interface TimeGraphLine extends TimeGraphDisplayObject {
     start: {
         x: number
         y: number
@@ -16,44 +27,65 @@ export interface TimeGraphLine {
         y: number
     }
     width?: number
-    color?: string
 }
 
 export abstract class TimeGraphComponent {
 
-    protected _ctx: CanvasRenderingContext2D;
-    private _id: string;
+    protected _ctx: TimeGraphContainer;
+    protected _id: string;
+    protected _controller: TimeGraphController;
+    protected displayObject: PIXI.Graphics;
+    protected options: TimeGraphDisplayObject;
 
-    constructor(id: string) {
+    constructor(id: string, protected app: TimeGraphApplication, timeGraphController: TimeGraphController) {
         this._id = id;
+        this._ctx = app.stage;
+        this._controller = timeGraphController;
+        this.displayObject = new PIXI.Graphics();
+        this._ctx.addChild(this.displayObject);
     }
 
     get id(): string {
         return this._id;
     }
 
-    set context(ctx: CanvasRenderingContext2D) {
-        this._ctx = ctx;
+    get context(): TimeGraphContainer {
+        return this._ctx;
     }
 
-    get context(): CanvasRenderingContext2D {
-        return this._ctx;
+    get controller(): TimeGraphController {
+        return this._controller;
     }
 
     abstract render(): void;
 
-    rect(opts: TimeGraphRect) {
-        const {x,y,w,h, color} = opts;
-        this._ctx.fillStyle = color || 'rgb(0,0,0)';
-        this._ctx.fillRect(x,y,w,h);
+    clear(){
+        this.displayObject.clear();
     }
 
-    line(opts: TimeGraphLine){
-        this._ctx.beginPath();
-        this._ctx.moveTo(opts.start.x, opts.start.y);
-        this._ctx.lineTo(opts.end.x, opts.end.y);
-        this._ctx.lineWidth = opts.width || 1;
-        this._ctx.strokeStyle = opts.color || 'rgb(0,0,0)';
-        this._ctx.stroke();
+    rect(opts: TimeGraphRect) {
+        const { x, y, w, h, color } = opts;
+        const c = this.controller;
+        const calcX = (x * c.zoomFactor) + c.positionOffset.x ;
+        const calcW = w * c.zoomFactor;
+        this.displayObject.beginFill((color || 0x000000));
+        this.displayObject.drawRect(calcX, y, calcW, h);
+        this.displayObject.endFill();
+    }
+
+    line(opts: TimeGraphLine) {
+        const { width, color } = opts;
+        this.displayObject.lineStyle(width || 1, color || 0x000000);
+        this.displayObject.moveTo(opts.start.x, opts.start.y);
+        this.displayObject.lineTo((opts.end.x * this.controller.zoomFactor), opts.end.y);
+    }
+
+    protected addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler) {
+        this.displayObject.interactive = true;
+        this.displayObject.on(event, (e: PIXI.interaction.InteractionEvent) => {
+            if (handler) {
+                handler(e);
+            }
+        });
     }
 }
