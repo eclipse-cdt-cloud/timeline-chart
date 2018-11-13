@@ -40,7 +40,7 @@ export class TimeAxisScale extends TimeGraphComponent {
             this.mouseStartX = ev.x;
             this.graphWidthStart = this.controller.graphWidth;
             this.zoom((ev.deltaY / 100) * (-1));
-            this.setXOffset();
+            this.setXOffset(ev.deltaX * (-1));
             this.setZoomAndPosition();
             return false;
         });
