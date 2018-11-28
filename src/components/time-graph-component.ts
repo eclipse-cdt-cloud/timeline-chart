@@ -6,6 +6,9 @@ export type TimeGraphComponentOptions = {}
 export interface TimeGraphElementStyle {
     color?: number
     opacity?: number
+    borderWidth?: number
+    borderColor?: number
+    borderRadius?: number
 }
 export interface TimeGraphElementPosition {
     x: number
@@ -58,24 +61,25 @@ export abstract class TimeGraphComponent {
     abstract render(): void;
 
     protected rect(opts: TimeGraphStyledRect) {
-        const { position, width, height, color, opacity } = opts;
+        const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
+        this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0x000000), (opacity !== undefined ? opacity : 1));
-        this.displayObject.drawRect(position.x, position.y, width, height);
+        this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
         this.displayObject.endFill();
     }
 
     protected hline(opts: TimeGraphHorizontalLine) {
         const { position, width, thickness, color } = opts;
         this.displayObject.lineStyle(thickness || 1, color || 0x000000);
-        this.displayObject.moveTo(position.x, position.y);
-        this.displayObject.lineTo(position.x + width, position.y);
+        this.displayObject.moveTo(position.x, position.y + 0.5);
+        this.displayObject.lineTo(position.x + width, position.y + 0.5);
     }
 
     protected vline(opts: TimeGraphVerticalLine) {
         const { position, height, thickness, color } = opts;
         this.displayObject.lineStyle(thickness || 1, color || 0x000000);
-        this.displayObject.moveTo(position.x, position.y);
-        this.displayObject.lineTo(position.x, position.y + height);
+        this.displayObject.moveTo(position.x + 0.5, position.y);
+        this.displayObject.lineTo(position.x + 0.5, position.y + height);
     }
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {

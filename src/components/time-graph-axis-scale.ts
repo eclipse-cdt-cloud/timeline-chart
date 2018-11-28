@@ -79,9 +79,5 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             start,
             end
         }
-
-
     }
-
-
 }

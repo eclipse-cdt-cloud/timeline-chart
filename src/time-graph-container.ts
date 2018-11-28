@@ -31,7 +31,9 @@ export class TimeGraphContainer {
             height: config.height,
             view: canvas,
             backgroundColor: config.backgroundColor,
-            transparent: config.transparent
+            transparent: config.transparent,
+            antialias: true,
+            roundPixels: false
         });
         application.stage.height = config.height;
 

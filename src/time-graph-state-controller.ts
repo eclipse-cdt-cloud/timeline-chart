@@ -5,7 +5,8 @@ export class TimeGraphStateController {
         x: number;
         y: number;
     };
-    canvasWidth: number;
+    readonly canvasWidth: number;
+    readonly canvasHeight: number;
 
     protected _zoomFactor: number;
     protected _initialZoomFactor: number;
@@ -19,6 +20,7 @@ export class TimeGraphStateController {
 
     constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
         this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
         this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
         this.oldPositionOffset = { x: 0, y: 0 };

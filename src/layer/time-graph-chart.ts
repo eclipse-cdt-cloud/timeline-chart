@@ -1,4 +1,4 @@
-import { TimeGraphRowElement } from "../components/time-graph-row-element";
+import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel } from "../time-graph-model";
 import { TimeGraphLayer } from "./time-graph-layer";
@@ -16,7 +16,7 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected rows: TimeGraphRowModel[];
     protected rowHeight: number;
     protected rowCount: number;
-    protected rowElementStyleHook: (el: TimeGraphRowElementModel) => { color?: number, height?: number } | undefined;
+    protected rowElementStyleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined;
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElement: TimeGraphRowElement;
     protected selectedElementChangedHandler: ((el:TimeGraphRowElement)=>void)[];
@@ -32,7 +32,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedRowChangedHandler = [];
     }
 
-    registerRowElementStyleHook(styleHook: (el: TimeGraphRowElementModel) => { color?: number, height?: number } | undefined) {
+    registerRowElementStyleHook(styleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined) {
         this.rowElementStyleHook = styleHook;
     }
 
@@ -67,7 +67,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
                 x: relativeStartPosition * this.stateController.zoomFactor,
-                y: (height * this.rows.length) + height / 2
+                y: (height * this.rows.length) + (height / 2)
             },
             width: range * this.stateController.zoomFactor
         }, this.rowCount);

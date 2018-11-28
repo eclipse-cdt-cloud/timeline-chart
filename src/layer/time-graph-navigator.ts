@@ -22,7 +22,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 
         if (this.unitController.selectionRange) {
             const selectionOpts: TimeGraphStyledRect = {
-                color: 0xf6f666,
+                color: 0xb7b799,
                 height: this.canvas.height,
                 opacity: 0.5,
                 position: {
@@ -55,7 +55,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent {
             height: 20,
             position,
             width,
-            color: 0x11aa11
+            color: 0x777769
         })
     }
 }
