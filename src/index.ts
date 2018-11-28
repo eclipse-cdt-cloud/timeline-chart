@@ -107,27 +107,43 @@ timeGraphChartLayer.addRows(timeGraph.rows, rowHeight);
 const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors');
 timeGraphChartContainer.addLayer(timeGraphChartCursors);
 timeGraphChartCursors.onNavigateLeft(() => {
-    const selectedRowIndex = selectedElement.row.rowIndex;
+    const selectedRowIndex = selectedElement ? selectedElement.row.rowIndex : 0;
     const row = timeGraph.rows[selectedRowIndex];
     const states = row.states;
     const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
-        return rowElementModel.range.start >= unitController.selectionRange.start;
+        const selStart = unitController.selectionRange ? unitController.selectionRange.start : 0;
+        return rowElementModel.range.start >= selStart;
     });
+    let newPos = 0;
+    let elIndex = 0;
     if (nextIndex > 0) {
-        const newPos = states[nextIndex - 1].range.start;
-        unitController.selectionRange = { start: newPos, end: newPos };
+        elIndex = nextIndex - 1;
+    } else if (nextIndex === -1) {
+        elIndex = states.length - 1;
+    }
+    newPos = states[elIndex].range.start;
+    unitController.selectionRange = { start: newPos, end: newPos };
+    const elementToSelect = timeGraphChartLayer.getElementByIndices(selectedRowIndex, elIndex);
+    if (elementToSelect) {
+        timeGraphChartLayer.selectRowElement(elementToSelect);
     }
 });
 timeGraphChartCursors.onNavigateRight(() => {
-    const selectedRowIndex = selectedElement.row.rowIndex;
+    const selectedRowIndex = selectedElement ? selectedElement.row.rowIndex : 0;
     const row = timeGraph.rows[selectedRowIndex];
     const states = row.states;
     const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
-        return rowElementModel.range.start > unitController.selectionRange.start;
+        const selStart = unitController.selectionRange ? unitController.selectionRange.start : 0;
+        return rowElementModel.range.start > selStart;
     });
+    let elementToSelect;
     if (nextIndex < states.length) {
         const newPos = states[nextIndex].range.start;
         unitController.selectionRange = { start: newPos, end: newPos };
+        elementToSelect = timeGraphChartLayer.getElementByIndices(selectedRowIndex, nextIndex);
+    }
+    if (elementToSelect) {
+        timeGraphChartLayer.selectRowElement(elementToSelect);
     }
 });
 

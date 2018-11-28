@@ -2,6 +2,7 @@ import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/tim
 import { TimeGraphRow } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel } from "../time-graph-model";
 import { TimeGraphLayer } from "./time-graph-layer";
+import { TimeGraphComponent } from "../components/time-graph-component";
 
 export interface TimeGraphRowElementMouseInteractions {
     click?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
@@ -15,7 +16,6 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     protected rows: TimeGraphRowModel[];
     protected rowHeight: number;
-    protected rowCount: number;
     protected rowElementStyleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined;
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElement: TimeGraphRowElement;
@@ -24,7 +24,6 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected selectedRowChangedHandler: ((el:TimeGraphRow)=>void)[];
 
     protected init() {
-        this.rowCount = 0;
         this.unitController.onViewRangeChanged(() => {
             this.update();
         });
@@ -60,8 +59,8 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedRowChangedHandler.forEach(handler => handler(this.selectedRow));
     }
 
-    protected addRow(row: TimeGraphRowModel, height: number) {
-        const rowId = 'row_' + this.rowCount;
+    protected addRow(row: TimeGraphRowModel, height: number, rowIndex: number) {
+        const rowId = 'row' +  rowIndex;
         const range = row.range.end - row.range.start;
         const relativeStartPosition = row.range.start - this.unitController.viewRange.start;
         const rowComponent = new TimeGraphRow(rowId, {
@@ -70,11 +69,11 @@ export class TimeGraphChart extends TimeGraphLayer {
                 y: (height * this.rows.length) + (height / 2)
             },
             width: range * this.stateController.zoomFactor
-        }, this.rowCount);
+        }, rowIndex);
         this.addChild(rowComponent);
         this.rows.push(row);
 
-        row.states.forEach((rowElement: TimeGraphRowElementModel, idx: number) => {
+        row.states.forEach((rowElement: TimeGraphRowElementModel, elementIndex: number) => {
             const relativeElementStartPosition = rowElement.range.start - this.unitController.viewRange.start;
             const relativeElementEndPosition = rowElement.range.end - this.unitController.viewRange.start;
             const start = (relativeElementStartPosition * this.stateController.zoomFactor) + this.stateController.positionOffset.x;
@@ -89,11 +88,19 @@ export class TimeGraphChart extends TimeGraphLayer {
                     data: rowElement.data
                 }
                 const style = this.rowElementStyleHook ? this.rowElementStyleHook(newRowElement) : undefined;
-                const el = new TimeGraphRowElement(rowId + '_el_' + idx, newRowElement, rowComponent, style);
+                const el = new TimeGraphRowElement('el_' +  rowIndex + '_' + elementIndex, newRowElement, rowComponent, style);
                 this.addElementInteractions(el);
                 this.addChild(el);
             }
         });
+    }
+
+    getElementByIndices(rowIdx: number, elIdx: number):TimeGraphRowElement | undefined {
+        const element: TimeGraphComponent | undefined = this.children.find((child)=>{
+            const id = 'el_' + rowIdx + '_' + elIdx;
+            return child.id === id;
+        });
+        return element as TimeGraphRowElement;
     }
 
     selectRowElement(el: TimeGraphRowElement){
@@ -143,10 +150,8 @@ export class TimeGraphChart extends TimeGraphLayer {
         }
         this.rowHeight = height;
         this.rows = [];
-        this.rowCount = 0;
-        rows.forEach(row => {
-            this.addRow(row, height);
-            this.rowCount++;
+        rows.forEach((row:TimeGraphRowModel, index: number) => {
+            this.addRow(row, height, index);
         })
     }
 

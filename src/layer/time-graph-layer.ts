@@ -6,7 +6,7 @@ export abstract class TimeGraphLayer {
     protected canvas: HTMLCanvasElement;
     protected stateController: TimeGraphStateController;
     protected unitController: TimeGraphUnitController;
-    protected children: PIXI.DisplayObject[];
+    protected children: TimeGraphComponent[];
     protected stage: PIXI.Container;
 
     constructor(protected id: string) {
@@ -19,7 +19,7 @@ export abstract class TimeGraphLayer {
         }
         child.render();
         this.stage.addChild(child.displayObject);
-        this.children.push(child.displayObject);
+        this.children.push(child);
     }
 
     /**
@@ -34,7 +34,7 @@ export abstract class TimeGraphLayer {
     }
 
     protected removeChildren() {
-        this.children.forEach(child => this.stage.removeChild(child));
+        this.children.forEach(child => this.stage.removeChild(child.displayObject));
     }
 
     protected init() { }
