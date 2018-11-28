@@ -1,5 +1,5 @@
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
-import { TimeGraphComponent, TimeGraphStyledRect } from "../components/time-graph-component";
+import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphInteractionHandler } from "../components/time-graph-component";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphLayer } from "./time-graph-layer";
@@ -44,8 +44,36 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 }
 
 export class TimeGraphNavigatorHandle extends TimeGraphComponent {
+
+    protected mouseIsDown: boolean;
+    protected mouseStartX: number;
+    protected oldViewStart: number;
+
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
+        this.addEvent('mousedown', event => {
+            this.mouseStartX = event.data.global.x;
+            this.oldViewStart = this.unitController.viewRange.start;
+            this.mouseIsDown = true;
+        }, this._displayObject);
+        this.addEvent('mousemove', event => {
+            if (this.mouseIsDown) {
+                const delta = (event.data.global.x - this.mouseStartX);
+                const start = this.oldViewStart + (delta / this.stateController.absoluteResolution);
+                const end = start + this.unitController.viewRangeLength;
+                if (end < this.unitController.absoluteRange && start > 0) {
+                    this.unitController.viewRange = {
+                        start,
+                        end
+                    }
+                }
+            }
+        }, this._displayObject);
+        const moveEnd: TimeGraphInteractionHandler = event => {
+            this.mouseIsDown = false;
+        }
+        this.addEvent('mouseup', moveEnd, this._displayObject);
+        this.addEvent('mouseupoutside', moveEnd, this._displayObject);
     }
 
     render(): void {
