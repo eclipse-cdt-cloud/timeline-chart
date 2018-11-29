@@ -16,20 +16,20 @@ export class TimeGraphGrid extends TimeGraphComponent {
         const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
         for (let i = 0; i < steps; i++) {
             const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos >= 0 && xpos < this.stateController.canvasWidth) {
+            if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
                 const position = {
                     x: xpos,
                     y: 0
                 };
                 this.vline({
                     position,
-                    height: this.stateController.canvasHeight,
+                    height: this.stateController.canvasDisplayHeight,
                     color: 0xdddddd
                 });
             }
         }
 
-        const rowNumber = Math.trunc(this.stateController.canvasHeight /this.rowHeight) + 2;
+        const rowNumber = Math.trunc(this.stateController.canvasDisplayHeight /this.rowHeight) + 2;
         for(let i = 0; i < rowNumber; i++){
             this.hline({
                 color: 0xdddddd,
@@ -37,7 +37,7 @@ export class TimeGraphGrid extends TimeGraphComponent {
                     x: 0,
                     y: (i * this.rowHeight) - (this.rowHeight/2)
                 },
-                width: this.stateController.canvasWidth
+                width: this.stateController.canvasDisplayWidth
             });
         }
     }

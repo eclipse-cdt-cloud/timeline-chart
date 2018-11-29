@@ -11,7 +11,6 @@ import { TimeGraphRowElement, TimeGraphRowElementStyle } from "./components/time
 import { TimeGraphChartGrid } from "./layer/time-graph-chart-grid";
 // import { TimeGraphChartArrows } from "./layer/time-graph-chart-arrows";
 
-
 const mainWidth = 1000; //the width for the main container and its added canvas elements. Fixed yet!
 const container = document.getElementById('main');
 if (!container) {

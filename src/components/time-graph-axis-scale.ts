@@ -46,7 +46,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         for (let i = 0; i < steps; i++) {
             const height = i % 10 === 0 ? -10 : -5;
             const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos >= 0 && xpos < this.stateController.canvasWidth) {
+            if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
                 const position = {
                     x: xpos,
                     y: this._options.height
@@ -66,7 +66,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         const normZoomFactor = newViewRangeLength / oldViewRangeLength;
         const shiftedMouseX = normZoomFactor * this.mouseStartX;
         const xOffset = this.mouseStartX - shiftedMouseX;
-        const viewRangeOffset = xOffset / (this.stateController.canvasWidth / oldViewRangeLength);
+        const viewRangeOffset = xOffset / (this.stateController.canvasDisplayWidth / oldViewRangeLength);
         let start = this.oldViewRange.start + viewRangeOffset;
         if(start < 0) {
             start = 0;

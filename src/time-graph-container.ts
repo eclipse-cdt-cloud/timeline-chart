@@ -22,20 +22,25 @@ export class TimeGraphContainer {
 
     constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
         const canvas: HTMLCanvasElement = document.createElement('canvas');
+        const ratio = window.devicePixelRatio;
+        canvas.style.width = config.width + 'px';
+        canvas.style.height = config.height + 'px';
         canvas.width = config.width;
         canvas.height = config.height;
         canvas.id = config.id;
         canvas.className = 'time-graph-canvas';
         const application = new PIXI.Application({
-            width: config.width,
-            height: config.height,
+            width: canvas.width,
+            height: canvas.height,
             view: canvas,
             backgroundColor: config.backgroundColor,
             transparent: config.transparent,
             antialias: true,
-            roundPixels: false
+            roundPixels: false,
+            resolution: ratio
         });
         application.stage.height = config.height;
+        // application.stage.scale = new PIXI.Point(ratio, ratio);
 
         this.stage = application.stage;
         this._canvas = application.view;
