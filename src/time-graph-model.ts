@@ -18,8 +18,10 @@ export interface TimeGraphRowModel {
 }
 
 export interface TimeGraphRowElementModel {
+    readonly id: string
     readonly range: TimeGraphRange
     readonly label: string
+    selected: boolean
     readonly data?: {[key:string]:any}
 }
 

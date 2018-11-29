@@ -1,6 +1,6 @@
 import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
-import { TimeGraphRowElementModel } from "../time-graph-model";
+import { TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
 
 export interface TimeGraphRowElementStyle {
     color?: number
@@ -16,22 +16,24 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     constructor(
         id: string,
         protected _options: TimeGraphRowElementModel,
+        protected range: TimeGraphRange,
         protected _row: TimeGraphRow,
         style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 }
     ) {
         super(id);
         const height = style.height || 14;
         const position = {
-            x: this._options.range.start,
+            x: this.range.start,
             y: this._row.position.y - (height / 2)
         };
-        const width = this._options.range.end - this._options.range.start;
+        const width = this.range.end - this.range.start;
         this.rectangleOptions = {
             color: style.color,
             height,
             position,
             width,
-            borderRadius: 2
+            borderRadius: 2,
+            borderWidth: style.borderWidth || 0
         };
     }
 

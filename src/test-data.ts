@@ -13,6 +13,7 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '0_0',
                     label: 'row 1 state 1',
                     range: {
                         start: 10,
@@ -20,9 +21,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'yellow'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_1',
                     label: 'row 1 state 2',
                     range: {
                         start: 210,
@@ -30,23 +33,29 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_2',
                     label: 'row 1 state 3',
                     range: {
                         start: 1110,
                         end: 2100
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_3',
                     label: 'row 1 state 4',
                     range: {
                         start: 2510,
                         end: 2600
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_4',
                     label: 'row 1 state 5',
                     range: {
                         start: 4010,
@@ -54,9 +63,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_5',
                     label: 'row 1 state 6',
                     range: {
                         start: 7010,
@@ -64,14 +75,17 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'yellow'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '0_6',
                     label: 'row 1 state 7',
                     range: {
                         start: 9010,
                         end: 11100
-                    }
+                    },
+                    selected: false
                 },
             ]
         },
@@ -84,6 +98,7 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '1_0',
                     label: 'row 2 state 1',
                     range: {
                         start: 11000,
@@ -91,9 +106,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: "red",
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '1_1',
                     label: 'row 2 state 3',
                     range: {
                         start: 15320,
@@ -101,9 +118,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '1_2',
                     label: 'row 2 state 4',
                     range: {
                         start: 26500,
@@ -111,9 +130,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'yellow'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '1_3',
                     label: 'row 2 state 5',
                     range: {
                         start: 35650,
@@ -121,14 +142,17 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '1_4',
                     label: 'row 2 state 6',
                     range: {
                         start: 57650,
                         end: 58455
-                    }
+                    },
+                    selected: false
                 }
             ]
         },
@@ -141,6 +165,7 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '2_0',
                     label: 'row 3 state 1',
                     range: {
                         start: 21145,
@@ -148,21 +173,26 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '2_1',
                     label: 'row 3 state 2',
                     range: {
                         start: 31265,
                         end: 35275
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '2_2',
                     label: 'row 3 state 3',
                     range: {
                         start: 36865,
                         end: 38955
-                    }
+                    },
+                    selected: false
                 }
             ]
         },
@@ -175,13 +205,16 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '3_0',
                     label: 'row 4 state 1',
                     range: {
                         start: 35265,
                         end: 36455
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '3_1',
                     label: 'row 4 state 2',
                     range: {
                         start: 43265,
@@ -189,14 +222,17 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '3_2',
                     label: 'row 4 state 3',
                     range: {
                         start: 48265,
                         end: 50000
-                    }
+                    },
+                    selected: false
                 }
             ]
         },
@@ -209,6 +245,7 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '4_0',
                     label: 'row 5 state 1',
                     range: {
                         start: 45265,
@@ -216,9 +253,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '4_1',
                     label: 'row 5 state 2',
                     range: {
                         start: 53265,
@@ -226,14 +265,17 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'yellow'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '4_2',
                     label: 'row 5 state 3',
                     range: {
                         start: 78265,
                         end: 90000
-                    }
+                    },
+                    selected: false
                 }
             ]
         },
@@ -246,6 +288,7 @@ export const timeGraph: TimeGraphModel = {
             },
             states: [
                 {
+                    id: '5_0',
                     label: 'row 6 state 1',
                     range: {
                         start: 75265,
@@ -253,16 +296,20 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '5_1',
                     label: 'row 6 state 2',
                     range: {
                         start: 77265,
                         end: 86455
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '5_2',
                     label: 'row 6 state 3',
                     range: {
                         start: 100265,
@@ -270,21 +317,26 @@ export const timeGraph: TimeGraphModel = {
                     },
                     data: {
                         type: 'red'
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '5_3',
                     label: 'row 6 state 4',
                     range: {
                         start: 120265,
                         end: 126455
-                    }
+                    },
+                    selected: false
                 },
                 {
+                    id: '5_4',
                     label: 'row 6 state 5',
                     range: {
                         start: 147265,
                         end: 160000
-                    }
+                    },
+                    selected: false
                 }
             ]
         }

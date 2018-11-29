@@ -57,26 +57,27 @@ const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeigh
 timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
 function getRowElementStyle(model: TimeGraphRowElementModel): TimeGraphRowElementStyle {
+    let style: TimeGraphRowElementStyle = {
+        color: 0x11ad1b,
+        height: 18
+    };
     if (model.data && model.data.type) {
         if (model.data.type === 'red') {
-            return {
+            style = {
                 color: 0xbc2f00,
-                height: 10,
-                borderWidth: 0
+                height: 10
             }
         } else if (model.data.type === 'yellow') {
-            return {
+            style = {
                 color: 0xccbf5d,
-                height: 10,
-                borderWidth: 0
+                height: 10
             }
         }
     }
-    return {
-        color: 0x11ad1b,
-        height: 18,
-        borderWidth: 0
+    if(model.selected){
+        style.borderWidth = 1;
     }
+    return style;
 }
 
 const timeGraphChartLayer = new TimeGraphChart('timeGraphChart');
@@ -89,16 +90,14 @@ timeGraphChartLayer.registerRowElementMouseInteractions({
     click: el => { console.log(el.model.label) }
 });
 let selectedElement: TimeGraphRowElement;
-timeGraphChartLayer.onSelectedRowElementChanged(el => {
-    if (selectedElement) {
-        selectedElement.style = getRowElementStyle(selectedElement.model);
+timeGraphChartLayer.onSelectedRowElementChanged((model)=>{
+    const el = timeGraphChartLayer.getElementById(model.id);
+    if(el){
+        selectedElement = el;
     }
-    selectedElement = el;
-    el.style = {
-        borderWidth: 1
-    }
-});
-timeGraphChartLayer.addRows(timeGraph.rows, rowHeight);
+})
+
+timeGraphChartLayer.setRowModel(timeGraph.rows, rowHeight);
 
 // const timeGraphChartArrows = new TimeGraphChartArrows('chartArrows');
 // timeGraphChartContainer.addLayer(timeGraphChartArrows);
@@ -123,9 +122,9 @@ timeGraphChartCursors.onNavigateLeft(() => {
     }
     newPos = states[elIndex].range.start;
     unitController.selectionRange = { start: newPos, end: newPos };
-    const elementToSelect = timeGraphChartLayer.getElementByIndices(selectedRowIndex, elIndex);
+    const elementToSelect = timeGraphChartLayer.getElementById(states[elIndex].id);
     if (elementToSelect) {
-        timeGraphChartLayer.selectRowElement(elementToSelect);
+        timeGraphChartLayer.selectRowElement(states[elIndex]);
     }
 });
 timeGraphChartCursors.onNavigateRight(() => {
@@ -136,15 +135,11 @@ timeGraphChartCursors.onNavigateRight(() => {
         const selStart = unitController.selectionRange ? unitController.selectionRange.start : 0;
         return rowElementModel.range.start > selStart;
     });
-    let elementToSelect;
     if (nextIndex < states.length) {
         const newPos = states[nextIndex].range.start;
         unitController.selectionRange = { start: newPos, end: newPos };
-        elementToSelect = timeGraphChartLayer.getElementByIndices(selectedRowIndex, nextIndex);
     }
-    if (elementToSelect) {
-        timeGraphChartLayer.selectRowElement(elementToSelect);
-    }
+    timeGraphChartLayer.selectRowElement(states[nextIndex]);
 });
 
 const naviEl = document.createElement('div');
