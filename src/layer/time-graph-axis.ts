@@ -7,9 +7,9 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     protected init() {
         this.canvas.addEventListener('mousewheel', (ev: WheelEvent) => {
-            const shiftStep = ev.deltaY * 10;
+            const shiftStep = ev.deltaY;
             const oldViewRange = this.unitController.viewRange;
-            let start = oldViewRange.start + shiftStep;
+            let start = oldViewRange.start + (shiftStep / this.stateController.zoomFactor);
             if (start < 0) {
                 start = 0;
             }
