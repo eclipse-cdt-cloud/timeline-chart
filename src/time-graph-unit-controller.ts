@@ -35,12 +35,12 @@ export class TimeGraphUnitController {
     }
     set viewRange(newRange: TimeGraphRange) {
         if (newRange.end > newRange.start) {
-            this._viewRange = newRange;
+            this._viewRange = { start: ~~(newRange.start + 0.5), end: ~~(newRange.end + 0.5) };
         }
-        if(newRange.start < 0) {
+        if (newRange.start < 0) {
             this._viewRange.start = 0;
         }
-        if(this._viewRange.end > this.absoluteRange){
+        if (this._viewRange.end > this.absoluteRange) {
             this._viewRange.end = this.absoluteRange;
         }
         this.handleViewRangeChange();

@@ -41,23 +41,27 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             width: this._options.width,
             position: this._options.position
         });
-        const stepLength = 1000;
-        const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
-        for (let i = 0; i < steps; i++) {
-            const height = i % 10 === 0 ? -10 : -5;
-            const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
-                const position = {
-                    x: xpos,
-                    y: this._options.height
-                };
-                this.vline({
-                    position,
-                    height,
-                    color: 0x000000
-                });
-            }
-        }
+        // const stepLength = 10000;
+        // const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
+        // for (let i = 0; i < steps; i++) {
+        //     const height = -10;
+        //     const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+        //     if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
+        //         const position = {
+        //             x: xpos,
+        //             y: this._options.height
+        //         };
+        //         this.vline({
+        //             position,
+        //             height,
+        //             color: 0x000000
+        //         });
+        //     }
+        // }
+        console.log("ZOOM", this.stateController.zoomFactor);
+        console.log("start", this.unitController.viewRange.start);
+        console.log("end", this.unitController.viewRange.end);
+        console.log("range", this.unitController.viewRangeLength);
     }
 
     zoom(zoomStep: number) {
