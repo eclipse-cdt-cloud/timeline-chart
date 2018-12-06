@@ -20,7 +20,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 100
                     },
                     data: {
-                        type: 'yellow'
+                        value: 'yellow'
                     },
                     selected: false
                 },
@@ -32,7 +32,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 1100
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -62,7 +62,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 6100
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -74,7 +74,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 8100
                     },
                     data: {
-                        type: 'yellow'
+                        value: 'yellow'
                     },
                     selected: false
                 },
@@ -87,10 +87,141 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 },
-            ]
+            ],
+            selected: false
         },
         {
             id: 1,
+            name: 'empty row1',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 2,
+            name: 'empty row2',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 3,
+            name: 'empty row3',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 4,
+            name: 'empty row4',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 5,
+            name: 'empty row5',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 6,
+            name: 'empty row6',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 7,
+            name: 'empty row7',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 8,
+            name: 'empty row8',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 9,
+            name: 'empty row9',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 10,
+            name: 'empty row10',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 11,
+            name: 'empty row11',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 12,
+            name: 'empty row12',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 13,
+            name: 'empty row13',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 14,
             name: 'Test Row 2',
             range: {
                 start: 9000,
@@ -105,7 +236,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 15000
                     },
                     data: {
-                        type: "red",
+                        value: "red",
                     },
                     selected: false
                 },
@@ -117,7 +248,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 15500
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -129,7 +260,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 34550
                     },
                     data: {
-                        type: 'yellow'
+                        value: 'yellow'
                     },
                     selected: false
                 },
@@ -141,7 +272,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 46550
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -154,10 +285,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
-            id: 2,
+            id: 15,
             name: 'Test Row 3',
             range: {
                 start: 21000,
@@ -172,7 +304,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 28255
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -194,10 +326,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
-            id: 3,
+            id: 16,
             name: 'Test Row 4',
             range: {
                 start: 35000,
@@ -221,7 +354,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 46455
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -234,10 +367,11 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
-            id: 4,
+            id: 17,
             name: 'Test Row 5',
             range: {
                 start: 45000,
@@ -252,7 +386,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 46455
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -264,7 +398,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 66455
                     },
                     data: {
-                        type: 'yellow'
+                        value: 'yellow'
                     },
                     selected: false
                 },
@@ -277,10 +411,61 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
         },
         {
-            id: 5,
+            id: 18,
+            name: 'empty row',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 19,
+            name: 'empty row',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 20,
+            name: 'empty row',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 21,
+            name: 'empty row',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 22,
+            name: 'empty row',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            selected: false,
+            states: []
+        },
+        {
+            id: 23,
             name: 'Test Row 6',
             range: {
                 start: 75000,
@@ -295,7 +480,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 76455
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -316,7 +501,7 @@ export const timeGraph: TimeGraphModel = {
                         end: 100455
                     },
                     data: {
-                        type: 'red'
+                        value: 'red'
                     },
                     selected: false
                 },
@@ -338,7 +523,31 @@ export const timeGraph: TimeGraphModel = {
                     },
                     selected: false
                 }
-            ]
+            ],
+            selected: false
+        },
+        {
+            id: 24,
+            name: 'Test Row 7',
+            range: {
+                start: 0,
+                end: 160000
+            },
+            states: [
+                {
+                    id: '6_0',
+                    label: 'row 7 state 1',
+                    range: {
+                        start: 0,
+                        end: 160000
+                    },
+                    data: {
+                        value: 'red'
+                    },
+                    selected: false
+                }
+            ],
+            selected: false
         }
     ],
     arrows: [
