@@ -1,70 +1,28 @@
 import { TimeGraphAxis } from "./layer/time-graph-axis";
-import { TimeGraphChart } from "./layer/time-graph-chart";
+import { TimeGraphChart, TimeGraphRowStyleHook } from "./layer/time-graph-chart";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphNavigator } from "./layer/time-graph-navigator";
 import { TimeGraphContainer } from "./time-graph-container";
 import { TimeGraphChartCursors } from "./layer/time-graph-chart-cursors";
 import { TimeGraphAxisCursors } from "./layer/time-graph-axis-cursors";
 // import { timeGraph } from "./test-data";
-import { TimeGraphRowElementModel } from "./time-graph-model";
+import { TimeGraphRowElementModel, TimeGraphRowModel } from "./time-graph-model";
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "./components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
 // import { TimeGraphChartGrid } from "./layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "./layer/time-graph-vertical-scrollbar";
 // import { TimeGraphChartArrows } from "./layer/time-graph-chart-arrows";
 
-const mainWidth = 1000; //the width for the main container and its added canvas elements. Fixed yet!
-const mainHeight = 300;
-const container = document.getElementById('main');
-if (!container) {
-    throw (`No container available.`);
+const styleConfig = {
+    mainWidth: 1000,
+    mainHeight: 300,
+    naviBackgroundColor: 0xf7eaaf,
+    chartBackgroundColor: 0xf9f6e8,
+    cursorColor: 0xb77f09
 }
-container.innerHTML = '';
-container.style.width = mainWidth + "px";
-
-const testDataProvider = new TestDataProvider(mainWidth);
-let timeGraph = testDataProvider.getData();
-const unitController = new TimeGraphUnitController(timeGraph.totalRange);
-
-const axisHTMLContainer = document.createElement('div');
-axisHTMLContainer.id = 'main_axis';
-container.appendChild(axisHTMLContainer);
-
-const timeGraphAxisContainer = new TimeGraphContainer({
-    height: 30,
-    width: mainWidth,
-    id: timeGraph.id + '_axis'
-}, unitController);
-axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
-
-const timeAxisLayer = new TimeGraphAxis('timeGraphAxis');
-timeGraphAxisContainer.addLayer(timeAxisLayer);
-
-const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors');
-timeGraphAxisContainer.addLayer(timeAxisCursors);
-
-const chartHTMLContainer = document.createElement('div');
-chartHTMLContainer.id = 'main_chart';
-container.appendChild(chartHTMLContainer);
-
-const timeGraphChartContainer = new TimeGraphContainer({
-    id: timeGraph.id + '_chart',
-    height: mainHeight,
-    width: mainWidth,
-    backgroundColor: 0xFFFFFF
-}, unitController);
-chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
-
-const rowHeight = 16;
-
-// const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
-// timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
-
-const timeGraphChartLayer = new TimeGraphChart('timeGraphChart');
-timeGraphChartContainer.addLayer(timeGraphChartLayer);
 
 const styleMap = new Map<string, TimeGraphRowElementStyle>();
-timeGraphChartLayer.registerRowElementStyleHook((model: TimeGraphRowElementModel) => {
+const stateStyleHook = (model: TimeGraphRowElementModel) => {
     const styles: TimeGraphRowElementStyle[] = [
         {
             color: 0x11ad1b,
@@ -91,13 +49,64 @@ timeGraphChartLayer.registerRowElementStyleHook((model: TimeGraphRowElementModel
         height: style.height,
         borderWidth: model.selected ? 1 : 0
     };
-});
-timeGraphChartLayer.registerRowStyleHook(row => {
+}
+
+const rowStyleHook: TimeGraphRowStyleHook = (row: TimeGraphRowModel) => {
     return {
         backgroundColor: row.selected ? 0xdef9fc : undefined,
-        backgroundOpacity: row.selected ? 0.6 : 0
+        backgroundOpacity: row.selected ? 0.6 : 0,
+        lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
+        lineThickness: row.data && row.data.hasStates ? 1 : 3
     }
-})
+}
+
+const container = document.getElementById('main');
+if (!container) {
+    throw (`No container available.`);
+}
+container.innerHTML = '';
+container.style.width = styleConfig.mainWidth + "px";
+
+const testDataProvider = new TestDataProvider(styleConfig.mainWidth);
+let timeGraph = testDataProvider.getData();
+const unitController = new TimeGraphUnitController(timeGraph.totalRange);
+
+const axisHTMLContainer = document.createElement('div');
+axisHTMLContainer.id = 'main_axis';
+container.appendChild(axisHTMLContainer);
+
+const timeGraphAxisContainer = new TimeGraphContainer({
+    height: 30,
+    width: styleConfig.mainWidth,
+    id: timeGraph.id + '_axis'
+}, unitController);
+axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
+
+const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
+timeGraphAxisContainer.addLayer(timeAxisLayer);
+
+const chartHTMLContainer = document.createElement('div');
+chartHTMLContainer.id = 'main_chart';
+container.appendChild(chartHTMLContainer);
+
+const timeGraphChartContainer = new TimeGraphContainer({
+    id: timeGraph.id + '_chart',
+    height: styleConfig.mainHeight,
+    width: styleConfig.mainWidth,
+    backgroundColor: styleConfig.chartBackgroundColor
+}, unitController);
+chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
+
+const rowHeight = 16;
+
+// const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
+// timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
+
+const timeGraphChartLayer = new TimeGraphChart('timeGraphChart');
+timeGraphChartContainer.addLayer(timeGraphChartLayer);
+
+timeGraphChartLayer.registerRowElementStyleHook(stateStyleHook);
+timeGraphChartLayer.registerRowStyleHook(rowStyleHook);
 timeGraphChartLayer.registerRowElementMouseInteractions({
     click: el => { console.log(el.model.label) }
 });
@@ -124,7 +133,9 @@ unitController.onViewRangeChanged(() => {
     timeGraphChartLayer.setRowModel(timeGraph.rows, rowHeight);
 })
 
-const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors');
+const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
+timeGraphAxisContainer.addLayer(timeAxisCursors);
+const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', { color: styleConfig.cursorColor });
 timeGraphChartContainer.addLayer(timeGraphChartCursors);
 function maybeCenterCursor() {
     const selection = unitController.selectionRange;
@@ -183,10 +194,10 @@ const naviEl = document.createElement('div');
 naviEl.id = 'navi';
 container.appendChild(naviEl);
 const naviContainer = new TimeGraphContainer({
-    width: mainWidth,
+    width: styleConfig.mainWidth,
     height: 10,
     id: 'navi',
-    backgroundColor: 0xeeeed9
+    backgroundColor: styleConfig.naviBackgroundColor
 }, unitController);
 const navi = new TimeGraphNavigator('timeGraphNavigator');
 naviContainer.addLayer(navi);
@@ -196,15 +207,15 @@ const vscrollElement = document.getElementById('main-vscroll');
 if (vscrollElement) {
     const verticalScrollContainer = new TimeGraphContainer({
         width: 10,
-        height: mainHeight,
+        height: styleConfig.mainHeight,
         id: 'vscroll',
-        backgroundColor: 0xeeeed9
+        backgroundColor: styleConfig.naviBackgroundColor
     }, unitController);
     const vscroll = new TimeGraphVerticalScrollbar('timeGraphVerticalScrollbar', (timeGraph.rows.length * rowHeight));
     verticalScrollContainer.addLayer(vscroll);
     vscroll.onVerticalPositionChanged(ypos => {
         timeGraphChartLayer.setVerticalPositionOffset(ypos);
     });
-    timeGraphChartLayer.onVerticalPositionChanged((verticalChartPosition:number)=>vscroll.setVerticalPosition(verticalChartPosition));
+    timeGraphChartLayer.onVerticalPositionChanged((verticalChartPosition: number) => vscroll.setVerticalPosition(verticalChartPosition));
     vscrollElement.appendChild(verticalScrollContainer.canvas);
 }

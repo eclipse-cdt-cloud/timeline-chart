@@ -1,4 +1,4 @@
-import { TimeGraphComponent, TimeGraphRect, TimeGraphInteractionHandler } from "./time-graph-component";
+import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphRange } from "../time-graph-model";
 import { TimeGraphStateController } from "../time-graph-state-controller";
@@ -10,7 +10,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     protected oldViewRange: TimeGraphRange;
     protected mouseIsDown: boolean = false;
 
-    constructor(id: string, protected _options: TimeGraphRect, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+    constructor(id: string, protected _options: TimeGraphStyledRect, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super(id);
         this.addEvents();
     }
@@ -44,8 +44,8 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         const maxSteps = canvasDisplayWidth / minCanvasStepWidth;
         const realStepLength = viewRangeLength / maxSteps;
         const log = Math.log10(realStepLength);
-        const ceilLog = ~~(log + 0.5);
-        const normalizedStepLength = Math.pow(10, ceilLog);
+        const logRounded = Math.round(log);
+        const normalizedStepLength = Math.pow(10, logRounded);
         return normalizedStepLength;
     }
 
@@ -71,7 +71,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
 
     render() {
         this.rect({
-            color: 0xededdd,
+            color: this._options.color || 0xededdd,
             height: this._options.height,
             width: this._options.width,
             position: this._options.position

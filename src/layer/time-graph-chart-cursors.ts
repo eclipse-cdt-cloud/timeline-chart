@@ -10,6 +10,15 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     protected selectionRange: TimeGraphRectangle;
     protected navigateLeftHandler: () => void;
     protected navigateRightHandler: () => void;
+    protected color: number = 0x0000ff;
+
+    constructor(id: string, style?: {color?: number}){
+        super(id);
+
+        if(style && style.color){
+            this.color = style.color;
+        }
+    }
 
     protected afterAddToContainer() {
         this.addBackground();
@@ -72,7 +81,6 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         }
     }
 
-
     protected goRight() {
         if (this.navigateRightHandler) {
             this.navigateRightHandler();
@@ -119,9 +127,8 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         if (this.unitController.selectionRange) {
             const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            const color = 0x0000ff;
             const firstCursorOptions = {
-                color,
+                color: this.color,
                 height: this.stateController.canvasDisplayHeight,
                 position: {
                     x: firstCursorPosition,
@@ -132,7 +139,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             this.addChild(this.firstCursor);
             if (secondCursorPosition !== firstCursorPosition) {
                 const secondCursorOptions = {
-                    color,
+                    color: this.color,
                     height: this.stateController.canvasDisplayHeight,
                     position: {
                         x: secondCursorPosition,
@@ -143,7 +150,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
                 this.addChild(this.secondCursor);
 
                 const selectionRange = new TimeGraphRectangle({
-                    color,
+                    color: this.color,
                     opacity: 0.2,
                     position: {
                         x: firstCursorPosition,

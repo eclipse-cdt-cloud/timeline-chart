@@ -12,6 +12,8 @@ export interface TimeGraphRowElementMouseInteractions {
     mouseup?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
 }
 
+export type TimeGraphRowStyleHook = (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
+
 export class TimeGraphChart extends TimeGraphLayer {
 
     protected rows: TimeGraphRowModel[];
@@ -87,15 +89,6 @@ export class TimeGraphChart extends TimeGraphLayer {
         });
     }
 
-    protected selectRow(row: TimeGraphRowModel) {
-        if (this.selectedRow) {
-            this.selectedRow.selected = false;
-        }
-        this.selectedRow = row;
-        row.selected = true;
-        this.handleSelectedRowChange();
-    }
-
     protected addElementInteractions(el: TimeGraphRowElement) {
         el.displayObject.interactive = true;
         el.displayObject.on('click', ((e: PIXI.interaction.InteractionEvent) => {
@@ -144,7 +137,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         }
     }
 
-    registerRowStyleHook(styleHook: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined) {
+    registerRowStyleHook(styleHook: TimeGraphRowStyleHook) {
         this.rowStyleHook = styleHook;
     }
 
@@ -177,6 +170,23 @@ export class TimeGraphChart extends TimeGraphLayer {
             return child.id === id;
         });
         return element as TimeGraphRowElement;
+    }
+
+    getSelectedRow(): TimeGraphRowModel {
+        return this.selectedRow;
+    }
+
+    selectRow(row: TimeGraphRowModel) {
+        if (this.selectedRow) {
+            this.selectedRow.selected = false;
+        }
+        this.selectedRow = row;
+        row.selected = true;
+        this.handleSelectedRowChange();
+    }
+
+    getSelectedRowElement(): TimeGraphRowElementModel {
+        return this.selectedElementModel;
     }
 
     selectRowElement(model: TimeGraphRowElementModel) {

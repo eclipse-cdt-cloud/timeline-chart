@@ -5,6 +5,23 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     protected scaleComponent: TimeGraphAxisScale;
 
+    constructor(id: string, protected style?: { color?: number }) {
+        super(id);
+    }
+
+    protected getOptions() {
+        const color = this.style && this.style.color ? this.style.color : undefined;
+        return {
+            height: this.stateController.canvasDisplayHeight,
+            width: this.stateController.canvasDisplayWidth,
+            position: {
+                x: 0,
+                y: 0
+            },
+            color
+        }
+    }
+
     protected afterAddToContainer() {
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
@@ -21,14 +38,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
             this.unitController.viewRange = { start, end }
             return false;
         });
-        this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', {
-            height: this.stateController.canvasDisplayHeight,
-            width: this.stateController.canvasDisplayWidth,
-            position: {
-                x: 0,
-                y: 0
-            }
-        }, this.unitController, this.stateController);
+        this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', this.getOptions(), this.unitController, this.stateController);
 
         this.addChild(this.scaleComponent);
 
@@ -37,13 +47,6 @@ export class TimeGraphAxis extends TimeGraphLayer {
     }
 
     update() {
-        this.scaleComponent.update({
-            height: this.stateController.canvasDisplayHeight,
-            width: this.stateController.canvasDisplayWidth,
-            position: {
-                x: 0,
-                y: 0
-            }
-        });
+        this.scaleComponent.update(this.getOptions());
     }
 }

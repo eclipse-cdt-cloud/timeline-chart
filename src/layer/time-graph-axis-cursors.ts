@@ -4,6 +4,15 @@ import { TimeGraphLayer } from "./time-graph-layer";
 export class TimeGraphAxisCursors extends TimeGraphLayer {
     protected firstCursor?: TimeGraphAxisCursor;
     protected secondCursor?: TimeGraphAxisCursor;
+    protected color: number = 0x0000ff;
+
+    constructor(id: string, style?: { color?: number }) {
+        super(id);
+
+        if (style && style.color) {
+            this.color = style.color;
+        }
+    }
 
     afterAddToContainer() {
         this.unitController.onSelectionRangeChange(() => this.update());
@@ -14,9 +23,8 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
         if (this.unitController.selectionRange) {
             const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            const color = 0x0000ff;
             const firstOpts = {
-                color,
+                color: this.color,
                 position: {
                     x: firstCursorPosition,
                     y: this.stateController.canvasDisplayHeight
@@ -30,7 +38,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
             }
             if (secondCursorPosition !== firstCursorPosition) {
                 const secondOpts = {
-                    color,
+                    color: this.color,
                     position: {
                         x: secondCursorPosition,
                         y: this.stateController.canvasDisplayHeight

@@ -36,7 +36,9 @@ export class TestDataProvider {
         timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number) => {
             const states: TimeGraphRowElementModel[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
+            let hasStates = false;
             if (row) {
+                hasStates = !!row.states.length;
                 row.states.forEach((state: any, stateIndex: number) => {
                     if (state.value > 0 && state.duration * resolution > 1) {
                         const start = state.startTime - entry.startTime;
@@ -63,7 +65,8 @@ export class TestDataProvider {
                 states,
                 selected: false,
                 data: {
-                    type: entry.type
+                    type: entry.type,
+                    hasStates
                 }
             });
         })
