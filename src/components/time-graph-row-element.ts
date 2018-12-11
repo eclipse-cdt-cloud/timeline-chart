@@ -18,9 +18,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         protected _options: TimeGraphRowElementModel,
         protected range: TimeGraphRange,
         protected _row: TimeGraphRow,
-        style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 }
+        style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
+        displayObject?:PIXI.Graphics
     ) {
-        super(id);
+        super(id, displayObject);
         const height = style.height || 14;
         const position = {
             x: this.range.start,

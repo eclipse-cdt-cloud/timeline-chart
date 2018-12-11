@@ -53,7 +53,7 @@ const stateStyleHook = (model: TimeGraphRowElementModel) => {
 
 const rowStyleHook: TimeGraphRowStyleHook = (row: TimeGraphRowModel) => {
     return {
-        backgroundColor: row.selected ? 0xdef9fc : undefined,
+        backgroundColor: 0xe0ddcf,
         backgroundOpacity: row.selected ? 0.6 : 0,
         lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
         lineThickness: row.data && row.data.hasStates ? 1 : 3
@@ -135,53 +135,8 @@ unitController.onViewRangeChanged(() => {
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);
-const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', { color: styleConfig.cursorColor });
+const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChartLayer, { color: styleConfig.cursorColor });
 timeGraphChartContainer.addLayer(timeGraphChartCursors);
-function maybeCenterCursor() {
-    const selection = unitController.selectionRange;
-    const view = unitController.viewRange;
-    if (selection && (selection.start < view.start || selection.start > view.end)) {
-        timeGraphChartCursors.centerCursor();
-    }
-};
-timeGraphChartCursors.onNavigateLeft(() => {
-    const selectedRowIndex = selectedElement ? selectedElement.row.rowIndex : 0;
-    const row = timeGraph.rows[selectedRowIndex];
-    const states = row.states;
-    const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
-        const selStart = unitController.selectionRange ? unitController.selectionRange.start : 0;
-        return rowElementModel.range.start >= selStart;
-    });
-    let newPos = 0;
-    let elIndex = 0;
-    if (nextIndex > 0) {
-        elIndex = nextIndex - 1;
-    } else if (nextIndex === -1) {
-        elIndex = states.length - 1;
-    }
-    newPos = states[elIndex].range.start;
-    unitController.selectionRange = { start: newPos, end: newPos };
-    const elementToSelect = timeGraphChartLayer.getElementById(states[elIndex].id);
-    if (elementToSelect) {
-        maybeCenterCursor();
-        timeGraphChartLayer.selectRowElement(states[elIndex]);
-    }
-});
-timeGraphChartCursors.onNavigateRight(() => {
-    const selectedRowIndex = selectedElement ? selectedElement.row.rowIndex : 0;
-    const row = timeGraph.rows[selectedRowIndex];
-    const states = row.states;
-    const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
-        const selStart = unitController.selectionRange ? unitController.selectionRange.start : 0;
-        return rowElementModel.range.start > selStart;
-    });
-    if (nextIndex < states.length) {
-        const newPos = states[nextIndex].range.start;
-        unitController.selectionRange = { start: newPos, end: newPos };
-    }
-    maybeCenterCursor();
-    timeGraphChartLayer.selectRowElement(states[nextIndex]);
-});
 
 const cursorReset = document.getElementById('cursor-reset');
 if (cursorReset) {

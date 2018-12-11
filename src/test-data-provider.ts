@@ -43,15 +43,13 @@ export class TestDataProvider {
                     if (state.value > 0 && state.duration * resolution > 1) {
                         const start = state.startTime - entry.startTime;
                         const end = state.startTime + state.duration - entry.startTime;
-                        if ((viewRange && ((start > viewRange.start && start < viewRange.end) || (end > viewRange.start))) || !viewRange) {
-                            states.push({
-                                id: 'el_' + rowIndex + '_' + stateIndex,
-                                label: state.label,
-                                selected: false,
-                                range: { start, end },
-                                data: { value: state.value }
-                            });
-                        }
+                        states.push({
+                            id: 'el_' + rowIndex + '_' + stateIndex,
+                            label: state.label,
+                            selected: false,
+                            range: { start, end },
+                            data: { value: state.value }
+                        });
                     }
                 });
             }

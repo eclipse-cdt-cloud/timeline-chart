@@ -1,6 +1,8 @@
 import { TimeGraphCursor } from "../components/time-graph-cursor";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphLayer } from "./time-graph-layer";
+import { TimeGraphChart } from "./time-graph-chart";
+import { TimeGraphRowElementModel } from "../time-graph-model";
 
 export class TimeGraphChartCursors extends TimeGraphLayer {
     protected mouseIsDown: boolean;
@@ -8,30 +10,26 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     protected firstCursor: TimeGraphCursor;
     protected secondCursor: TimeGraphCursor;
     protected selectionRange: TimeGraphRectangle;
-    protected navigateLeftHandler: () => void;
-    protected navigateRightHandler: () => void;
     protected color: number = 0x0000ff;
 
-    constructor(id: string, style?: {color?: number}){
+    constructor(id: string, protected chartLayer: TimeGraphChart, style?: { color?: number }) {
         super(id);
-
-        if(style && style.color){
+        if (style && style.color) {
             this.color = style.color;
         }
     }
 
     protected afterAddToContainer() {
         this.addBackground();
-
         this.mouseIsDown = false;
         this.shiftKeyDown = false
         this.stage.interactive = true;
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
             if (event.keyCode === 37) {
-                this.goLeft();
+                this.navigateOrSelectLeft();
             } else if (event.keyCode === 39) {
-                this.goRight();
+                this.navigateOrSelectRight();
             }
         });
         document.addEventListener('keyup', (event: KeyboardEvent) => {
@@ -75,16 +73,55 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.unitController.onViewRangeChanged(() => this.update());
     }
 
-    protected goLeft() {
-        if (this.navigateLeftHandler) {
-            this.navigateLeftHandler();
+    protected maybeCenterCursor() {
+        const selection = this.unitController.selectionRange;
+        const view = this.unitController.viewRange;
+        if (selection && (selection.start < view.start || selection.start > view.end)) {
+            this.centerCursor();
         }
+    };
+
+    protected navigateOrSelectLeft() {
+        const row = this.chartLayer.getSelectedRow();
+        const states = row.states;
+        const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
+            const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
+            return rowElementModel.range.start >= selStart;
+        });
+        let newPos = 0;
+        let elIndex = 0;
+        if (nextIndex > 0) {
+            elIndex = nextIndex - 1;
+        } else if (nextIndex === -1) {
+            elIndex = states.length - 1;
+        }
+        newPos = states[elIndex].range.start;
+        if (this.unitController.selectionRange && this.shiftKeyDown) {
+            this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
+        } else {
+            this.unitController.selectionRange = { start: newPos, end: newPos };
+        }
+        this.maybeCenterCursor();
+        this.chartLayer.selectRowElement(states[elIndex]);
     }
 
-    protected goRight() {
-        if (this.navigateRightHandler) {
-            this.navigateRightHandler();
+    protected navigateOrSelectRight() {
+        const row = this.chartLayer.getSelectedRow();
+        const states = row.states;
+        const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
+            const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
+            return rowElementModel.range.start > cursorPosition;
+        });
+        if (nextIndex < states.length) {
+            const newPos = states[nextIndex].range.start;
+            if (this.unitController.selectionRange && this.shiftKeyDown) {
+                this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
+            } else {
+                this.unitController.selectionRange = { start: newPos, end: newPos };
+            }
         }
+        this.maybeCenterCursor();
+        this.chartLayer.selectRowElement(states[nextIndex]);
     }
 
     // this background is needed because an empty stage, or a point at that stage which is not actually an displayObject, wont react on mouse events.
@@ -96,14 +133,6 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             opacity: 0
         });
         this.addChild(background);
-    }
-
-    onNavigateLeft(handler: () => void) {
-        this.navigateLeftHandler = handler;
-    }
-
-    onNavigateRight(handler: () => void) {
-        this.navigateRightHandler = handler;
     }
 
     centerCursor() {

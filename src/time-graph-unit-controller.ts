@@ -52,7 +52,6 @@ export class TimeGraphUnitController {
     set selectionRange(value: TimeGraphRange | undefined) {
         this._selectionRange = value;
         this.handleSelectionRangeChange();
-
     }
 
     get viewRangeLength(): number {

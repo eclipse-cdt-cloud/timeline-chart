@@ -3,6 +3,7 @@ import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
 import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphComponent } from "../components/time-graph-component";
+import * as _ from "lodash";
 
 export interface TimeGraphRowElementMouseInteractions {
     click?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
@@ -25,8 +26,9 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
     protected selectedRow: TimeGraphRowModel;
     protected selectedRowChangedHandler: ((el: TimeGraphRowModel) => void)[] = [];
-    protected verticalPositionChangedHandler: ((verticalChartPosition:number) => void)[] = [];
+    protected verticalPositionChangedHandler: ((verticalChartPosition: number) => void)[] = [];
     protected totalHeight: number;
+    protected throttledUpdate: () => void;
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => this.update());
@@ -36,13 +38,19 @@ export class TimeGraphChart extends TimeGraphLayer {
             if (verticalOffset < 0) {
                 verticalOffset = 0;
             }
-            if(this.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight){
+            if (this.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
                 verticalOffset = this.totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.stateController.positionOffset.y = verticalOffset;
             this.handleVerticalPositionChange();
             return false;
         });
+        this.throttledUpdate = _.throttle(() => {
+            if (this.rows && this.rowHeight) {
+                this.removeChildren();
+                this.addRows(this.rows, this.rowHeight);
+            }
+        }, 40);
     }
 
     protected handleVerticalPositionChange() {
@@ -70,6 +78,10 @@ export class TimeGraphChart extends TimeGraphLayer {
             width: range * this.stateController.zoomFactor,
             height
         }, rowIndex, row, rowStyle);
+        rowComponent.displayObject.interactive = true;
+        rowComponent.displayObject.on('click', ((e: PIXI.interaction.InteractionEvent) => {
+            this.selectRow(row);
+        }).bind(this))
         this.addChild(rowComponent);
         row.states.forEach((rowElementModel: TimeGraphRowElementModel, elementIndex: number) => {
             const relativeElementStartPosition = rowElementModel.range.start - this.unitController.viewRange.start;
@@ -131,10 +143,7 @@ export class TimeGraphChart extends TimeGraphLayer {
     }
 
     protected update() {
-        if (this.rows && this.rowHeight) {
-            this.removeChildren();
-            this.addRows(this.rows, this.rowHeight);
-        }
+        this.throttledUpdate();
     }
 
     registerRowStyleHook(styleHook: TimeGraphRowStyleHook) {
@@ -157,7 +166,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedRowChangedHandler.push(handler);
     }
 
-    onVerticalPositionChanged(handler: (verticalChartPosition:number)=>void){
+    onVerticalPositionChanged(handler: (verticalChartPosition: number) => void) {
         this.verticalPositionChangedHandler.push(handler);
     }
 
@@ -183,6 +192,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedRow = row;
         row.selected = true;
         this.handleSelectedRowChange();
+        this.update();
     }
 
     getSelectedRowElement(): TimeGraphRowElementModel {

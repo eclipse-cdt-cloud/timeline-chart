@@ -1,5 +1,6 @@
 import { TimeGraphAxisScale } from "../components/time-graph-axis-scale";
 import { TimeGraphLayer } from "./time-graph-layer";
+import * as _ from "lodash";
 
 export class TimeGraphAxis extends TimeGraphLayer {
 
@@ -23,7 +24,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
     }
 
     protected afterAddToContainer() {
-        this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
+        const mw = _.throttle((ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
             const oldViewRange = this.unitController.viewRange;
             let start = oldViewRange.start + (shiftStep / this.stateController.zoomFactor);
@@ -38,6 +39,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
             this.unitController.viewRange = { start, end }
             return false;
         });
+        this.onCanvasEvent('mousewheel', mw);
         this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', this.getOptions(), this.unitController, this.stateController);
 
         this.addChild(this.scaleComponent);

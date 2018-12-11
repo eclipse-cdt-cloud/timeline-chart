@@ -34,8 +34,8 @@ export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
     protected _options: TimeGraphComponentOptions;
 
-    constructor(protected _id: string) {
-        this._displayObject = new PIXI.Graphics();
+    constructor(protected _id: string, displayObject?: PIXI.Graphics) {
+        this._displayObject = displayObject || new PIXI.Graphics();
     }
 
     get id(): string {

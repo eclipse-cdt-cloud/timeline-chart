@@ -2,6 +2,7 @@ import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect } 
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphRange } from "../time-graph-model";
 import { TimeGraphStateController } from "../time-graph-state-controller";
+import * as _ from "lodash";
 
 export class TimeGraphAxisScale extends TimeGraphComponent {
 
@@ -16,19 +17,20 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     }
 
     protected addEvents() {
+        const mouseMove = _.throttle(event => {
+            if (this.mouseIsDown) {
+                const delta = event.data.global.y - this.mouseStartY;
+                const zoomStep = (delta / 100);
+                this.zoom(zoomStep);
+            }
+        }, 40);
         this.addEvent('mousedown', event => {
             this.mouseStartY = event.data.global.y;
             this.mouseStartX = event.data.global.x;
             this.oldViewRange = this.unitController.viewRange;
             this.mouseIsDown = true;
         }, this._displayObject);
-        this.addEvent('mousemove', event => {
-            if (this.mouseIsDown) {
-                const delta = event.data.global.y - this.mouseStartY;
-                const zoomStep = (delta / 100);
-                this.zoom(zoomStep);
-            }
-        }, this._displayObject);
+        this.addEvent('mousemove', mouseMove, this._displayObject);
         const moveEnd: TimeGraphInteractionHandler = event => {
             this.mouseIsDown = false;
         }
