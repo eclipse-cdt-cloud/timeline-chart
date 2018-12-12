@@ -5,6 +5,7 @@ import * as _ from "lodash";
 export class TimeGraphAxis extends TimeGraphLayer {
 
     protected scaleComponent: TimeGraphAxisScale;
+    protected numberTranslator?: (theNumber: number) => string;
 
     constructor(id: string, protected style?: { color?: number }) {
         super(id);
@@ -40,8 +41,13 @@ export class TimeGraphAxis extends TimeGraphLayer {
             return false;
         });
         this.onCanvasEvent('mousewheel', mw);
-        this.scaleComponent = new TimeGraphAxisScale(this.id + '_scale', this.getOptions(), this.unitController, this.stateController);
-
+        this.scaleComponent = new TimeGraphAxisScale(
+            this.id + '_scale',
+            this.getOptions(),
+            this.unitController,
+            this.stateController,
+            this.numberTranslator
+        );
         this.addChild(this.scaleComponent);
 
         this.unitController.onSelectionRangeChange(() => this.update());
@@ -50,5 +56,9 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     update() {
         this.scaleComponent.update(this.getOptions());
+    }
+
+    registerNumberTranslator(translator: (theNumber: number) => string) {
+        this.numberTranslator = translator;
     }
 }

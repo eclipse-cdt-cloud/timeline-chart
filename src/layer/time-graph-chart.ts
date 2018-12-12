@@ -81,7 +81,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         rowComponent.displayObject.interactive = true;
         rowComponent.displayObject.on('click', ((e: PIXI.interaction.InteractionEvent) => {
             this.selectRow(row);
-        }).bind(this))
+        }).bind(this));
         this.addChild(rowComponent);
         row.states.forEach((rowElementModel: TimeGraphRowElementModel, elementIndex: number) => {
             const relativeElementStartPosition = rowElementModel.range.start - this.unitController.viewRange.start;

@@ -1,4 +1,4 @@
-import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect } from "./time-graph-component";
+import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect, TimeGraphComponentOptions } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphRange } from "../time-graph-model";
 import { TimeGraphStateController } from "../time-graph-state-controller";
@@ -10,10 +10,16 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     protected mouseStartX: number;
     protected oldViewRange: TimeGraphRange;
     protected mouseIsDown: boolean = false;
+    protected labels: PIXI.Text[];
 
-    constructor(id: string, protected _options: TimeGraphStyledRect, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+    constructor(id: string,
+        protected _options: TimeGraphStyledRect,
+        protected unitController: TimeGraphUnitController,
+        protected stateController: TimeGraphStateController,
+        protected numberTranslator?: (theNumber: number) => string) {
         super(id);
         this.addEvents();
+        this.labels = [];
     }
 
     protected addEvents() {
@@ -55,20 +61,36 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         const stepLength = this.getStepLength();
         const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
         for (let i = 0; i < steps; i++) {
-            const height = lineHeight * (-1);
-            const xpos = (stepLength * i - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const absolutePosition = stepLength * i;
+            const xpos = (absolutePosition - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
                 const position = {
                     x: xpos,
                     y: this._options.height
                 };
+                if (this.numberTranslator) {
+                    const label = this.numberTranslator(absolutePosition);
+                    const text = new PIXI.Text(label, {
+                        fontSize: 10
+                    });
+                    text.x = position.x + 5;
+                    text.y = this._options.height - (2 * lineHeight);
+                    this.labels.push(text);
+                    this._displayObject.addChild(text);
+                }
                 this.vline({
                     position,
-                    height,
+                    height: lineHeight * (-1),
                     color: lineColor
                 });
             }
         }
+    }
+
+    update(opts?: TimeGraphComponentOptions){
+        this.labels.forEach(label => label.destroy());
+        this.labels = [];
+        super.update(opts);
     }
 
     render() {

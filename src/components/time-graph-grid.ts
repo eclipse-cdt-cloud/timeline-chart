@@ -5,7 +5,11 @@ import { TimeGraphStateController } from "../time-graph-state-controller";
 
 export class TimeGraphGrid extends TimeGraphAxisScale {
 
-    constructor(id: string, protected _options: TimeGraphRect, protected rowHeight: number, protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+    constructor(id: string,
+        protected _options: TimeGraphRect,
+        protected rowHeight: number,
+        protected unitController: TimeGraphUnitController,
+        protected stateController: TimeGraphStateController) {
         super(id, _options, unitController, stateController);
     }
 

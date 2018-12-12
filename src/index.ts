@@ -78,11 +78,18 @@ container.appendChild(axisHTMLContainer);
 const timeGraphAxisContainer = new TimeGraphContainer({
     height: 30,
     width: styleConfig.mainWidth,
-    id: timeGraph.id + '_axis'
+    id: timeGraph.id + '_axis',
+    backgroundColor: 0xffffff
 }, unitController);
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
+timeAxisLayer.registerNumberTranslator((theNumber:number)=>{
+    const milli = Math.floor(theNumber / 1000000);
+    const micro = Math.floor((theNumber % 1000000) / 1000);
+    const nano = Math.floor((theNumber % 1000000) % 1000);
+    return milli + ':' + micro + ':' + nano;
+});
 timeGraphAxisContainer.addLayer(timeAxisLayer);
 
 const chartHTMLContainer = document.createElement('div');
