@@ -1,16 +1,16 @@
 {
   "name": "timeline-chart",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "@types/pixi.js": "^4.8.2",
-    "@types/lodash.throttle": "^4.1.4"
+    "@types/lodash.throttle": "^4.1.4",
+    "@types/pixi.js": "^4.8.2"
   },
   "dependencies": {
-    "pixi.js": "^4.8.2",
-    "lodash.throttle": "^4.1.1"
+    "lodash.throttle": "^4.1.1",
+    "pixi.js": "^4.8.2"
   }
 }
