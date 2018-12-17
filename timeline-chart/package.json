@@ -1,7 +1,6 @@
 {
   "name": "timeline-chart",
   "version": "0.0.1",
-  "private": true,
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch"
