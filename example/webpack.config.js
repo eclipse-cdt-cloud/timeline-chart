@@ -5,7 +5,7 @@ module.exports = {
     entry: ['./src/index.ts'],
     devtool: "source-map",
     devServer: {
-        contentBase: path.join(__dirname, 'example'),
+        contentBase: path.join(__dirname, 'public'),
         disableHostCheck: true,
         hot: true
     },

@@ -1,17 +1,17 @@
-import { TimeGraphAxis } from "./layer/time-graph-axis";
-import { TimeGraphChart, TimeGraphRowStyleHook } from "./layer/time-graph-chart";
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphNavigator } from "./layer/time-graph-navigator";
-import { TimeGraphContainer } from "./time-graph-container";
-import { TimeGraphChartCursors } from "./layer/time-graph-chart-cursors";
-import { TimeGraphAxisCursors } from "./layer/time-graph-axis-cursors";
-// import { timeGraph } from "./test-data";
-import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "./time-graph-model";
-import { TimeGraphRowElement, TimeGraphRowElementStyle } from "./components/time-graph-row-element";
+import { TimeGraphAxis } from "timeline-chart/lib/layer/time-graph-axis";
+import { TimeGraphChart, TimeGraphRowStyleHook } from "timeline-chart/lib/layer/time-graph-chart";
+import { TimeGraphUnitController } from "timeline-chart/lib/time-graph-unit-controller";
+import { TimeGraphNavigator } from "timeline-chart/lib/layer/time-graph-navigator";
+import { TimeGraphContainer } from "timeline-chart/lib/time-graph-container";
+import { TimeGraphChartCursors } from "timeline-chart/lib/layer/time-graph-chart-cursors";
+import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
+// import { timeGraph } from "timeline-chart/lib/test-data";
+import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "timeline-chart/lib/time-graph-model";
+import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
-import { TimeGraphChartGrid } from "./layer/time-graph-chart-grid";
-import { TimeGraphVerticalScrollbar } from "./layer/time-graph-vertical-scrollbar";
-import { TimeGraphChartArrows } from "./layer/time-graph-chart-arrows";
+import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
+import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
+import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
 
 const styleConfig = {
     mainWidth: 1000,

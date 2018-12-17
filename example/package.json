@@ -1,0 +1,27 @@
+{
+  "name": "timeline-chart-example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --host 0.0.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.26",
+    "@types/pixi.js": "^4.8.2",
+    "@types/lodash.throttle": "^4.1.4",
+    "source-map-loader": "^0.2.4",
+    "ts-loader": "^5.2.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "webpack": "^4.22.0",
+    "file-loader": "^2.0.0"
+  },
+  "dependencies": {
+    "pixi.js": "^4.8.2",
+    "lodash.throttle": "^4.1.1",
+    "timeline-chart": "0.0.1"
+  }
+}

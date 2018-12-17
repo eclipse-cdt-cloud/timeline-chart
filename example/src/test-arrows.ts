@@ -1,4 +1,4 @@
-import { TimeGraphArrow } from "./time-graph-model";
+import { TimeGraphArrow } from "timeline-chart/lib/time-graph-model";
 
 export const timeGraphArrows: TimeGraphArrow[] = [
     {

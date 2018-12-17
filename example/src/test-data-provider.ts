@@ -1,4 +1,4 @@
-import { TimeGraphModel, TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange, TimeGraphArrow } from "./time-graph-model";
+import { TimeGraphModel, TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange, TimeGraphArrow } from "timeline-chart/lib/time-graph-model";
 import { timeGraphEntries } from "./test-entries";
 import { timeGraphStates } from "./test-states";
 import { timeGraphArrows } from "./test-arrows";

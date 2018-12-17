@@ -1,4 +1,4 @@
-import { TimeGraphModel } from "./time-graph-model";
+import { TimeGraphModel } from "timeline-chart/lib/time-graph-model";
 
 export const timeGraph: TimeGraphModel = {
     id: 'test1',
