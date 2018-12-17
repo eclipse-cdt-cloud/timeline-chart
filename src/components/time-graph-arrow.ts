@@ -26,16 +26,20 @@ export class TimeGraphArrowHead extends TimeGraphComponent {
     }
 
     render(): void {
-        const end = this.coords.end;
-        this._displayObject.beginFill(0x000000);
-        this._displayObject.drawPolygon([
-            end.x, end.y,
-            end.x-10, end.y-4,
-            end.x-10, end.y+4,
-            end.x,end.y
-        ]);
-        this._displayObject.endFill();
-        //this._displayObject.pivot = new PIXI.Point(end.x, end.y);
-        //this._displayObject.rotation = 45;
+        // const end = this.coords.end;
+        // this._displayObject.beginFill(0x000000);
+        // this._displayObject.drawPolygon([
+        //     end.x, end.y,
+        //     end.x-10, end.y-4,
+        //     end.x-10, end.y+4,
+        //     end.x,end.y
+        // ]);
+        // const head = PIXI.Sprite.fromImage('../assets/arrowhead.png');
+        // head.x = 100;
+        // head.y = 100;
+        // this._displayObject.addChild(head);
+        // this._displayObject.endFill();
+        // this._displayObject.pivot = new PIXI.Point(end.x, end.y);
+        // this._displayObject.rotation = 45;
     }
 }

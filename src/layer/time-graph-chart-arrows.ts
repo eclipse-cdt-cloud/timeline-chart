@@ -2,6 +2,7 @@ import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphArrowComponent, TimeGraphArrowHead } from "../components/time-graph-arrow";
 import { TimeGraphElementPosition } from "../components/time-graph-component";
 import { TimeGraphArrow } from "../time-graph-model";
+// import ArrowHead from "./arrowhead.png";
 
 export class TimeGraphChartArrows extends TimeGraphLayer {
 
@@ -16,11 +17,11 @@ export class TimeGraphChartArrows extends TimeGraphLayer {
         const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
             x: relativeStartPosition * this.stateController.zoomFactor,
-            y: (arrow.sourceId * rowHeight) + (rowHeight/2)
+            y: (arrow.sourceId * rowHeight) + (rowHeight / 2)
         }
         const end: TimeGraphElementPosition = {
             x: (relativeStartPosition + arrow.range.end - arrow.range.start) * this.stateController.zoomFactor,
-            y: (arrow.destinationId * rowHeight) + (rowHeight/2)
+            y: (arrow.destinationId * rowHeight) + (rowHeight / 2)
         }
         const arrowComponent = new TimeGraphArrowComponent('arrow', { start, end });
         this.addChild(arrowComponent);
@@ -30,7 +31,7 @@ export class TimeGraphChartArrows extends TimeGraphLayer {
 
     addArrows(arrows: TimeGraphArrow[], rowHeight: number): void {
         if (!this.stateController) {
-            throw ('Add this TimeGraphChartArrows to a container before adding rows.');
+            throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
         this.rowHeight = rowHeight;
         this.arrows = [];
@@ -41,10 +42,21 @@ export class TimeGraphChartArrows extends TimeGraphLayer {
     }
 
     protected update(): void {
-        if (this.arrows && this.rowHeight) {
-            this.removeChildren();
-            this.addArrows(this.arrows, this.rowHeight);
-        }
+        // PIXI.loader
+        //     .add(ArrowHead)
+        //     .load((() => {
+        //     let sprite = new PIXI.Sprite(
+        //         PIXI.loader.resources[ArrowHead].texture
+        //     );
+        //     sprite.x = 100;
+        //     sprite.y = 100;
+        //     this.stage.addChild(sprite);
+        // }).bind(this));
+
+        // if (this.arrows && this.rowHeight) {
+        //     this.removeChildren();
+        //     this.addArrows(this.arrows, this.rowHeight);
+        // }
     }
 
 }

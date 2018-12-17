@@ -18,7 +18,6 @@ export type TimeGraphRowStyleHook = (row: TimeGraphRowModel) => TimeGraphRowStyl
 export class TimeGraphChart extends TimeGraphLayer {
 
     protected rows: TimeGraphRowModel[];
-    protected rowHeight: number;
     protected rowElementStyleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined;
     protected rowStyleHook: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
@@ -29,9 +28,20 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected verticalPositionChangedHandler: ((verticalChartPosition: number) => void)[] = [];
     protected totalHeight: number;
     protected throttledUpdate: () => void;
+    protected pullHook: (range: TimeGraphRange, resolution: number) => {rows: TimeGraphRowModel[], range: TimeGraphRange};
+
+    constructor(id: string, protected rowHeight: number) {
+        super(id);
+    }
 
     protected afterAddToContainer() {
-        this.unitController.onViewRangeChanged(() => this.update());
+        this.unitController.onViewRangeChanged(() => {
+            // TODO shouldn't be called on every view range change.
+            // Smarter decisions should be made here.
+            const rowData = this.pullHook(this.unitController.viewRange, this.stateController.zoomFactor);
+            this.setRowModel(rowData.rows);
+            this.update();
+        });
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
             let verticalOffset = this.stateController.positionOffset.y + shiftStep;
@@ -146,6 +156,10 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.throttledUpdate();
     }
 
+    registerPullHook(pullHook: (range: TimeGraphRange, resolution: number) => {rows: TimeGraphRowModel[], range: TimeGraphRange}){
+        this.pullHook = pullHook;
+    }
+
     registerRowStyleHook(styleHook: TimeGraphRowStyleHook) {
         this.rowStyleHook = styleHook;
     }
@@ -213,8 +227,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.update();
     }
 
-    setRowModel(rows: TimeGraphRowModel[], rowHeight: number) {
-        this.rowHeight = rowHeight;
+    setRowModel(rows: TimeGraphRowModel[]) {
         this.rows = rows;
         this.update();
     }

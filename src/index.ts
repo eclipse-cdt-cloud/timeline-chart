@@ -6,12 +6,12 @@ import { TimeGraphContainer } from "./time-graph-container";
 import { TimeGraphChartCursors } from "./layer/time-graph-chart-cursors";
 import { TimeGraphAxisCursors } from "./layer/time-graph-axis-cursors";
 // import { timeGraph } from "./test-data";
-import { TimeGraphRowElementModel, TimeGraphRowModel } from "./time-graph-model";
+import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "./time-graph-model";
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "./components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
-// import { TimeGraphChartGrid } from "./layer/time-graph-chart-grid";
+import { TimeGraphChartGrid } from "./layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "./layer/time-graph-vertical-scrollbar";
-// import { TimeGraphChartArrows } from "./layer/time-graph-chart-arrows";
+import { TimeGraphChartArrows } from "./layer/time-graph-chart-arrows";
 
 const styleConfig = {
     mainWidth: 1000,
@@ -84,7 +84,7 @@ const timeGraphAxisContainer = new TimeGraphContainer({
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
-timeAxisLayer.registerNumberTranslator((theNumber:number)=>{
+timeAxisLayer.registerNumberTranslator((theNumber: number) => {
     const milli = Math.floor(theNumber / 1000000);
     const micro = Math.floor((theNumber % 1000000) / 1000);
     const nano = Math.floor((theNumber % 1000000) % 1000);
@@ -106,16 +106,21 @@ chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
 const rowHeight = 16;
 
-// const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
-// timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
+const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
+timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
-const timeGraphChartLayer = new TimeGraphChart('timeGraphChart');
+const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', rowHeight);
 timeGraphChartContainer.addLayer(timeGraphChartLayer);
 
 timeGraphChartLayer.registerRowElementStyleHook(stateStyleHook);
 timeGraphChartLayer.registerRowStyleHook(rowStyleHook);
 timeGraphChartLayer.registerRowElementMouseInteractions({
-    click: el => { console.log(el.model.label) }
+    click: el => {
+        console.log(el.model.label);
+        if (el.model.data) {
+            console.log(el.model.data.timeRange);
+        }
+    }
 });
 let selectedElement: TimeGraphRowElement;
 timeGraphChartLayer.onSelectedRowElementChanged((model) => {
@@ -125,9 +130,9 @@ timeGraphChartLayer.onSelectedRowElementChanged((model) => {
     }
 })
 
-timeGraphChartLayer.setRowModel(timeGraph.rows, rowHeight);
-unitController.onViewRangeChanged(() => {
-    timeGraph = testDataProvider.getData(unitController.viewRange);
+timeGraphChartLayer.setRowModel(timeGraph.rows);
+timeGraphChartLayer.registerPullHook((range: TimeGraphRange, resolution: number) => {
+    timeGraph = testDataProvider.getData(range);
     if (selectedElement) {
         for (const row of timeGraph.rows) {
             const selEl = row.states.find(el => el.id === selectedElement.id);
@@ -137,8 +142,15 @@ unitController.onViewRangeChanged(() => {
             }
         }
     }
-    timeGraphChartLayer.setRowModel(timeGraph.rows, rowHeight);
-})
+    return {
+        rows: timeGraph.rows,
+        range
+    };
+});
+
+const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows');
+timeGraphChartContainer.addLayer(timeGraphChartArrows);
+timeGraphChartArrows.addArrows(timeGraph.arrows, rowHeight);
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);
