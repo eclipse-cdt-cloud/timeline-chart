@@ -20,15 +20,20 @@ export class TimeGraphContainer {
 
     protected layers: TimeGraphLayer[];
 
-    constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController) {
-        const canvas: HTMLCanvasElement = document.createElement('canvas');
-        const ratio = window.devicePixelRatio;
+    constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController, protected extCanvas?: HTMLCanvasElement) {
+        let canvas: HTMLCanvasElement
+        if (!extCanvas) {
+            canvas = document.createElement('canvas');
+        } else {
+            canvas = extCanvas;
+        }
         canvas.style.width = config.width + 'px';
         canvas.style.height = config.height + 'px';
         canvas.width = config.width;
         canvas.height = config.height;
         canvas.id = config.id;
         canvas.className = 'time-graph-canvas';
+        const ratio = window.devicePixelRatio;
         const application = new PIXI.Application({
             width: canvas.width,
             height: canvas.height,
@@ -40,7 +45,6 @@ export class TimeGraphContainer {
             resolution: ratio
         });
         application.stage.height = config.height;
-        // application.stage.scale = new PIXI.Point(ratio, ratio);
 
         this.stage = application.stage;
         this._canvas = application.view;

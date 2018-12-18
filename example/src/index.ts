@@ -75,12 +75,13 @@ const axisHTMLContainer = document.createElement('div');
 axisHTMLContainer.id = 'main_axis';
 container.appendChild(axisHTMLContainer);
 
+const axisCanvas = document.createElement('canvas');
 const timeGraphAxisContainer = new TimeGraphContainer({
     height: 30,
     width: styleConfig.mainWidth,
     id: timeGraph.id + '_axis',
     backgroundColor: 0xffffff
-}, unitController);
+}, unitController, axisCanvas);
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
