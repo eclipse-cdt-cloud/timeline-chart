@@ -5,11 +5,11 @@
         "build": "lerna run build",
         "watch": "lerna run watch",
         "start": "lerna run start",
-        "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact",
-        "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary --npm-tag=next --no-git-tag-version --no-push --yes"
+        "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact --skip-git",
+        "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary=next --npm-tag=next --skip-git --yes"
     },
     "devDependencies": {
-        "lerna": "3.6.0",
+        "lerna": "2.11.0",
         "typescript": "^3.2.2"
     },
     "workspaces": [
