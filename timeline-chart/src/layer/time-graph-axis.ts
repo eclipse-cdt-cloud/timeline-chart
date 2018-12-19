@@ -41,6 +41,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
             return false;
         });
         this.onCanvasEvent('mousewheel', mw);
+        this.onCanvasEvent('wheel', mw);
         this.scaleComponent = new TimeGraphAxisScale(
             this.id + '_scale',
             this.getOptions(),

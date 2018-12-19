@@ -9,6 +9,7 @@ export interface TimeGraphContainerOptions {
     height: number
     backgroundColor?: number
     transparent?: boolean
+    classNames?: string
 }
 
 export class TimeGraphContainer {
@@ -32,7 +33,7 @@ export class TimeGraphContainer {
         canvas.width = config.width;
         canvas.height = config.height;
         canvas.id = config.id;
-        canvas.className = 'time-graph-canvas';
+        canvas.className = `time-graph-canvas ${this.config.classNames || ''}`;
         const ratio = window.devicePixelRatio;
         const application = new PIXI.Application({
             width: canvas.width,
