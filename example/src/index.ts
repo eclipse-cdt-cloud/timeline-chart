@@ -1,5 +1,5 @@
 import { TimeGraphAxis } from "timeline-chart/lib/layer/time-graph-axis";
-import { TimeGraphChart, TimeGraphRowStyleHook } from "timeline-chart/lib/layer/time-graph-chart";
+import { TimeGraphChart } from "timeline-chart/lib/layer/time-graph-chart";
 import { TimeGraphUnitController } from "timeline-chart/lib/time-graph-unit-controller";
 import { TimeGraphNavigator } from "timeline-chart/lib/layer/time-graph-navigator";
 import { TimeGraphContainer } from "timeline-chart/lib/time-graph-container";
@@ -11,7 +11,7 @@ import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/li
 import { TestDataProvider } from "./test-data-provider";
 import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
-import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
+// import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
 
 const styleConfig = {
     mainWidth: 1000,
@@ -22,43 +22,6 @@ const styleConfig = {
 }
 
 const styleMap = new Map<string, TimeGraphRowElementStyle>();
-const stateStyleHook = (model: TimeGraphRowElementModel) => {
-    const styles: TimeGraphRowElementStyle[] = [
-        {
-            color: 0x11ad1b,
-            height: rowHeight * 0.8
-        }, {
-            color: 0xbc2f00,
-            height: rowHeight * 0.7
-        }, {
-            color: 0xccbf5d,
-            height: rowHeight * 0.6
-        }
-    ];
-    let style: TimeGraphRowElementStyle | undefined = styles[0];
-    if (model.data && model.data.value) {
-        const val = model.data.value;
-        style = styleMap.get(val);
-        if (!style) {
-            style = styles[(styleMap.size % styles.length)];
-            styleMap.set(val, style);
-        }
-    }
-    return {
-        color: style.color,
-        height: style.height,
-        borderWidth: model.selected ? 1 : 0
-    };
-}
-
-const rowStyleHook: TimeGraphRowStyleHook = (row: TimeGraphRowModel) => {
-    return {
-        backgroundColor: 0xe0ddcf,
-        backgroundOpacity: row.selected ? 0.6 : 0,
-        lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
-        lineThickness: row.data && row.data.hasStates ? 1 : 3
-    }
-}
 
 const container = document.getElementById('main');
 if (!container) {
@@ -110,11 +73,62 @@ const rowHeight = 16;
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
 timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
-const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', rowHeight);
+const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', {
+    dataProvider: (range: TimeGraphRange, resolution: number) => {
+        timeGraph = testDataProvider.getData(range);
+        if (selectedElement) {
+            for (const row of timeGraph.rows) {
+                const selEl = row.states.find(el => el.id === selectedElement.id);
+                if (selEl) {
+                    selEl.selected = true;
+                    break;
+                }
+            }
+        }
+        return {
+            rows: timeGraph.rows,
+            range
+        };
+    },
+    rowElementStyleProvider: (model: TimeGraphRowElementModel) => {
+        const styles: TimeGraphRowElementStyle[] = [
+            {
+                color: 0x11ad1b,
+                height: rowHeight * 0.8
+            }, {
+                color: 0xbc2f00,
+                height: rowHeight * 0.7
+            }, {
+                color: 0xccbf5d,
+                height: rowHeight * 0.6
+            }
+        ];
+        let style: TimeGraphRowElementStyle | undefined = styles[0];
+        if (model.data && model.data.value) {
+            const val = model.data.value;
+            style = styleMap.get(val);
+            if (!style) {
+                style = styles[(styleMap.size % styles.length)];
+                styleMap.set(val, style);
+            }
+        }
+        return {
+            color: style.color,
+            height: style.height,
+            borderWidth: model.selected ? 1 : 0
+        };
+    },
+    rowStyleProvider: (row: TimeGraphRowModel) => {
+        return {
+            backgroundColor: 0xe0ddcf,
+            backgroundOpacity: row.selected ? 0.6 : 0,
+            lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
+            lineThickness: row.data && row.data.hasStates ? 1 : 3
+        }
+    }
+}, rowHeight);
 timeGraphChartContainer.addLayer(timeGraphChartLayer);
 
-timeGraphChartLayer.registerRowElementStyleHook(stateStyleHook);
-timeGraphChartLayer.registerRowStyleHook(rowStyleHook);
 timeGraphChartLayer.registerRowElementMouseInteractions({
     click: el => {
         console.log(el.model.label);
@@ -131,27 +145,9 @@ timeGraphChartLayer.onSelectedRowElementChanged((model) => {
     }
 })
 
-timeGraphChartLayer.setRowModel(timeGraph.rows);
-timeGraphChartLayer.registerPullHook((range: TimeGraphRange, resolution: number) => {
-    timeGraph = testDataProvider.getData(range);
-    if (selectedElement) {
-        for (const row of timeGraph.rows) {
-            const selEl = row.states.find(el => el.id === selectedElement.id);
-            if (selEl) {
-                selEl.selected = true;
-                break;
-            }
-        }
-    }
-    return {
-        rows: timeGraph.rows,
-        range
-    };
-});
-
-const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows');
-timeGraphChartContainer.addLayer(timeGraphChartArrows);
-timeGraphChartArrows.addArrows(timeGraph.arrows, rowHeight);
+// const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows');
+// timeGraphChartContainer.addLayer(timeGraphChartArrows);
+// timeGraphChartArrows.addArrows(timeGraph.arrows, rowHeight);
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);

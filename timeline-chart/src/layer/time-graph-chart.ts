@@ -13,13 +13,17 @@ export interface TimeGraphRowElementMouseInteractions {
     mouseup?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
 }
 
+export interface TimeGraphChartProviders {
+    dataProvider: (range: TimeGraphRange, resolution: number) => { rows: TimeGraphRowModel[], range: TimeGraphRange }
+    rowElementStyleProvider?: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined
+    rowStyleProvider?: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined
+}
+
 export type TimeGraphRowStyleHook = (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 export class TimeGraphChart extends TimeGraphLayer {
 
     protected rows: TimeGraphRowModel[];
-    protected rowElementStyleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined;
-    protected rowStyleHook: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElementModel: TimeGraphRowElementModel;
     protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
@@ -27,19 +31,13 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected selectedRowChangedHandler: ((el: TimeGraphRowModel) => void)[] = [];
     protected verticalPositionChangedHandler: ((verticalChartPosition: number) => void)[] = [];
     protected totalHeight: number;
-    protected throttledUpdate: () => void;
-    protected pullHook: (range: TimeGraphRange, resolution: number) => {rows: TimeGraphRowModel[], range: TimeGraphRange};
 
-    constructor(id: string, protected rowHeight: number) {
+    constructor(id: string, protected providers: TimeGraphChartProviders, protected rowHeight: number) {
         super(id);
     }
 
     protected afterAddToContainer() {
-        this.unitController.onViewRangeChanged(() => {
-            this.stage.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
-            this.stage.scale.x = this.stateController.zoomFactor;
-            this.update();
-        });
+
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
             let verticalOffset = this.stateController.positionOffset.y + shiftStep;
@@ -50,13 +48,28 @@ export class TimeGraphChart extends TimeGraphLayer {
                 verticalOffset = this.totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.stateController.positionOffset.y = verticalOffset;
-            this.stage.position.y = -verticalOffset;
+            this.layer.position.y = -verticalOffset;
             this.handleVerticalPositionChange();
             return false;
         });
+
+        this.unitController.onViewRangeChanged(() => {
+            this.updateScaleAndPosition();
+        });
+        this.updateScaleAndPosition();
+
+        // lets fetch everything
+        const rowData = this.providers.dataProvider({ start: 0, end: this.unitController.absoluteRange }, 1);
+        this.setRowModel(rowData.rows);
+        this.addRows(this.rows, this.rowHeight);
     }
 
-    update() {}
+    update() { }
+
+    protected updateScaleAndPosition() {
+        this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
+        this.layer.scale.x = this.stateController.zoomFactor;
+    }
 
     protected handleVerticalPositionChange() {
         this.verticalPositionChangedHandler.forEach(handler => handler(this.stateController.positionOffset.y));
@@ -73,7 +86,7 @@ export class TimeGraphChart extends TimeGraphLayer {
     protected addRow(row: TimeGraphRowModel, height: number, rowIndex: number) {
         const rowId = 'row_' + rowIndex;
         const length = row.range.end - row.range.start;
-        const rowStyle = this.rowStyleHook ? this.rowStyleHook(row) : undefined;
+        const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
                 x: row.range.start,
@@ -94,7 +107,7 @@ export class TimeGraphChart extends TimeGraphLayer {
                 start,
                 end
             };
-            const elementStyle = this.rowElementStyleHook ? this.rowElementStyleHook(rowElementModel) : undefined;
+            const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
             const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
             this.addElementInteractions(el);
             this.addChild(el);
@@ -142,20 +155,8 @@ export class TimeGraphChart extends TimeGraphLayer {
         });
     }
 
-    registerPullHook(pullHook: (range: TimeGraphRange, resolution: number) => {rows: TimeGraphRowModel[], range: TimeGraphRange}){
-        this.pullHook = pullHook;
-        // lets fetch everything
-        const rowData = this.pullHook({ start:0, end: this.unitController.absoluteRange}, 1);
-        this.setRowModel(rowData.rows);
-        this.addRows(rowData.rows, this.rowHeight);
-    }
-
-    registerRowStyleHook(styleHook: TimeGraphRowStyleHook) {
-        this.rowStyleHook = styleHook;
-    }
-
-    registerRowElementStyleHook(styleHook: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined) {
-        this.rowElementStyleHook = styleHook;
+    protected setRowModel(rows: TimeGraphRowModel[]) {
+        this.rows = rows;
     }
 
     registerRowElementMouseInteractions(interactions: TimeGraphRowElementMouseInteractions) {
@@ -213,10 +214,6 @@ export class TimeGraphChart extends TimeGraphLayer {
             this.selectRow(el.row.model);
         }
         this.handleSelectedRowElementChange();
-    }
-
-    setRowModel(rows: TimeGraphRowModel[]) {
-        this.rows = rows;
     }
 
     setVerticalPositionOffset(ypos: number) {

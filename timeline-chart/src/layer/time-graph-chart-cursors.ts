@@ -19,6 +19,11 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         }
     }
 
+    protected updateScaleAndPosition() {
+        this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
+        this.layer.scale.x = this.stateController.zoomFactor;
+    }
+
     protected afterAddToContainer() {
         this.addBackground();
         this.mouseIsDown = false;
@@ -39,6 +44,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             this.mouseIsDown = true;
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
+            console.log("SET CURSOR AT", xpos);
             if (this.shiftKeyDown) {
                 const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
                 this.unitController.selectionRange = {
@@ -69,8 +75,12 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.stage.on('mouseupoutside', (event: PIXI.interaction.InteractionEvent) => {
             this.mouseIsDown = false;
         });
+        this.unitController.onViewRangeChanged(() => {
+            this.updateScaleAndPosition();
+        });
+        this.updateScaleAndPosition();
         this.unitController.onSelectionRangeChange(() => this.update());
-        this.unitController.onViewRangeChanged(() => this.update());
+        // this.unitController.onViewRangeChanged(() => this.update());
     }
 
     protected maybeCenterCursor() {
@@ -154,8 +164,8 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.removeChildren();
         this.addBackground();
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const firstCursorPosition = this.unitController.selectionRange.start;//(this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const secondCursorPosition = this.unitController.selectionRange.end;//(this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const firstCursorOptions = {
                 color: this.color,
                 height: this.stateController.canvasDisplayHeight,

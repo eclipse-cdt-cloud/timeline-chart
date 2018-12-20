@@ -200,7 +200,6 @@ export class TestDataProvider {
         })
         let arrows: TimeGraphArrow[] = [];
         timeGraphArrows.forEach(arrow => {
-            console.log("in provider arrow", arrow, this.absoluteStart);
             arrows.push({
                 sourceId: arrow.sourceId,
                 destinationId: arrow.destinationId,

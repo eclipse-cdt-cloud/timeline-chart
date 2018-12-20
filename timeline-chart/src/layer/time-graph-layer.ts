@@ -8,37 +8,40 @@ export abstract class TimeGraphLayer {
     protected unitController: TimeGraphUnitController;
     protected children: TimeGraphComponent[];
     protected stage: PIXI.Container;
+    protected layer: PIXI.Container;
 
     constructor(protected id: string) {
         this.children = [];
+        this.layer = new PIXI.Container;
     }
 
     protected addChild(child: TimeGraphComponent) {
-        if(!this.stage){
-            throw("Layers must be added to a container before components can be added.");
+        if (!this.canvas) {
+            throw ("Layers must be added to a container before components can be added.");
         }
         child.render();
-        this.stage.addChild(child.displayObject);
+        this.layer.addChild(child.displayObject);
         this.children.push(child);
     }
 
     /**
     This method is called by the container this layer is added to.
     */
-    initializeLayer(canvas:HTMLCanvasElement, stage: PIXI.Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController) {
+    initializeLayer(canvas: HTMLCanvasElement, stage: PIXI.Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController) {
         this.canvas = canvas;
-        this.stage = stage;
         this.stateController = stateController;
         this.unitController = unitController;
+        this.stage = stage;
+        stage.addChild(this.layer);
         this.afterAddToContainer();
     }
 
-    protected onCanvasEvent(type: string, handler: (event:Event)=>void){
+    protected onCanvasEvent(type: string, handler: (event: Event) => void) {
         this.canvas.addEventListener(type, handler);
     }
 
     protected removeChildren() {
-        this.children.forEach(child => this.stage.removeChild(child.displayObject));
+        this.children.forEach(child => this.layer.removeChild(child.displayObject));
         this.children = [];
     }
 
