@@ -1,46 +1,30 @@
 import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphElementPosition } from "../components/time-graph-component";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
-import { TimeGraphLayer } from "./time-graph-layer";
+import { TimeGraphChartLayer } from "./time-graph-chart-layer";
+import { TimeGraphRowController } from "../time-graph-row-controller";
 
-export class TimeGraphVerticalScrollbar extends TimeGraphLayer {
+export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
 
     protected navigatorHandle: TimeGraphVerticalScrollbarHandle;
     protected selectionRange?: TimeGraphRectangle;
 
     protected factor: number;
 
-    protected verticalPositionChangedHandler: ((ypos: number) => void)[];
-
-    constructor(id: string, protected totalHeight: number) {
-        super(id);
-        this.verticalPositionChangedHandler = [];
+    constructor(id: string, protected rowController: TimeGraphRowController) {
+        super(id, rowController);
     }
 
     protected afterAddToContainer() {
-        this.factor = this.totalHeight / this.stateController.canvasDisplayHeight;
-        this.navigatorHandle = new TimeGraphVerticalScrollbarHandle(this.stateController, this.factor);
+        this.factor = this.stateController.canvasDisplayHeight / this.rowController.totalHeight;
+        this.navigatorHandle = new TimeGraphVerticalScrollbarHandle(this.rowController, this.stateController, this.factor);
         this.addChild(this.navigatorHandle);
-        this.stateController.onPositionChanged(() => this.update());
-    }
-
-    protected handleVerticalPositionChange(ypos: number) {
-        this.verticalPositionChangedHandler.forEach(handler => handler(ypos));
-    }
-
-    onVerticalPositionChanged(handler: (ypos: number) => void) {
-        this.verticalPositionChangedHandler.push(handler);
-    }
-
-    setVerticalPosition(verticalPosition: number){
-        this.stateController.positionOffset.y = verticalPosition / this.factor;
-        this.update();
+        this.rowController.onVerticalOffsetChangedHandler(() => this.update());
     }
 
     update() {
         this.navigatorHandle.clear();
         this.navigatorHandle.render();
-        this.handleVerticalPositionChange(this.stateController.positionOffset.y * this.factor);
     }
 }
 
@@ -53,11 +37,11 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
     protected height: number;
     protected position: TimeGraphElementPosition;
 
-    constructor(protected stateController: TimeGraphStateController, protected factor: number) {
+    constructor(protected rowController: TimeGraphRowController, protected stateController: TimeGraphStateController, protected factor: number) {
         super('vscroll_handle');
         this.addEvent('mousedown', event => {
             this.mouseStartY = event.data.global.y;
-            this.oldVerticalOffset = this.stateController.positionOffset.y
+            this.oldVerticalOffset = this.rowController.verticalOffset
             this.mouseIsDown = true;
         }, this._displayObject);
         this.addEvent('mousemove', event => {
@@ -65,7 +49,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
                 const delta = event.data.global.y - this.mouseStartY;
                 let ypos = this.oldVerticalOffset + delta;
                 if (ypos >= 0 && (ypos + this.height) <= this.stateController.canvasDisplayHeight) {
-                    this.stateController.positionOffset = { x: 0, y: ypos };
+                    this.rowController.verticalOffset = ypos/this.factor;
                 }
             }
         }, this._displayObject);
@@ -77,8 +61,8 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
     }
 
     render(): void {
-        this.position = { x: 0, y: this.stateController.positionOffset.y };
-        this.height = this.stateController.canvasDisplayHeight / this.factor;
+        this.position = { x: 0, y: this.rowController.verticalOffset * this.factor };
+        this.height = this.stateController.canvasDisplayHeight * this.factor;
         this.rect({
             height: this.height,
             position: this.position,

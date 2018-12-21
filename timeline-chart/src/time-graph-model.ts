@@ -15,7 +15,7 @@ export interface TimeGraphRowModel {
     name: string
     range: TimeGraphRange
     states: TimeGraphRowElementModel[]
-    selected: boolean
+    selected?: boolean
     readonly data?: {[key:string]:any}
 }
 
@@ -23,7 +23,7 @@ export interface TimeGraphRowElementModel {
     readonly id: string
     readonly range: TimeGraphRange
     readonly label: string
-    selected: boolean
+    selected?: boolean
     readonly data?: {[key:string]:any}
 }
 

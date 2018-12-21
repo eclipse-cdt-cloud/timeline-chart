@@ -1,9 +1,11 @@
 import { TimeGraphAxis } from "timeline-chart/lib/layer/time-graph-axis";
 import { TimeGraphChart } from "timeline-chart/lib/layer/time-graph-chart";
 import { TimeGraphUnitController } from "timeline-chart/lib/time-graph-unit-controller";
+import { TimeGraphRowController } from "timeline-chart/lib/time-graph-row-controller";
 import { TimeGraphNavigator } from "timeline-chart/lib/layer/time-graph-navigator";
 import { TimeGraphContainer } from "timeline-chart/lib/time-graph-container";
 import { TimeGraphChartCursors } from "timeline-chart/lib/layer/time-graph-chart-cursors";
+import { TimeGraphChartSelectionRange } from "timeline-chart/lib/layer/time-graph-chart-selection-range";
 import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
 // import { timeGraph } from "timeline-chart/lib/test-data";
 import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "timeline-chart/lib/time-graph-model";
@@ -33,6 +35,10 @@ container.style.width = styleConfig.mainWidth + "px";
 const testDataProvider = new TestDataProvider(styleConfig.mainWidth);
 let timeGraph = testDataProvider.getData();
 const unitController = new TimeGraphUnitController(timeGraph.totalRange);
+
+const rowHeight = 16;
+const totalHeight = timeGraph.rows.length * rowHeight;
+const rowController = new TimeGraphRowController(rowHeight, totalHeight);
 
 const axisHTMLContainer = document.createElement('div');
 axisHTMLContainer.id = 'main_axis';
@@ -68,12 +74,10 @@ const timeGraphChartContainer = new TimeGraphContainer({
 }, unitController);
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
-const rowHeight = 16;
-
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
 timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
-const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', {
+const timeGraphChart = new TimeGraphChart('timeGraphChart', {
     dataProvider: (range: TimeGraphRange, resolution: number) => {
         timeGraph = testDataProvider.getData(range);
         if (selectedElement) {
@@ -126,10 +130,10 @@ const timeGraphChartLayer = new TimeGraphChart('timeGraphChart', {
             lineThickness: row.data && row.data.hasStates ? 1 : 3
         }
     }
-}, rowHeight);
-timeGraphChartContainer.addLayer(timeGraphChartLayer);
+}, rowController);
+timeGraphChartContainer.addLayer(timeGraphChart);
 
-timeGraphChartLayer.registerRowElementMouseInteractions({
+timeGraphChart.registerRowElementMouseInteractions({
     click: el => {
         console.log(el.model.label);
         if (el.model.data) {
@@ -138,8 +142,8 @@ timeGraphChartLayer.registerRowElementMouseInteractions({
     }
 });
 let selectedElement: TimeGraphRowElement;
-timeGraphChartLayer.onSelectedRowElementChanged((model) => {
-    const el = timeGraphChartLayer.getElementById(model.id);
+timeGraphChart.onSelectedRowElementChanged((model) => {
+    const el = timeGraphChart.getElementById(model.id);
     if (el) {
         selectedElement = el;
     }
@@ -151,7 +155,9 @@ timeGraphChartLayer.onSelectedRowElementChanged((model) => {
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);
-const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChartLayer, { color: styleConfig.cursorColor });
+const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor } );
+timeGraphChartContainer.addLayer(timeGraphSelectionRange);
+const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChart, rowController, { color: styleConfig.cursorColor });
 timeGraphChartContainer.addLayer(timeGraphChartCursors);
 
 const cursorReset = document.getElementById('cursor-reset');
@@ -182,11 +188,7 @@ if (vscrollElement) {
         id: 'vscroll',
         backgroundColor: styleConfig.naviBackgroundColor
     }, unitController);
-    const vscroll = new TimeGraphVerticalScrollbar('timeGraphVerticalScrollbar', (timeGraph.rows.length * rowHeight));
+    const vscroll = new TimeGraphVerticalScrollbar('timeGraphVerticalScrollbar', rowController);
     verticalScrollContainer.addLayer(vscroll);
-    vscroll.onVerticalPositionChanged(ypos => {
-        timeGraphChartLayer.setVerticalPositionOffset(ypos);
-    });
-    timeGraphChartLayer.onVerticalPositionChanged((verticalChartPosition: number) => vscroll.setVerticalPosition(verticalChartPosition));
     vscrollElement.appendChild(verticalScrollContainer.canvas);
 }

@@ -1,31 +1,24 @@
 import { TimeGraphCursor } from "../components/time-graph-cursor";
-import { TimeGraphRectangle } from "../components/time-graph-rectangle";
-import { TimeGraphLayer } from "./time-graph-layer";
-import { TimeGraphChart } from "./time-graph-chart";
 import { TimeGraphRowElementModel } from "../time-graph-model";
+import { TimeGraphChartLayer } from "./time-graph-chart-layer";
+import { TimeGraphRowController } from "../time-graph-row-controller";
+import { TimeGraphChart } from "./time-graph-chart";
 
-export class TimeGraphChartCursors extends TimeGraphLayer {
+export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected mouseIsDown: boolean;
     protected shiftKeyDown: boolean;
     protected firstCursor: TimeGraphCursor;
     protected secondCursor: TimeGraphCursor;
-    protected selectionRange: TimeGraphRectangle;
     protected color: number = 0x0000ff;
 
-    constructor(id: string, protected chartLayer: TimeGraphChart, style?: { color?: number }) {
-        super(id);
+    constructor(id: string, protected chartLayer: TimeGraphChart, protected rowController: TimeGraphRowController, style?: { color?: number }) {
+        super(id, rowController);
         if (style && style.color) {
             this.color = style.color;
         }
     }
 
-    protected updateScaleAndPosition() {
-        this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
-        this.layer.scale.x = this.stateController.zoomFactor;
-    }
-
     protected afterAddToContainer() {
-        this.addBackground();
         this.mouseIsDown = false;
         this.shiftKeyDown = false
         this.stage.interactive = true;
@@ -44,7 +37,6 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
             this.mouseIsDown = true;
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
-            console.log("SET CURSOR AT", xpos);
             if (this.shiftKeyDown) {
                 const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
                 this.unitController.selectionRange = {
@@ -75,12 +67,8 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         this.stage.on('mouseupoutside', (event: PIXI.interaction.InteractionEvent) => {
             this.mouseIsDown = false;
         });
-        this.unitController.onViewRangeChanged(() => {
-            this.updateScaleAndPosition();
-        });
-        this.updateScaleAndPosition();
+        this.unitController.onViewRangeChanged(() => this.update());
         this.unitController.onSelectionRangeChange(() => this.update());
-        // this.unitController.onViewRangeChanged(() => this.update());
     }
 
     protected maybeCenterCursor() {
@@ -92,7 +80,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     };
 
     protected navigateOrSelectLeft() {
-        const row = this.chartLayer.getSelectedRow();
+        const row = this.rowController.selectedRow;
         const states = row.states;
         const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
             const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
@@ -116,7 +104,7 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
     }
 
     protected navigateOrSelectRight() {
-        const row = this.chartLayer.getSelectedRow();
+        const row = this.rowController.selectedRow;
         const states = row.states;
         const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
             const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
@@ -132,17 +120,6 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
         }
         this.maybeCenterCursor();
         this.chartLayer.selectRowElement(states[nextIndex]);
-    }
-
-    // this background is needed because an empty stage, or a point at that stage which is not actually an displayObject, wont react on mouse events.
-    protected addBackground() {
-        const background = new TimeGraphRectangle({
-            position: { x: 0, y: 0 },
-            height: this.stateController.canvasDisplayHeight,
-            width: this.stateController.canvasDisplayWidth,
-            opacity: 0
-        });
-        this.addChild(background);
     }
 
     centerCursor() {
@@ -162,10 +139,9 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
 
     update() {
         this.removeChildren();
-        this.addBackground();
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.unitController.selectionRange.start;//(this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            const secondCursorPosition = this.unitController.selectionRange.end;//(this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const firstCursorOptions = {
                 color: this.color,
                 height: this.stateController.canvasDisplayHeight,
@@ -187,18 +163,6 @@ export class TimeGraphChartCursors extends TimeGraphLayer {
                 };
                 this.secondCursor = new TimeGraphCursor(secondCursorOptions);
                 this.addChild(this.secondCursor);
-
-                const selectionRange = new TimeGraphRectangle({
-                    color: this.color,
-                    opacity: 0.2,
-                    position: {
-                        x: firstCursorPosition,
-                        y: 0
-                    },
-                    height: this.stateController.canvasDisplayHeight,
-                    width: secondCursorPosition - firstCursorPosition
-                });
-                this.addChild(selectionRange);
             }
         }
     }

@@ -176,7 +176,6 @@ export class TestDataProvider {
                         states.push({
                             id: 'el_' + rowIndex + '_' + stateIndex,
                             label: state.label,
-                            selected: false,
                             range: { start, end },
                             data: { value: state.value, timeRange: { startTime: state.startTime, endTime: (state.startTime + state.duration) } }
                         });
@@ -191,7 +190,6 @@ export class TestDataProvider {
                     end: entry.endTime - entry.startTime
                 },
                 states,
-                selected: false,
                 data: {
                     type: entry.type,
                     hasStates

@@ -1,10 +1,10 @@
-import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphArrowComponent, TimeGraphArrowHead } from "../components/time-graph-arrow";
 import { TimeGraphElementPosition } from "../components/time-graph-component";
 import { TimeGraphArrow } from "../time-graph-model";
+import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 // import ArrowHead from "./arrowhead.png";
 
-export class TimeGraphChartArrows extends TimeGraphLayer {
+export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected rowHeight: number;
     protected arrows: TimeGraphArrow[];

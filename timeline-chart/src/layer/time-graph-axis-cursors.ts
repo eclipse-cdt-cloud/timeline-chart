@@ -15,8 +15,8 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
     }
 
     afterAddToContainer() {
-        this.unitController.onSelectionRangeChange(() => this.update());
         this.unitController.onViewRangeChanged(() => this.update());
+        this.unitController.onSelectionRangeChange(() => this.update());
     }
 
     update(): void {

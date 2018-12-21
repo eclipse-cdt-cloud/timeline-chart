@@ -4,6 +4,7 @@ export interface TimeGraphCursorOptions {
     height: number
     position: TimeGraphElementPosition
     color: number
+    thickness?: number
 }
 
 export class TimeGraphCursor extends TimeGraphComponent{
@@ -12,8 +13,9 @@ export class TimeGraphCursor extends TimeGraphComponent{
         this._options = opts;
     }
     render(): void {
-        const {color, height, position} = this._options as TimeGraphCursorOptions;
+        const {color, height, position, thickness} = this._options as TimeGraphCursorOptions;
         this.vline({
+            thickness,
             color,
             height,
             position

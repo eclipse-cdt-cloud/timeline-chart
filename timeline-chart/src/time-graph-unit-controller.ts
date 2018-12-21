@@ -35,7 +35,7 @@ export class TimeGraphUnitController {
     }
     set viewRange(newRange: TimeGraphRange) {
         if (newRange.end > newRange.start) {
-            this._viewRange = { start: Math.round(newRange.start), end: Math.round(newRange.end) };
+            this._viewRange = { start: newRange.start, end: newRange.end };
         }
         if (newRange.start < 0) {
             this._viewRange.start = 0;

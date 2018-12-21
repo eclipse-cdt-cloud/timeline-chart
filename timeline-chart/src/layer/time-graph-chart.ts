@@ -1,9 +1,10 @@
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
-import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphComponent } from "../components/time-graph-component";
 import * as _ from "lodash";
+import { TimeGraphChartLayer } from "./time-graph-chart-layer";
+import { TimeGraphRowController } from "../time-graph-row-controller";
 
 export interface TimeGraphRowElementMouseInteractions {
     click?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
@@ -21,36 +22,34 @@ export interface TimeGraphChartProviders {
 
 export type TimeGraphRowStyleHook = (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
-export class TimeGraphChart extends TimeGraphLayer {
+export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected rows: TimeGraphRowModel[];
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElementModel: TimeGraphRowElementModel;
     protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
-    protected selectedRow: TimeGraphRowModel;
-    protected selectedRowChangedHandler: ((el: TimeGraphRowModel) => void)[] = [];
-    protected verticalPositionChangedHandler: ((verticalChartPosition: number) => void)[] = [];
-    protected totalHeight: number;
 
-    constructor(id: string, protected providers: TimeGraphChartProviders, protected rowHeight: number) {
-        super(id);
+    constructor(id: string, protected providers: TimeGraphChartProviders, protected rowController: TimeGraphRowController) {
+        super(id, rowController);
     }
 
     protected afterAddToContainer() {
 
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
-            let verticalOffset = this.stateController.positionOffset.y + shiftStep;
+            let verticalOffset = this.rowController.verticalOffset + shiftStep;
             if (verticalOffset < 0) {
                 verticalOffset = 0;
             }
-            if (this.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
-                verticalOffset = this.totalHeight - this.stateController.canvasDisplayHeight;
+            if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
+                verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
             }
-            this.stateController.positionOffset.y = verticalOffset;
+            this.rowController.verticalOffset = verticalOffset;
+            ev.preventDefault();
+        });
+
+        this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
-            this.handleVerticalPositionChange();
-            return false;
         });
 
         this.unitController.onViewRangeChanged(() => {
@@ -61,7 +60,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         // lets fetch everything
         const rowData = this.providers.dataProvider({ start: 0, end: this.unitController.absoluteRange }, 1);
         this.setRowModel(rowData.rows);
-        this.addRows(this.rows, this.rowHeight);
+        this.addRows(this.rows, this.rowController.rowHeight);
     }
 
     update() { }
@@ -71,16 +70,8 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.layer.scale.x = this.stateController.zoomFactor;
     }
 
-    protected handleVerticalPositionChange() {
-        this.verticalPositionChangedHandler.forEach(handler => handler(this.stateController.positionOffset.y));
-    }
-
     protected handleSelectedRowElementChange() {
         this.selectedElementChangedHandler.forEach(handler => handler(this.selectedElementModel));
-    }
-
-    protected handleSelectedRowChange() {
-        this.selectedRowChangedHandler.forEach(handler => handler(this.selectedRow));
     }
 
     protected addRow(row: TimeGraphRowModel, height: number, rowIndex: number) {
@@ -148,8 +139,7 @@ export class TimeGraphChart extends TimeGraphLayer {
         if (!this.stateController) {
             throw ('Add this TimeGraphChart to a container before adding rows.');
         }
-        this.rowHeight = height;
-        this.totalHeight = rows.length * height;
+        this.rowController.rowHeight = height;
         rows.forEach((row: TimeGraphRowModel, index: number) => {
             this.addRow(row, height, index);
         });
@@ -167,14 +157,6 @@ export class TimeGraphChart extends TimeGraphLayer {
         this.selectedElementChangedHandler.push(handler);
     }
 
-    onSelectedRowChanged(handler: (row: TimeGraphRowModel) => void) {
-        this.selectedRowChangedHandler.push(handler);
-    }
-
-    onVerticalPositionChanged(handler: (verticalChartPosition: number) => void) {
-        this.verticalPositionChangedHandler.push(handler);
-    }
-
     getRowModels(): TimeGraphRowModel[] {
         return this.rows;
     }
@@ -186,17 +168,12 @@ export class TimeGraphChart extends TimeGraphLayer {
         return element as TimeGraphRowElement;
     }
 
-    getSelectedRow(): TimeGraphRowModel {
-        return this.selectedRow;
-    }
-
     selectRow(row: TimeGraphRowModel) {
-        if (this.selectedRow) {
-            this.selectedRow.selected = false;
+        if (this.rowController.selectedRow) {
+            delete this.rowController.selectedRow.selected;
         }
-        this.selectedRow = row;
+        this.rowController.selectedRow = row;
         row.selected = true;
-        this.handleSelectedRowChange();
     }
 
     getSelectedRowElement(): TimeGraphRowElementModel {
@@ -205,7 +182,7 @@ export class TimeGraphChart extends TimeGraphLayer {
 
     selectRowElement(model: TimeGraphRowElementModel) {
         if (this.selectedElementModel) {
-            this.selectedElementModel.selected = false;
+            delete this.selectedElementModel.selected;
         }
         this.selectedElementModel = model;
         model.selected = true;
@@ -214,9 +191,5 @@ export class TimeGraphChart extends TimeGraphLayer {
             this.selectRow(el.row.model);
         }
         this.handleSelectedRowElementChange();
-    }
-
-    setVerticalPositionOffset(ypos: number) {
-        this.stateController.positionOffset.y = ypos;
     }
 }
