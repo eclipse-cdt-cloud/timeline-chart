@@ -15,7 +15,7 @@ export interface TimeGraphRowElementMouseInteractions {
 }
 
 export interface TimeGraphChartProviders {
-    dataProvider: (range: TimeGraphRange, resolution: number) => { rows: TimeGraphRowModel[], range: TimeGraphRange }
+    dataProvider: (range: TimeGraphRange, resolution: number) => { rows: TimeGraphRowModel[], range: TimeGraphRange, resolution: number } | undefined
     rowElementStyleProvider?: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined
     rowStyleProvider?: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
@@ -29,12 +29,21 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected selectedElementModel: TimeGraphRowElementModel;
     protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
 
-    constructor(id: string, protected providers: TimeGraphChartProviders, protected rowController: TimeGraphRowController) {
+    protected providedRange: TimeGraphRange;
+    protected providedResolution: number;
+
+    protected fetching: boolean;
+
+    constructor(id: string,
+        protected providers: TimeGraphChartProviders,
+        protected rowController: TimeGraphRowController,
+        protected viewRange?: TimeGraphRange) {
         super(id, rowController);
+        this.providedRange = { start: 0, end: 0 };
+        this.providedResolution = 1;
     }
 
     protected afterAddToContainer() {
-
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
             const shiftStep = ev.deltaY;
             let verticalOffset = this.rowController.verticalOffset + shiftStep;
@@ -52,18 +61,41 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.layer.position.y = -verticalOffset;
         });
 
+        if (!this.viewRange) {
+            this.viewRange = this.unitController.viewRange;
+        }
         this.unitController.onViewRangeChanged(() => {
             this.updateScaleAndPosition();
+            this.viewRange = this.unitController.viewRange;
+            if (!this.fetching) {
+                this.maybeFetchNewData();
+            }
         });
         this.updateScaleAndPosition();
-
-        // lets fetch everything
-        const rowData = this.providers.dataProvider({ start: 0, end: this.unitController.absoluteRange }, 1);
-        this.setRowModel(rowData.rows);
-        this.addRows(this.rows, this.rowController.rowHeight);
+        this.maybeFetchNewData();
     }
 
     update() { }
+
+    protected maybeFetchNewData() {
+        const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
+        if (this.viewRange && (
+            this.viewRange.start < this.providedRange.start ||
+            this.viewRange.end > this.providedRange.end ||
+            resolution < this.providedResolution
+        )) {
+            console.log("fetch");
+            this.fetching = true;
+            const rowData = this.providers.dataProvider(this.viewRange, resolution);
+            if (rowData) {
+                this.providedResolution = rowData.resolution;
+                this.providedRange = rowData.range;
+                this.setRowModel(rowData.rows);
+                this.addRows(this.rows, this.rowController.rowHeight);
+            }
+            this.fetching = false;
+        }
+    }
 
     protected updateScaleAndPosition() {
         this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);

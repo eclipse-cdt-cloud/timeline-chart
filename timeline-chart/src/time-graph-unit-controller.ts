@@ -7,6 +7,8 @@ export class TimeGraphUnitController {
     protected selectionRangeChangedHandler: ((newRange?: TimeGraphRange) => void)[];
     protected _selectionRange?: TimeGraphRange;
 
+    numberTranslator?: (theNumber: number) => string;
+
     constructor(public absoluteRange: number, viewRange?: TimeGraphRange) {
         this.viewRangeChangedHandler = [];
         this._viewRange = viewRange || { start: 0, end: absoluteRange };

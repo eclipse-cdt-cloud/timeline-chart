@@ -159,10 +159,10 @@ export class TestDataProvider {
         })
     }
 
-    getData(viewRange?: TimeGraphRange): TimeGraphModel {
+    getData(opts: { range?: TimeGraphRange, resolution?: number }): TimeGraphModel {
         const rows: TimeGraphRowModel[] = [];
-        let resolution: number;
-        resolution = viewRange ? this.canvasDisplayWidth / (viewRange.end - viewRange.start) : this.canvasDisplayWidth / this.totalRange;
+        const range = opts.range || { start: 0, end: this.totalRange };
+        const resolution = opts.resolution || this.totalRange / this.canvasDisplayWidth;
         timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number) => {
             const states: TimeGraphRowElementModel[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
@@ -170,15 +170,17 @@ export class TestDataProvider {
             if (row) {
                 hasStates = !!row.states.length;
                 row.states.forEach((state: any, stateIndex: number) => {
-                    if (state.value > 0 && state.duration * resolution > 1) {
+                    if (state.value > 0 && state.duration * (1 / resolution) > 1) {
                         const start = state.startTime - entry.startTime;
                         const end = state.startTime + state.duration - entry.startTime;
-                        states.push({
-                            id: 'el_' + rowIndex + '_' + stateIndex,
-                            label: state.label,
-                            range: { start, end },
-                            data: { value: state.value, timeRange: { startTime: state.startTime, endTime: (state.startTime + state.duration) } }
-                        });
+                        if (end > range.start && start < range.end) {
+                            states.push({
+                                id: 'el_' + rowIndex + '_' + stateIndex,
+                                label: state.label,
+                                range: { start, end },
+                                data: { value: state.value, timeRange: { startTime: state.startTime, endTime: (state.startTime + state.duration) } }
+                            });
+                        }
                     }
                 });
             }

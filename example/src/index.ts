@@ -33,8 +33,14 @@ container.innerHTML = '';
 container.style.width = styleConfig.mainWidth + "px";
 
 const testDataProvider = new TestDataProvider(styleConfig.mainWidth);
-let timeGraph = testDataProvider.getData();
+let timeGraph = testDataProvider.getData({});
 const unitController = new TimeGraphUnitController(timeGraph.totalRange);
+unitController.numberTranslator = (theNumber: number) => {
+    const milli = Math.floor(theNumber / 1000000);
+    const micro = Math.floor((theNumber % 1000000) / 1000);
+    const nano = Math.floor((theNumber % 1000000) % 1000);
+    return milli + ':' + micro + ':' + nano;
+};
 
 const rowHeight = 16;
 const totalHeight = timeGraph.rows.length * rowHeight;
@@ -54,12 +60,6 @@ const timeGraphAxisContainer = new TimeGraphContainer({
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
-timeAxisLayer.registerNumberTranslator((theNumber: number) => {
-    const milli = Math.floor(theNumber / 1000000);
-    const micro = Math.floor((theNumber % 1000000) / 1000);
-    const nano = Math.floor((theNumber % 1000000) % 1000);
-    return milli + ':' + micro + ':' + nano;
-});
 timeGraphAxisContainer.addLayer(timeAxisLayer);
 
 const chartHTMLContainer = document.createElement('div');
@@ -79,7 +79,13 @@ timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
 const timeGraphChart = new TimeGraphChart('timeGraphChart', {
     dataProvider: (range: TimeGraphRange, resolution: number) => {
-        timeGraph = testDataProvider.getData(range);
+        const length = range.end - range.start;
+        const overlap = ((length * 5) - length) / 2;
+        const start = range.start - overlap > 0 ? range.start - overlap : 0;
+        const end = range.end + overlap < unitController.absoluteRange ? range.end + overlap : unitController.absoluteRange;
+        const newRange: TimeGraphRange = { start, end };
+        const newResolution: number = resolution * 0.6;
+        timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
         if (selectedElement) {
             for (const row of timeGraph.rows) {
                 const selEl = row.states.find(el => el.id === selectedElement.id);
@@ -91,7 +97,8 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
         }
         return {
             rows: timeGraph.rows,
-            range
+            range: newRange,
+            resolution: newResolution
         };
     },
     rowElementStyleProvider: (model: TimeGraphRowElementModel) => {
@@ -155,7 +162,7 @@ timeGraphChart.onSelectedRowElementChanged((model) => {
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);
-const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor } );
+const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor });
 timeGraphChartContainer.addLayer(timeGraphSelectionRange);
 const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChart, rowController, { color: styleConfig.cursorColor });
 timeGraphChartContainer.addLayer(timeGraphChartCursors);

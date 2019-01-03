@@ -15,8 +15,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     constructor(id: string,
         protected _options: TimeGraphStyledRect,
         protected unitController: TimeGraphUnitController,
-        protected stateController: TimeGraphStateController,
-        protected numberTranslator?: (theNumber: number) => string) {
+        protected stateController: TimeGraphStateController) {
         super(id);
         this.addEvents();
         this.labels = [];
@@ -68,8 +67,8 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                     x: xpos,
                     y: this._options.height
                 };
-                if (this.numberTranslator) {
-                    const label = this.numberTranslator(absolutePosition);
+                if (this.unitController.numberTranslator) {
+                    const label = this.unitController.numberTranslator(absolutePosition);
                     const text = new PIXI.Text(label, {
                         fontSize: 10
                     });
