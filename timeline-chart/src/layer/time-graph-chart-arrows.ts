@@ -6,22 +6,25 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
-    protected rowHeight: number;
     protected arrows: TimeGraphArrow[];
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => this.update());
+
+        this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
+            this.layer.position.y = -verticalOffset;
+        });
     }
 
-    protected addArrow(arrow: TimeGraphArrow, rowHeight: number) {
+    protected addArrow(arrow: TimeGraphArrow) {
         const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
             x: relativeStartPosition * this.stateController.zoomFactor,
-            y: (arrow.sourceId * rowHeight) + (rowHeight / 2)
+            y: (arrow.sourceId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         const end: TimeGraphElementPosition = {
             x: (relativeStartPosition + arrow.range.end - arrow.range.start) * this.stateController.zoomFactor,
-            y: (arrow.destinationId * rowHeight) + (rowHeight / 2)
+            y: (arrow.destinationId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         const arrowComponent = new TimeGraphArrowComponent('arrow', { start, end });
         this.addChild(arrowComponent);
@@ -29,15 +32,14 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         this.addChild(arrowHead);
     }
 
-    addArrows(arrows: TimeGraphArrow[], rowHeight: number): void {
+    addArrows(arrows: TimeGraphArrow[]): void {
         if (!this.stateController) {
             throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
-        this.rowHeight = rowHeight;
         this.arrows = [];
         arrows.forEach(arrow => {
             this.arrows.push(arrow);
-            this.addArrow(arrow, rowHeight);
+            this.addArrow(arrow);
         })
     }
 
@@ -53,10 +55,10 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         //     this.stage.addChild(sprite);
         // }).bind(this));
 
-        // if (this.arrows && this.rowHeight) {
-        //     this.removeChildren();
-        //     this.addArrows(this.arrows, this.rowHeight);
-        // }
+        if (this.arrows) {
+            this.removeChildren();
+            this.addArrows(this.arrows);
+        }
     }
 
 }

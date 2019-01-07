@@ -2,7 +2,6 @@ import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/tim
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
 import { TimeGraphComponent } from "../components/time-graph-component";
-import * as _ from "lodash";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 
@@ -84,7 +83,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.viewRange.end > this.providedRange.end ||
             resolution < this.providedResolution
         )) {
-            console.log("fetch");
             this.fetching = true;
             const rowData = this.providers.dataProvider(this.viewRange, resolution);
             if (rowData) {

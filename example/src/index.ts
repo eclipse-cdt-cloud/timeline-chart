@@ -13,7 +13,7 @@ import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/li
 import { TestDataProvider } from "./test-data-provider";
 import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
-// import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
+import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
 
 const styleConfig = {
     mainWidth: 1000,
@@ -80,11 +80,11 @@ timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 const timeGraphChart = new TimeGraphChart('timeGraphChart', {
     dataProvider: (range: TimeGraphRange, resolution: number) => {
         const length = range.end - range.start;
-        const overlap = ((length * 5) - length) / 2;
+        const overlap = ((length * 20) - length) / 2;
         const start = range.start - overlap > 0 ? range.start - overlap : 0;
         const end = range.end + overlap < unitController.absoluteRange ? range.end + overlap : unitController.absoluteRange;
         const newRange: TimeGraphRange = { start, end };
-        const newResolution: number = resolution * 0.6;
+        const newResolution: number = resolution * 0.1;
         timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
         if (selectedElement) {
             for (const row of timeGraph.rows) {
@@ -156,9 +156,9 @@ timeGraphChart.onSelectedRowElementChanged((model) => {
     }
 })
 
-// const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows');
-// timeGraphChartContainer.addLayer(timeGraphChartArrows);
-// timeGraphChartArrows.addArrows(timeGraph.arrows, rowHeight);
+const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
+timeGraphChartContainer.addLayer(timeGraphChartArrows);
+timeGraphChartArrows.addArrows(timeGraph.arrows);
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
 timeGraphAxisContainer.addLayer(timeAxisCursors);
