@@ -44,17 +44,6 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
     }
 
     protected update(): void {
-        // PIXI.loader
-        //     .add(ArrowHead)
-        //     .load((() => {
-        //     let sprite = new PIXI.Sprite(
-        //         PIXI.loader.resources[ArrowHead].texture
-        //     );
-        //     sprite.x = 100;
-        //     sprite.y = 100;
-        //     this.stage.addChild(sprite);
-        // }).bind(this));
-
         if (this.arrows) {
             this.removeChildren();
             this.addArrows(this.arrows);
