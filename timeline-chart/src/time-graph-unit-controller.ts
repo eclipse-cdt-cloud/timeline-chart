@@ -1,35 +1,35 @@
 import { TimeGraphRange } from "./time-graph-model";
 
 export class TimeGraphUnitController {
-    protected viewRangeChangedHandler: ((newRange: TimeGraphRange) => void)[];
+    protected viewRangeChangedHandlers: ((newRange: TimeGraphRange) => void)[];
     protected _viewRange: TimeGraphRange;
 
-    protected selectionRangeChangedHandler: ((newRange?: TimeGraphRange) => void)[];
+    protected selectionRangeChangedHandlers: ((newRange?: TimeGraphRange) => void)[];
     protected _selectionRange?: TimeGraphRange;
 
     numberTranslator?: (theNumber: number) => string;
 
     constructor(public absoluteRange: number, viewRange?: TimeGraphRange) {
-        this.viewRangeChangedHandler = [];
+        this.viewRangeChangedHandlers = [];
         this._viewRange = viewRange || { start: 0, end: absoluteRange };
 
-        this.selectionRangeChangedHandler = [];
+        this.selectionRangeChangedHandlers = [];
     }
 
     protected handleViewRangeChange() {
-        this.viewRangeChangedHandler.map(handler => handler(this._viewRange));
+        this.viewRangeChangedHandlers.forEach(handler => handler(this._viewRange));
     }
 
     protected handleSelectionRangeChange() {
-        this.selectionRangeChangedHandler.map(handler => handler(this._selectionRange));
+        this.selectionRangeChangedHandlers.forEach(handler => handler(this._selectionRange));
     }
 
     onViewRangeChanged(handler: (viewRange: TimeGraphRange) => void) {
-        this.viewRangeChangedHandler.push(handler);
+        this.viewRangeChangedHandlers.push(handler);
     }
 
     onSelectionRangeChange(handler: (selectionRange: TimeGraphRange) => void) {
-        this.selectionRangeChangedHandler.push(handler);
+        this.selectionRangeChangedHandlers.push(handler);
     }
 
     get viewRange(): TimeGraphRange {

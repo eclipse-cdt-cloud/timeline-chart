@@ -21,8 +21,8 @@ export class TimeGraphStateController {
         y: number;
     };
 
-    protected zoomChangedHandler: (() => void)[];
-    protected positionChangedHandler: (() => void)[];
+    protected zoomChangedHandlers: (() => void)[];
+    protected positionChangedHandlers: (() => void)[];
 
     constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
         const ratio = window.devicePixelRatio;
@@ -31,22 +31,22 @@ export class TimeGraphStateController {
         this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
         this.oldPositionOffset = { x: 0, y: 0 };
-        this.zoomChangedHandler = [];
-        this.positionChangedHandler = [];
+        this.zoomChangedHandlers = [];
+        this.positionChangedHandlers = [];
     }
 
     protected handleZoomChange() {
-        this.zoomChangedHandler.map(handler => handler());
+        this.zoomChangedHandlers.forEach(handler => handler());
     }
     protected handlePositionChange() {
-        this.positionChangedHandler.map(handler => handler());
+        this.positionChangedHandlers.forEach(handler => handler());
     }
 
     onZoomChanged(handler: () => void) {
-        this.zoomChangedHandler.push(handler);
+        this.zoomChangedHandlers.push(handler);
     }
     onPositionChanged(handler: () => void) {
-        this.positionChangedHandler.push(handler);
+        this.positionChangedHandlers.push(handler);
     }
 
     get initialZoomFactor(): number {

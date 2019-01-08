@@ -35,8 +35,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
-        protected rowController: TimeGraphRowController,
-        protected viewRange?: TimeGraphRange) {
+        protected rowController: TimeGraphRowController) {
         super(id, rowController);
         this.providedRange = { start: 0, end: 0 };
         this.providedResolution = 1;
@@ -60,12 +59,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.layer.position.y = -verticalOffset;
         });
 
-        if (!this.viewRange) {
-            this.viewRange = this.unitController.viewRange;
-        }
         this.unitController.onViewRangeChanged(() => {
             this.updateScaleAndPosition();
-            this.viewRange = this.unitController.viewRange;
             if (!this.fetching) {
                 this.maybeFetchNewData();
             }
@@ -78,13 +73,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected maybeFetchNewData() {
         const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
-        if (this.viewRange && (
-            this.viewRange.start < this.providedRange.start ||
-            this.viewRange.end > this.providedRange.end ||
+        const viewRange = this.unitController.viewRange;
+        if (viewRange && (
+            viewRange.start < this.providedRange.start ||
+            viewRange.end > this.providedRange.end ||
             resolution < this.providedResolution
         )) {
             this.fetching = true;
-            const rowData = this.providers.dataProvider(this.viewRange, resolution);
+            const rowData = this.providers.dataProvider(viewRange, resolution);
             if (rowData) {
                 this.providedResolution = rowData.resolution;
                 this.providedRange = rowData.range;

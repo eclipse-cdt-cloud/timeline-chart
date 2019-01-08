@@ -5,6 +5,7 @@ export interface TimeGraphRange {
 
 export interface TimeGraphModel {
     id: string
+    // what is this? A range is usually an interval with start and end. Consider rename
     totalRange: number
     rows: TimeGraphRowModel[]
     arrows: TimeGraphArrow[]
@@ -32,4 +33,5 @@ export interface TimeGraphArrow {
     destinationId: number
     range: TimeGraphRange
     data?: {[key:string]:any}
+    // Q: Can I select an arrow?
 }
