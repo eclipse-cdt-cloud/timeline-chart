@@ -45,7 +45,9 @@ export abstract class TimeGraphLayer {
         this.children = [];
     }
 
-    protected afterAddToContainer() { }
+    protected removeChild(child:TimeGraphComponent){
+        this.layer.removeChild(child.displayObject);
+    }
 
-    protected abstract update(): void;
+    protected afterAddToContainer() { }
 }

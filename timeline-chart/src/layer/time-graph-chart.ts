@@ -33,6 +33,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected fetching: boolean;
 
+    protected shiftKeyDown: boolean;
+
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
         protected rowController: TimeGraphRowController) {
@@ -42,16 +44,27 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected afterAddToContainer() {
+        this.shiftKeyDown = false
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.shiftKeyDown = event.shiftKey;
+        });
+        document.addEventListener('keyup', (event: KeyboardEvent) => {
+            this.shiftKeyDown = event.shiftKey;
+        });
         this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
-            const shiftStep = ev.deltaY;
-            let verticalOffset = this.rowController.verticalOffset + shiftStep;
-            if (verticalOffset < 0) {
-                verticalOffset = 0;
+            if (this.shiftKeyDown) {
+                const shiftStep = ev.deltaY;
+                let verticalOffset = this.rowController.verticalOffset + shiftStep;
+                if (verticalOffset < 0) {
+                    verticalOffset = 0;
+                }
+                if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
+                    verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
+                }
+                this.rowController.verticalOffset = verticalOffset;
+            } else {
+                
             }
-            if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
-                verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
-            }
-            this.rowController.verticalOffset = verticalOffset;
             ev.preventDefault();
         });
 

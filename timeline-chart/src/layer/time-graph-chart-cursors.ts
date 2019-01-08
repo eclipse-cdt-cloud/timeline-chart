@@ -138,7 +138,6 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     }
 
     update() {
-        this.removeChildren();
         if (this.unitController.selectionRange) {
             const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
@@ -150,8 +149,12 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     y: 0
                 }
             };
-            this.firstCursor = new TimeGraphCursor(firstCursorOptions);
-            this.addChild(this.firstCursor);
+            if (!this.firstCursor) {
+                this.firstCursor = new TimeGraphCursor(firstCursorOptions);
+                this.addChild(this.firstCursor);
+            }else{
+                this.firstCursor.update(firstCursorOptions);
+            }
             if (secondCursorPosition !== firstCursorPosition) {
                 const secondCursorOptions = {
                     color: this.color,
@@ -161,9 +164,20 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                         y: 0
                     }
                 };
-                this.secondCursor = new TimeGraphCursor(secondCursorOptions);
-                this.addChild(this.secondCursor);
+                if (!this.secondCursor) {
+                    this.secondCursor = new TimeGraphCursor(secondCursorOptions);
+                    this.addChild(this.secondCursor);
+                }else{
+                    this.secondCursor.update(secondCursorOptions);
+                }
+            } else if(!!this.secondCursor){
+                this.removeChild(this.secondCursor);
+                delete this.secondCursor;
             }
+        } else {
+            this.removeChildren();
+            delete this.firstCursor;
+            delete this.secondCursor;
         }
     }
 }

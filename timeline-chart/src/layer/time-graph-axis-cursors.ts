@@ -55,8 +55,8 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
             }
         } else {
             this.removeChildren();
-            this.firstCursor = undefined;
-            this.secondCursor = undefined;
+            delete this.firstCursor;
+            delete this.secondCursor;
         }
     }
 }

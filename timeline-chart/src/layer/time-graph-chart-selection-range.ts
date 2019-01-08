@@ -26,22 +26,37 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
     }
 
     update() {
-        this.removeChildren();
         if (this.unitController.selectionRange) {
             const firstCursorPosition = this.unitController.selectionRange.start;
             const secondCursorPosition = this.unitController.selectionRange.end;
             if (secondCursorPosition !== firstCursorPosition) {
-                this.selectionRange = new TimeGraphRectangle({
-                    color: this.color,
-                    opacity: 0.2,
-                    position: {
-                        x: firstCursorPosition,
-                        y: 0
-                    },
-                    height: this.stateController.canvasDisplayHeight,
-                    width: secondCursorPosition - firstCursorPosition
-                });
-                this.addChild(this.selectionRange);
+                if (!this.selectionRange) {
+                    this.selectionRange = new TimeGraphRectangle({
+                        color: this.color,
+                        opacity: 0.2,
+                        position: {
+                            x: firstCursorPosition,
+                            y: 0
+                        },
+                        height: this.stateController.canvasDisplayHeight,
+                        width: secondCursorPosition - firstCursorPosition
+                    });
+                    this.addChild(this.selectionRange);
+                } else {
+                    this.selectionRange.update({
+                        color: this.color,
+                        opacity: 0.2,
+                        position: {
+                            x: firstCursorPosition,
+                            y: 0
+                        },
+                        height: this.stateController.canvasDisplayHeight,
+                        width: secondCursorPosition - firstCursorPosition
+                    })
+                }
+            }else{
+                this.removeChildren();
+                delete this.selectionRange;
             }
         }
     }

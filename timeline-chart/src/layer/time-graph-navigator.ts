@@ -35,9 +35,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
                 this.selectionRange = new TimeGraphRectangle(selectionOpts);
                 this.addChild(this.selectionRange);
             } else {
-                this.selectionRange.displayObject.clear();
-                this.selectionRange.setOptions(selectionOpts);
-                this.selectionRange.render();
+                this.selectionRange.update(selectionOpts);
             }
         } else {
             if(this.selectionRange){

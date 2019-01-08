@@ -45,20 +45,23 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
 
     protected getStepLength(): number {
         const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
-        const minCanvasStepWidth = 200;
+        const minCanvasStepWidth = 80;
         const viewRangeLength = this.unitController.viewRangeLength;
-
         const maxSteps = canvasDisplayWidth / minCanvasStepWidth;
         const realStepLength = viewRangeLength / maxSteps;
         const log = Math.log10(realStepLength);
         const logRounded = Math.round(log);
         const normalizedStepLength = Math.pow(10, logRounded);
-        return normalizedStepLength;
+        const residual = realStepLength / normalizedStepLength;
+        const steps = [1, 1.5, 2, 2.5, 5, 10];
+        const normStepLength = steps.find(s => s > residual);
+        const stepLength = normalizedStepLength * (normStepLength || 1);
+        return stepLength;
     }
 
     protected renderVerticalLines(lineHeight: number, lineColor: number) {
         const stepLength = this.getStepLength();
-        const steps = Math.trunc(this.unitController.absoluteRange / stepLength);
+        const steps = Math.trunc(this.unitController.absoluteRange / stepLength) + 1;
         for (let i = 0; i < steps; i++) {
             const absolutePosition = stepLength * i;
             const xpos = (absolutePosition - this.unitController.viewRange.start) * this.stateController.zoomFactor;
@@ -86,7 +89,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         }
     }
 
-    update(opts?: TimeGraphComponentOptions){
+    update(opts?: TimeGraphComponentOptions) {
         this.labels.forEach(label => label.destroy());
         this.labels = [];
         super.update(opts);
