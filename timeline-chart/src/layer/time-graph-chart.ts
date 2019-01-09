@@ -51,7 +51,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
         });
-        this.onCanvasEvent('mousewheel', (ev: WheelEvent) => {
+        const mw = (ev: WheelEvent) => {
             if (this.shiftKeyDown) {
                 const shiftStep = ev.deltaY;
                 let verticalOffset = this.rowController.verticalOffset + shiftStep;
@@ -63,10 +63,38 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
                 this.rowController.verticalOffset = verticalOffset;
             } else {
-                
+                let newViewRangeLength = this.unitController.viewRangeLength;
+                let xOffset = 0;
+                let moveX = false;
+                if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) {
+                    xOffset = -(ev.deltaX / this.stateController.zoomFactor);
+                    moveX = true;
+                } else {
+                    const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
+                    const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
+                    newViewRangeLength += deltaLength;
+                    xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
+                }
+                let start = this.unitController.viewRange.start - xOffset;
+                if (start < 0) {
+                    start = 0;
+                }
+                let end = start + newViewRangeLength;
+                if (end > this.unitController.absoluteRange) {
+                    end = this.unitController.absoluteRange;
+                    if (moveX) {
+                        start = end - newViewRangeLength;
+                    }
+                }
+                this.unitController.viewRange = {
+                    start,
+                    end
+                }
             }
             ev.preventDefault();
-        });
+        }
+        this.onCanvasEvent('mousewheel', mw);
+        this.onCanvasEvent('wheel', mw);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
