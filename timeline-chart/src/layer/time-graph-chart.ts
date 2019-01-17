@@ -14,7 +14,7 @@ export interface TimeGraphRowElementMouseInteractions {
 }
 
 export interface TimeGraphChartProviders {
-    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
     rowElementStyleProvider?: (el: TimelineChart.TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined
     rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
@@ -112,7 +112,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     update() { }
 
-    protected maybeFetchNewData() {
+    protected async maybeFetchNewData() {
         const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
         const viewRange = this.unitController.viewRange;
         if (viewRange && (
@@ -121,7 +121,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             resolution < this.providedResolution
         )) {
             this.fetching = true;
-            const rowData = this.providers.dataProvider(viewRange, resolution);
+            const rowData = await this.providers.dataProvider(viewRange, resolution);
             if (rowData) {
                 this.providedResolution = rowData.resolution;
                 this.providedRange = rowData.range;
