@@ -8,7 +8,7 @@ import { TimeGraphChartCursors } from "timeline-chart/lib/layer/time-graph-chart
 import { TimeGraphChartSelectionRange } from "timeline-chart/lib/layer/time-graph-chart-selection-range";
 import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
 // import { timeGraph } from "timeline-chart/lib/test-data";
-import { TimeGraphRowElementModel, TimeGraphRowModel, TimeGraphRange } from "timeline-chart/lib/time-graph-model";
+import { TimelineChart } from "timeline-chart/lib/time-graph-model";
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
 import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
@@ -34,7 +34,7 @@ container.style.width = styleConfig.mainWidth + "px";
 
 const testDataProvider = new TestDataProvider(styleConfig.mainWidth);
 let timeGraph = testDataProvider.getData({});
-const unitController = new TimeGraphUnitController(timeGraph.totalRange);
+const unitController = new TimeGraphUnitController(timeGraph.totalLength);
 unitController.numberTranslator = (theNumber: number) => {
     const milli = Math.floor(theNumber / 1000000);
     const micro = Math.floor((theNumber % 1000000) / 1000);
@@ -78,12 +78,12 @@ const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeigh
 timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 
 const timeGraphChart = new TimeGraphChart('timeGraphChart', {
-    dataProvider: (range: TimeGraphRange, resolution: number) => {
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
         const length = range.end - range.start;
         const overlap = ((length * 20) - length) / 2;
         const start = range.start - overlap > 0 ? range.start - overlap : 0;
         const end = range.end + overlap < unitController.absoluteRange ? range.end + overlap : unitController.absoluteRange;
-        const newRange: TimeGraphRange = { start, end };
+        const newRange: TimelineChart.TimeGraphRange = { start, end };
         const newResolution: number = resolution * 0.1;
         timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
         if (selectedElement) {
@@ -101,7 +101,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
             resolution: newResolution
         };
     },
-    rowElementStyleProvider: (model: TimeGraphRowElementModel) => {
+    rowElementStyleProvider: (model: TimelineChart.TimeGraphRowElementModel) => {
         const styles: TimeGraphRowElementStyle[] = [
             {
                 color: 0x11ad1b,
@@ -129,7 +129,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
             borderWidth: model.selected ? 1 : 0
         };
     },
-    rowStyleProvider: (row: TimeGraphRowModel) => {
+    rowStyleProvider: (row: TimelineChart.TimeGraphRowModel) => {
         return {
             backgroundColor: 0xe0ddcf,
             backgroundOpacity: row.selected ? 0.6 : 0,

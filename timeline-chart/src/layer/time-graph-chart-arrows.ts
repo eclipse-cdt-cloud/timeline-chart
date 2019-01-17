@@ -1,11 +1,11 @@
 import { TimeGraphArrowComponent, TimeGraphArrowCoordinates } from "../components/time-graph-arrow";
 import { TimeGraphElementPosition } from "../components/time-graph-component";
-import { TimeGraphArrow } from "../time-graph-model";
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
-    protected arrows: Map<TimeGraphArrow, TimeGraphArrowComponent>;
+    protected arrows: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>;
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => this.update());
@@ -15,7 +15,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         });
     }
 
-    protected getCoordinates(arrow: TimeGraphArrow): TimeGraphArrowCoordinates {
+    protected getCoordinates(arrow: TimelineChart.TimeGraphArrow): TimeGraphArrowCoordinates {
         const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
             x: relativeStartPosition * this.stateController.zoomFactor,
@@ -28,14 +28,14 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         return { start, end };
     }
 
-    protected addArrow(arrow: TimeGraphArrow) {
+    protected addArrow(arrow: TimelineChart.TimeGraphArrow) {
         const coords = this.getCoordinates(arrow);
         const arrowComponent = new TimeGraphArrowComponent('arrow', coords);
         this.arrows.set(arrow, arrowComponent);
         this.addChild(arrowComponent);
     }
 
-    addArrows(arrows: TimeGraphArrow[]): void {
+    addArrows(arrows: TimelineChart.TimeGraphArrow[]): void {
         if (!this.stateController) {
             throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
@@ -53,7 +53,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         }
     }
 
-    protected updateArrow(arrow: TimeGraphArrow) {
+    protected updateArrow(arrow: TimelineChart.TimeGraphArrow) {
         const { start, end } = this.getCoordinates(arrow);
         const arrowComponent = this.arrows.get(arrow);
         if (arrowComponent) {

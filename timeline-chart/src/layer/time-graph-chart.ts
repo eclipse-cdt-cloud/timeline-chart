@@ -1,6 +1,6 @@
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
-import { TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphComponent } from "../components/time-graph-component";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
@@ -14,21 +14,21 @@ export interface TimeGraphRowElementMouseInteractions {
 }
 
 export interface TimeGraphChartProviders {
-    dataProvider: (range: TimeGraphRange, resolution: number) => { rows: TimeGraphRowModel[], range: TimeGraphRange, resolution: number } | undefined
-    rowElementStyleProvider?: (el: TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined
-    rowStyleProvider?: (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
+    rowElementStyleProvider?: (el: TimelineChart.TimeGraphRowElementModel) => TimeGraphRowElementStyle | undefined
+    rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
 
-export type TimeGraphRowStyleHook = (row: TimeGraphRowModel) => TimeGraphRowStyle | undefined;
+export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 export class TimeGraphChart extends TimeGraphChartLayer {
 
-    protected rows: TimeGraphRowModel[];
+    protected rows: TimelineChart.TimeGraphRowModel[];
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
-    protected selectedElementModel: TimeGraphRowElementModel;
-    protected selectedElementChangedHandler: ((el: TimeGraphRowElementModel) => void)[] = [];
+    protected selectedElementModel: TimelineChart.TimeGraphRowElementModel;
+    protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphRowElementModel) => void)[] = [];
 
-    protected providedRange: TimeGraphRange;
+    protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
 
     protected fetching: boolean;
@@ -141,7 +141,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.selectedElementChangedHandler.forEach(handler => handler(this.selectedElementModel));
     }
 
-    protected addRow(row: TimeGraphRowModel, height: number, rowIndex: number) {
+    protected addRow(row: TimelineChart.TimeGraphRowModel, height: number, rowIndex: number) {
         const rowId = 'row_' + rowIndex;
         const length = row.range.end - row.range.start;
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
@@ -158,10 +158,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.selectRow(row);
         }).bind(this));
         this.addChild(rowComponent);
-        row.states.forEach((rowElementModel: TimeGraphRowElementModel, elementIndex: number) => {
+        row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel, elementIndex: number) => {
             const start = rowElementModel.range.start;
             const end = rowElementModel.range.end;
-            const range: TimeGraphRange = {
+            const range: TimelineChart.TimeGraphRange = {
                 start,
                 end
             };
@@ -202,17 +202,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }).bind(this));
     }
 
-    protected addRows(rows: TimeGraphRowModel[], height: number) {
+    protected addRows(rows: TimelineChart.TimeGraphRowModel[], height: number) {
         if (!this.stateController) {
             throw ('Add this TimeGraphChart to a container before adding rows.');
         }
         this.rowController.rowHeight = height;
-        rows.forEach((row: TimeGraphRowModel, index: number) => {
+        rows.forEach((row: TimelineChart.TimeGraphRowModel, index: number) => {
             this.addRow(row, height, index);
         });
     }
 
-    protected setRowModel(rows: TimeGraphRowModel[]) {
+    protected setRowModel(rows: TimelineChart.TimeGraphRowModel[]) {
         this.rows = rows;
     }
 
@@ -220,11 +220,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.rowElementMouseInteractions = interactions;
     }
 
-    onSelectedRowElementChanged(handler: (el: TimeGraphRowElementModel) => void) {
+    onSelectedRowElementChanged(handler: (el: TimelineChart.TimeGraphRowElementModel) => void) {
         this.selectedElementChangedHandler.push(handler);
     }
 
-    getRowModels(): TimeGraphRowModel[] {
+    getRowModels(): TimelineChart.TimeGraphRowModel[] {
         return this.rows;
     }
 
@@ -235,7 +235,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return element as TimeGraphRowElement;
     }
 
-    selectRow(row: TimeGraphRowModel) {
+    selectRow(row: TimelineChart.TimeGraphRowModel) {
         if (this.rowController.selectedRow) {
             delete this.rowController.selectedRow.selected;
         }
@@ -243,11 +243,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         row.selected = true;
     }
 
-    getSelectedRowElement(): TimeGraphRowElementModel {
+    getSelectedRowElement(): TimelineChart.TimeGraphRowElementModel {
         return this.selectedElementModel;
     }
 
-    selectRowElement(model: TimeGraphRowElementModel) {
+    selectRowElement(model: TimelineChart.TimeGraphRowElementModel) {
         if (this.selectedElementModel) {
             delete this.selectedElementModel.selected;
         }

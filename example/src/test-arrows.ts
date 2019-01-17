@@ -1,6 +1,6 @@
-import { TimeGraphArrow } from "timeline-chart/lib/time-graph-model";
+import { TimelineChart } from "timeline-chart/lib/time-graph-model";
 
-export const timeGraphArrows: TimeGraphArrow[] = [
+export const timeGraphArrows: TimelineChart.TimeGraphArrow[] = [
     {
         sourceId: 1,
         destinationId: 2,

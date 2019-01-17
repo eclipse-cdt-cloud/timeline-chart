@@ -1,5 +1,5 @@
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphRect } from "./time-graph-component";
-import { TimeGraphRowModel } from "../time-graph-model";
+import { TimelineChart } from "../time-graph-model";
 
 export interface TimeGraphRowStyle {
     backgroundColor?: number
@@ -15,7 +15,7 @@ export class TimeGraphRow extends TimeGraphComponent {
         id: string,
         protected _options: TimeGraphRect,
         protected _rowIndex: number,
-        public readonly model: TimeGraphRowModel,
+        public readonly model: TimelineChart.TimeGraphRowModel,
         protected style: TimeGraphRowStyle = {lineOpacity:0.5, lineThickness: 1, backgroundOpacity: 0}) {
         super(id);
     }

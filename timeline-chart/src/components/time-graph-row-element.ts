@@ -1,6 +1,6 @@
 import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
-import { TimeGraphRowElementModel, TimeGraphRange } from "../time-graph-model";
+import { TimelineChart } from "../time-graph-model";
 
 export interface TimeGraphRowElementStyle {
     color?: number
@@ -15,8 +15,8 @@ export class TimeGraphRowElement extends TimeGraphComponent {
 
     constructor(
         id: string,
-        protected _options: TimeGraphRowElementModel,
-        protected range: TimeGraphRange,
+        protected _options: TimelineChart.TimeGraphRowElementModel,
+        protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
         style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
         displayObject?:PIXI.Graphics
@@ -38,7 +38,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         };
     }
 
-    get model(): TimeGraphRowElementModel {
+    get model(): TimelineChart.TimeGraphRowElementModel {
         return this._options;
     }
 

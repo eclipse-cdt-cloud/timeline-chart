@@ -1,5 +1,5 @@
 import { TimeGraphCursor } from "../components/time-graph-cursor";
-import { TimeGraphRowElementModel } from "../time-graph-model";
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChart } from "./time-graph-chart";
@@ -82,7 +82,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected navigateOrSelectLeft() {
         const row = this.rowController.selectedRow;
         const states = row.states;
-        const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
+        const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
             const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
             return rowElementModel.range.start >= selStart;
         });
@@ -106,7 +106,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected navigateOrSelectRight() {
         const row = this.rowController.selectedRow;
         const states = row.states;
-        const nextIndex = states.findIndex((rowElementModel: TimeGraphRowElementModel) => {
+        const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
             const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
             return rowElementModel.range.start > cursorPosition;
         });

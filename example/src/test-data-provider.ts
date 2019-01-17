@@ -1,7 +1,7 @@
-import { TimeGraphModel, TimeGraphRowModel, TimeGraphRowElementModel, TimeGraphRange, TimeGraphArrow } from "timeline-chart/lib/time-graph-model";
 import { timeGraphEntries } from "./test-entries";
 import { timeGraphStates } from "./test-states";
 import { timeGraphArrows } from "./test-arrows";
+import { TimelineChart } from "timeline-chart/lib/time-graph-model";
 
 export namespace TestData {
     /**
@@ -129,7 +129,7 @@ export namespace TestData {
 
 export class TestDataProvider {
     protected absoluteStart: number;
-    protected totalRange: number;
+    protected totalLength: number;
     protected timeGraphEntries: object[];
     protected timeGraphRows: object[];
     protected canvasDisplayWidth: number;
@@ -137,7 +137,7 @@ export class TestDataProvider {
     constructor(canvasDisplayWidth: number) {
         this.timeGraphEntries = timeGraphEntries.model.entries;
         this.timeGraphRows = timeGraphStates.model.rows;
-        this.totalRange = 0;
+        this.totalLength = 0;
 
         this.canvasDisplayWidth = canvasDisplayWidth;
 
@@ -152,19 +152,19 @@ export class TestDataProvider {
                 row.states.forEach((state: TestData.TimeGraphState, stateIndex: number) => {
                     if (state.value > 0) {
                         const end = state.startTime + state.duration - entry.startTime;
-                        this.totalRange = end > this.totalRange ? end : this.totalRange;
+                        this.totalLength = end > this.totalLength ? end : this.totalLength;
                     }
                 });
             }
         })
     }
 
-    getData(opts: { range?: TimeGraphRange, resolution?: number }): TimeGraphModel {
-        const rows: TimeGraphRowModel[] = [];
-        const range = opts.range || { start: 0, end: this.totalRange };
-        const resolution = opts.resolution || this.totalRange / this.canvasDisplayWidth;
+    getData(opts: { range?: TimelineChart.TimeGraphRange, resolution?: number }): TimelineChart.TimeGraphModel {
+        const rows: TimelineChart.TimeGraphRowModel[] = [];
+        const range = opts.range || { start: 0, end: this.totalLength };
+        const resolution = opts.resolution || this.totalLength / this.canvasDisplayWidth;
         timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number) => {
-            const states: TimeGraphRowElementModel[] = [];
+            const states: TimelineChart.TimeGraphRowElementModel[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
             let hasStates = false;
             if (row) {
@@ -198,7 +198,7 @@ export class TestDataProvider {
                 }
             });
         })
-        let arrows: TimeGraphArrow[] = [];
+        let arrows: TimelineChart.TimeGraphArrow[] = [];
         timeGraphArrows.forEach(arrow => {
             arrows.push({
                 sourceId: arrow.sourceId,
@@ -214,7 +214,7 @@ export class TestDataProvider {
             id: "",
             arrows,
             rows,
-            totalRange: this.totalRange
+            totalLength: this.totalLength
         }
     }
 }

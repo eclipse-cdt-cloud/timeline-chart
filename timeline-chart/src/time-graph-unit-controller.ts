@@ -1,15 +1,15 @@
-import { TimeGraphRange } from "./time-graph-model";
+import { TimelineChart } from "./time-graph-model";
 
 export class TimeGraphUnitController {
-    protected viewRangeChangedHandlers: ((newRange: TimeGraphRange) => void)[];
-    protected _viewRange: TimeGraphRange;
+    protected viewRangeChangedHandlers: ((newRange: TimelineChart.TimeGraphRange) => void)[];
+    protected _viewRange: TimelineChart.TimeGraphRange;
 
-    protected selectionRangeChangedHandlers: ((newRange?: TimeGraphRange) => void)[];
-    protected _selectionRange?: TimeGraphRange;
+    protected selectionRangeChangedHandlers: ((newRange?: TimelineChart.TimeGraphRange) => void)[];
+    protected _selectionRange?: TimelineChart.TimeGraphRange;
 
     numberTranslator?: (theNumber: number) => string;
 
-    constructor(public absoluteRange: number, viewRange?: TimeGraphRange) {
+    constructor(public absoluteRange: number, viewRange?: TimelineChart.TimeGraphRange) {
         this.viewRangeChangedHandlers = [];
         this._viewRange = viewRange || { start: 0, end: absoluteRange };
 
@@ -24,18 +24,18 @@ export class TimeGraphUnitController {
         this.selectionRangeChangedHandlers.forEach(handler => handler(this._selectionRange));
     }
 
-    onViewRangeChanged(handler: (viewRange: TimeGraphRange) => void) {
+    onViewRangeChanged(handler: (viewRange: TimelineChart.TimeGraphRange) => void) {
         this.viewRangeChangedHandlers.push(handler);
     }
 
-    onSelectionRangeChange(handler: (selectionRange: TimeGraphRange) => void) {
+    onSelectionRangeChange(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
         this.selectionRangeChangedHandlers.push(handler);
     }
 
-    get viewRange(): TimeGraphRange {
+    get viewRange(): TimelineChart.TimeGraphRange {
         return this._viewRange;
     }
-    set viewRange(newRange: TimeGraphRange) {
+    set viewRange(newRange: TimelineChart.TimeGraphRange) {
         if (newRange.end > newRange.start) {
             this._viewRange = { start: newRange.start, end: newRange.end };
         }
@@ -48,10 +48,10 @@ export class TimeGraphUnitController {
         this.handleViewRangeChange();
     }
 
-    get selectionRange(): TimeGraphRange | undefined {
+    get selectionRange(): TimelineChart.TimeGraphRange | undefined {
         return this._selectionRange;
     }
-    set selectionRange(value: TimeGraphRange | undefined) {
+    set selectionRange(value: TimelineChart.TimeGraphRange | undefined) {
         this._selectionRange = value;
         this.handleSelectionRangeChange();
     }

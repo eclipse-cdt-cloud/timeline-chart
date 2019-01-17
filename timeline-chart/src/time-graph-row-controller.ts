@@ -1,9 +1,9 @@
-import { TimeGraphRowModel } from "./time-graph-model";
+import { TimelineChart } from "./time-graph-model";
 
 export class TimeGraphRowController {
-    private _selectedRow: TimeGraphRowModel;
+    private _selectedRow: TimelineChart.TimeGraphRowModel;
     private _verticalOffset: number;
-    protected selectedRowChangedHandlers: ((row: TimeGraphRowModel) => void)[] = [];
+    protected selectedRowChangedHandlers: ((row: TimelineChart.TimeGraphRowModel) => void)[] = [];
     protected verticalOffsetChangedHandlers: ((verticalOffset: number) => void)[] = [];
 
     constructor(public rowHeight: number, public totalHeight: number) {
@@ -18,7 +18,7 @@ export class TimeGraphRowController {
         this.selectedRowChangedHandlers.forEach(h=>h(this._selectedRow));
     }
 
-    onSelectedRowChangedHandler(handler: (row: TimeGraphRowModel) => void) {
+    onSelectedRowChangedHandler(handler: (row: TimelineChart.TimeGraphRowModel) => void) {
         this.selectedRowChangedHandlers.push(handler);
     }
 
@@ -34,10 +34,10 @@ export class TimeGraphRowController {
         this.handleVerticalOffsetChanged();
     }
 
-    get selectedRow(): TimeGraphRowModel {
+    get selectedRow(): TimelineChart.TimeGraphRowModel {
         return this._selectedRow;
     }
-    set selectedRow(value: TimeGraphRowModel) {
+    set selectedRow(value: TimelineChart.TimeGraphRowModel) {
         this._selectedRow = value;
         this.handleSelectedRowChanged();
     }

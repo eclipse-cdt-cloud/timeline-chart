@@ -1,14 +1,14 @@
 import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect, TimeGraphComponentOptions } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
-import { TimeGraphRange } from "../time-graph-model";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 import * as _ from "lodash";
+import { TimelineChart } from "../time-graph-model";
 
 export class TimeGraphAxisScale extends TimeGraphComponent {
 
     protected mouseStartY: number;
     protected mouseStartX: number;
-    protected oldViewRange: TimeGraphRange;
+    protected oldViewRange: TimelineChart.TimeGraphRange;
     protected mouseIsDown: boolean = false;
     protected labels: PIXI.Text[];
 
