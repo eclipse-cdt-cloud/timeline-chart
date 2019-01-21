@@ -5,8 +5,9 @@ export class TimeGraphRowController {
     private _verticalOffset: number;
     protected selectedRowChangedHandlers: ((row: TimelineChart.TimeGraphRowModel) => void)[] = [];
     protected verticalOffsetChangedHandlers: ((verticalOffset: number) => void)[] = [];
+    protected totalHeightChangedHandlers: ((totalHeight: number) => void)[] = [];
 
-    constructor(public rowHeight: number, public totalHeight: number) {
+    constructor(public rowHeight: number, private _totalHeight: number) {
         this._verticalOffset = 0;
     }
 
@@ -18,12 +19,29 @@ export class TimeGraphRowController {
         this.selectedRowChangedHandlers.forEach(h=>h(this._selectedRow));
     }
 
+    protected handleTotalHeightChanged(){
+        this.totalHeightChangedHandlers.forEach(h=>h(this._totalHeight));
+    }
+
     onSelectedRowChangedHandler(handler: (row: TimelineChart.TimeGraphRowModel) => void) {
         this.selectedRowChangedHandlers.push(handler);
     }
 
     onVerticalOffsetChangedHandler(handler: (verticalOffset: number) => void) {
         this.verticalOffsetChangedHandlers.push(handler);
+    }
+
+    onTotalHeightChangedHandler(handler: (totalHeight: number) =>  void) {
+        this.totalHeightChangedHandlers.push(handler);
+    }
+
+    get totalHeight(): number {
+        return this._totalHeight;
+    }
+
+    set totalHeight(height: number) {
+        this._totalHeight = height;
+        this.handleTotalHeightChanged();
     }
 
     get verticalOffset(): number {

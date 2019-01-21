@@ -16,10 +16,23 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
     }
 
     protected afterAddToContainer() {
-        this.factor = this.stateController.canvasDisplayHeight / this.rowController.totalHeight;
+        this.updateFactor();
         this.navigatorHandle = new TimeGraphVerticalScrollbarHandle(this.rowController, this.stateController, this.factor);
         this.addChild(this.navigatorHandle);
         this.rowController.onVerticalOffsetChangedHandler(() => this.update());
+        this.rowController.onTotalHeightChangedHandler(() => {
+            this.updateFactor();
+            this.navigatorHandle.updateFactor(this.factor);
+            this.update()
+        });
+    }
+
+    protected updateFactor() {
+        if (this.rowController.totalHeight) {
+            this.factor = this.stateController.canvasDisplayHeight / this.rowController.totalHeight;
+        } else {
+            this.factor = 0;
+        }
     }
 
     update() {
@@ -49,7 +62,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
                 const delta = event.data.global.y - this.mouseStartY;
                 let ypos = this.oldVerticalOffset + delta;
                 if (ypos >= 0 && (ypos + this.height) <= this.stateController.canvasDisplayHeight) {
-                    this.rowController.verticalOffset = ypos/this.factor;
+                    this.rowController.verticalOffset = ypos / this.factor;
                 }
             }
         }, this._displayObject);
@@ -58,6 +71,10 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
         }
         this.addEvent('mouseup', moveEnd, this._displayObject);
         this.addEvent('mouseupoutside', moveEnd, this._displayObject);
+    }
+
+    updateFactor(factor: number){
+        this.factor = factor;
     }
 
     render(): void {

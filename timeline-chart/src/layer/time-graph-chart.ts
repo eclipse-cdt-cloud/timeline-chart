@@ -102,12 +102,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.unitController.onViewRangeChanged(() => {
             this.updateScaleAndPosition();
-            if (!this.fetching) {
+            if (!this.fetching && this.unitController.viewRangeLength !== 0) {
                 this.maybeFetchNewData();
             }
         });
-        this.updateScaleAndPosition();
-        this.maybeFetchNewData();
+        if (this.unitController.viewRangeLength) {
+            this.updateScaleAndPosition();
+            this.maybeFetchNewData();
+        }
     }
 
     update() { }

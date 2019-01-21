@@ -60,31 +60,33 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     }
 
     protected renderVerticalLines(lineHeight: number, lineColor: number) {
-        const stepLength = this.getStepLength();
-        const steps = Math.trunc(this.unitController.absoluteRange / stepLength) + 1;
-        for (let i = 0; i < steps; i++) {
-            const absolutePosition = stepLength * i;
-            const xpos = (absolutePosition - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
-                const position = {
-                    x: xpos,
-                    y: this._options.height
-                };
-                if (this.unitController.numberTranslator) {
-                    const label = this.unitController.numberTranslator(absolutePosition);
-                    const text = new PIXI.Text(label, {
-                        fontSize: 10
+        if (this.unitController.viewRangeLength > 0) {
+            const stepLength = this.getStepLength();
+            const steps = Math.trunc(this.unitController.absoluteRange / stepLength) + 1;
+            for (let i = 0; i < steps; i++) {
+                const absolutePosition = stepLength * i;
+                const xpos = (absolutePosition - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+                if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
+                    const position = {
+                        x: xpos,
+                        y: this._options.height
+                    };
+                    if (this.unitController.numberTranslator) {
+                        const label = this.unitController.numberTranslator(absolutePosition);
+                        const text = new PIXI.Text(label, {
+                            fontSize: 10
+                        });
+                        text.x = position.x + 5;
+                        text.y = this._options.height - (2 * lineHeight);
+                        this.labels.push(text);
+                        this._displayObject.addChild(text);
+                    }
+                    this.vline({
+                        position,
+                        height: lineHeight * (-1),
+                        color: lineColor
                     });
-                    text.x = position.x + 5;
-                    text.y = this._options.height - (2 * lineHeight);
-                    this.labels.push(text);
-                    this._displayObject.addChild(text);
                 }
-                this.vline({
-                    position,
-                    height: lineHeight * (-1),
-                    color: lineColor
-                });
             }
         }
     }
