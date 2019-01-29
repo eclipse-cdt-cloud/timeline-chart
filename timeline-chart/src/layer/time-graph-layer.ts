@@ -1,4 +1,4 @@
-import { TimeGraphComponent } from "../components/time-graph-component";
+import { TimeGraphComponent, TimeGraphParentComponent } from "../components/time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
@@ -15,13 +15,17 @@ export abstract class TimeGraphLayer {
         this.layer = new PIXI.Container;
     }
 
-    protected addChild(child: TimeGraphComponent) {
+    protected addChild(child: TimeGraphComponent, parent?: TimeGraphParentComponent) {
         if (!this.canvas) {
             throw ("Layers must be added to a container before components can be added.");
         }
         child.render();
-        this.layer.addChild(child.displayObject);
-        this.children.push(child);
+        if (parent) {
+            parent.addChild(child);
+        } else {
+            this.layer.addChild(child.displayObject);
+            this.children.push(child);
+        }
     }
 
     /**
@@ -45,7 +49,7 @@ export abstract class TimeGraphLayer {
         this.children = [];
     }
 
-    protected removeChild(child:TimeGraphComponent){
+    protected removeChild(child: TimeGraphComponent) {
         this.layer.removeChild(child.displayObject);
     }
 

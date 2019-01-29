@@ -30,6 +30,10 @@ export type TimeGraphStyledRect = TimeGraphRect & TimeGraphElementStyle;
 export type TimeGraphHorizontalLine = TimeGraphHorizontalElement & TimeGraphLineStyle;
 export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyle;
 
+export interface TimeGraphParentComponent {
+    addChild(child: TimeGraphComponent): void;
+}
+
 export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
     protected _options: TimeGraphComponentOptions;

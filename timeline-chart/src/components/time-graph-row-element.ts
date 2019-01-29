@@ -1,4 +1,4 @@
-import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
+import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphElementPosition } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
 import { TimelineChart } from "../time-graph-model";
 
@@ -11,27 +11,30 @@ export interface TimeGraphRowElementStyle {
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 
-    protected rectangleOptions: TimeGraphStyledRect;
+    height: number;
+    position: TimeGraphElementPosition;
+
+    protected _options: TimeGraphStyledRect;
 
     constructor(
         id: string,
-        protected _options: TimelineChart.TimeGraphRowElementModel,
+        protected _model: TimelineChart.TimeGraphRowElementModel,
         protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
         style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
-        displayObject?:PIXI.Graphics
+        displayObject?: PIXI.Graphics
     ) {
         super(id, displayObject);
-        const height = style.height || 14;
-        const position = {
+        this.height = style.height || 14;
+        this.position = {
             x: this.range.start,
-            y: this._row.position.y + ((this.row.height - height) / 2)
+            y: this._row.position.y + ((this.row.height - this.height) / 2)
         };
         const width = this.range.end - this.range.start;
-        this.rectangleOptions = {
+        this._options = {
             color: style.color,
-            height,
-            position,
+            height: this.height,
+            position: this.position,
             width,
             borderRadius: 2,
             borderWidth: style.borderWidth || 0
@@ -39,7 +42,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     get model(): TimelineChart.TimeGraphRowElementModel {
-        return this._options;
+        return this._model;
     }
 
     get row(): TimeGraphRow {
@@ -48,21 +51,29 @@ export class TimeGraphRowElement extends TimeGraphComponent {
 
     set style(style: TimeGraphRowElementStyle) {
         if (style.color !== undefined) {
-            this.rectangleOptions.color = style.color;
+            this._options.color = style.color;
         }
         if (style.height !== undefined) {
-            this.rectangleOptions.height = style.height;
+            this._options.height = style.height;
         }
         if (style.borderColor !== undefined) {
-            this.rectangleOptions.borderColor = style.color;
+            this._options.borderColor = style.color;
         }
         if (style.borderWidth !== undefined) {
-            this.rectangleOptions.borderWidth = style.borderWidth;
+            this._options.borderWidth = style.borderWidth;
         }
         this.update();
     }
 
+    update(opts?: TimeGraphStyledRect) {
+        if(opts){
+            this._options.position = opts.position;
+            this._options.width = opts.width;
+        }
+        super.update();
+    }
+
     render() {
-        this.rect(this.rectangleOptions);
+        this.rect(this._options);
     }
 }

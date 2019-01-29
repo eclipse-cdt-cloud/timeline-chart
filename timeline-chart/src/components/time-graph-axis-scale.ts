@@ -53,7 +53,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         const logRounded = Math.round(log);
         const normalizedStepLength = Math.pow(10, logRounded);
         const residual = realStepLength / normalizedStepLength;
-        const steps = [1, 1.5, 2, 2.5, 5, 10];
+        const steps = this.unitController.scaleSteps || [1, 1.5, 2, 2.5, 5, 10];
         const normStepLength = steps.find(s => s > residual);
         const stepLength = normalizedStepLength * (normStepLength || 1);
         return stepLength;

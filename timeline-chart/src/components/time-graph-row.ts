@@ -1,5 +1,6 @@
-import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphRect } from "./time-graph-component";
+import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphRect, TimeGraphParentComponent } from "./time-graph-component";
 import { TimelineChart } from "../time-graph-model";
+import { TimeGraphRowElement } from "./time-graph-row-element";
 
 export interface TimeGraphRowStyle {
     backgroundColor?: number
@@ -9,7 +10,9 @@ export interface TimeGraphRowStyle {
     lineOpacity?: number
 }
 
-export class TimeGraphRow extends TimeGraphComponent {
+export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentComponent{
+
+    protected rowElements: TimeGraphRowElement[] = [];
 
     constructor(
         id: string,
@@ -44,11 +47,19 @@ export class TimeGraphRow extends TimeGraphComponent {
         });
     }
 
+    
+
     get position(): TimeGraphElementPosition {
         return this._options.position;
     }
 
     get height(): number {
         return this._options.height;
+    }
+
+    // Gets called by TimeGraphLayer. Don't call it unless you know what you are doing.
+    addChild(rowElement: TimeGraphRowElement){
+        this.rowElements.push(rowElement);
+        this._displayObject.addChild(rowElement.displayObject);
     }
 }

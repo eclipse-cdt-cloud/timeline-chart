@@ -1,7 +1,7 @@
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimelineChart } from "../time-graph-model";
-import { TimeGraphComponent } from "../components/time-graph-component";
+import { TimeGraphComponent, TimeGraphRect, TimeGraphStyledRect } from "../components/time-graph-component";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 
@@ -24,6 +24,8 @@ export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => Ti
 export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected rows: TimelineChart.TimeGraphRowModel[];
+    protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
+    protected rowElementComponents: Map<TimelineChart.TimeGraphRowElementModel, TimeGraphRowElement>
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElementModel: TimelineChart.TimeGraphRowElementModel;
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphRowElementModel) => void)[] = [];
@@ -107,7 +109,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         });
         if (this.unitController.viewRangeLength) {
-            this.updateScaleAndPosition();
             this.maybeFetchNewData();
         }
     }
@@ -128,6 +129,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.providedResolution = rowData.resolution;
                 this.providedRange = rowData.range;
                 this.setRowModel(rowData.rows);
+                this.removeChildren();
                 this.addRows(this.rows, this.rowController.rowHeight);
             }
             this.fetching = false;
@@ -135,8 +137,38 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected updateScaleAndPosition() {
-        this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
-        this.layer.scale.x = this.stateController.zoomFactor;
+        if (this.rows) {
+            this.rows.forEach((row: TimelineChart.TimeGraphRowModel) => {
+                const comp = this.rowComponents.get(row);
+                if (comp) {
+                    const opts: TimeGraphRect = {
+                        height: this.rowController.rowHeight,
+                        position: {
+                            x: (row.range.start - this.unitController.viewRange.start) * this.stateController.zoomFactor,
+                            y: comp.position.y
+                        },
+                        width: (row.range.end - row.range.start) * this.stateController.zoomFactor
+                    }
+                    comp.update(opts);
+                }
+                row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel, elementIndex: number) => {
+                    const el = this.rowElementComponents.get(rowElementModel);
+                    if (el) {
+                        const start = rowElementModel.range.start;
+                        const end = rowElementModel.range.end;
+                        const opts: TimeGraphStyledRect = {
+                            height: el.height,
+                            position: {
+                                x: (start - this.unitController.viewRange.start) * this.stateController.zoomFactor,
+                                y: el.position.y
+                            },
+                            width: (end - start) * this.stateController.zoomFactor
+                        }
+                        el.update(opts);
+                    }
+                });
+            });
+        }
     }
 
     protected handleSelectedRowElementChange() {
@@ -149,10 +181,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
-                x: row.range.start,
+                x: row.range.start * this.stateController.zoomFactor,
                 y: (height * rowIndex)
             },
-            width: length,
+            width: length * this.stateController.zoomFactor,
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
@@ -160,15 +192,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.selectRow(row);
         }).bind(this));
         this.addChild(rowComponent);
+        this.rowComponents.set(row, rowComponent);
         row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel, elementIndex: number) => {
-            const start = rowElementModel.range.start;
-            const end = rowElementModel.range.end;
+            const start = rowElementModel.range.start * this.stateController.zoomFactor;
+            const end = rowElementModel.range.end * this.stateController.zoomFactor;
             const range: TimelineChart.TimeGraphRange = {
                 start,
                 end
             };
             const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
             const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
+            this.rowElementComponents.set(rowElementModel, el);
             this.addElementInteractions(el);
             this.addChild(el);
         });
@@ -208,6 +242,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (!this.stateController) {
             throw ('Add this TimeGraphChart to a container before adding rows.');
         }
+        this.rowComponents = new Map();
+        this.rowElementComponents = new Map();
         this.rowController.rowHeight = height;
         rows.forEach((row: TimelineChart.TimeGraphRowModel, index: number) => {
             this.addRow(row, height, index);
