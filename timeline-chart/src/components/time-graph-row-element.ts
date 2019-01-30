@@ -57,7 +57,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             this._options.height = style.height;
         }
         if (style.borderColor !== undefined) {
-            this._options.borderColor = style.color;
+            this._options.borderColor = style.borderColor;
         }
         if (style.borderWidth !== undefined) {
             this._options.borderWidth = style.borderWidth;

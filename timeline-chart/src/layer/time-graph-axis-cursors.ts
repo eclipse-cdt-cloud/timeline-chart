@@ -21,8 +21,8 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
 
     update(): void {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = (this.unitController.selectionRange.start - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            const secondCursorPosition = (this.unitController.selectionRange.end - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const secondCursorPosition = this.getPixels(this.unitController.selectionRange.end - this.unitController.viewRange.start);
             const firstOpts = {
                 color: this.color,
                 position: {

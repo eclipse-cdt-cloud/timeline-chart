@@ -13,22 +13,24 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
     }
 
     protected updateScaleAndPosition() {
-        this.layer.position.x = -(this.unitController.viewRange.start * this.stateController.zoomFactor);
-        this.layer.scale.x = this.stateController.zoomFactor;
+        if (this.unitController.selectionRange) {
+            this.selectionRange.rectOptions.position.x = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            this.selectionRange.rectOptions.width = this.getPixels(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
+            this.selectionRange.update();
+        }
     }
 
     protected afterAddToContainer() {
         this.unitController.onViewRangeChanged(() => {
             this.updateScaleAndPosition();
         });
-        this.updateScaleAndPosition();
         this.unitController.onSelectionRangeChange(() => this.update());
     }
 
     update() {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.unitController.selectionRange.start;
-            const secondCursorPosition = this.unitController.selectionRange.end;
+            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const secondCursorPosition = this.getPixels(this.unitController.selectionRange.end - this.unitController.viewRange.start);
             if (secondCursorPosition !== firstCursorPosition) {
                 if (!this.selectionRange) {
                     this.selectionRange = new TimeGraphRectangle({
@@ -54,7 +56,7 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
                         width: secondCursorPosition - firstCursorPosition
                     })
                 }
-            }else{
+            } else {
                 this.removeChildren();
                 delete this.selectionRange;
             }

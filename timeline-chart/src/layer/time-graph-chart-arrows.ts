@@ -18,11 +18,11 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
     protected getCoordinates(arrow: TimelineChart.TimeGraphArrow): TimeGraphArrowCoordinates {
         const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
-            x: relativeStartPosition * this.stateController.zoomFactor,
+            x: this.getPixels(relativeStartPosition),
             y: (arrow.sourceId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         const end: TimeGraphElementPosition = {
-            x: (relativeStartPosition + arrow.range.end - arrow.range.start) * this.stateController.zoomFactor,
+            x: this.getPixels(relativeStartPosition + arrow.range.end - arrow.range.start),
             y: (arrow.destinationId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         return { start, end };

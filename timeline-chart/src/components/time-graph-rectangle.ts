@@ -6,6 +6,10 @@ export class TimeGraphRectangle extends TimeGraphComponent {
         this._options = opts;
     }
 
+    get rectOptions(): TimeGraphStyledRect {
+        return this._options as TimeGraphStyledRect;
+    }
+
     render(): void {
         this.rect(this._options as TimeGraphStyledRect);
     }

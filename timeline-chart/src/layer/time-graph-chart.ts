@@ -144,10 +144,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     const opts: TimeGraphRect = {
                         height: this.rowController.rowHeight,
                         position: {
-                            x: (row.range.start - this.unitController.viewRange.start) * this.stateController.zoomFactor,
+                            x: this.getPixels(row.range.start - this.unitController.viewRange.start),
                             y: comp.position.y
                         },
-                        width: (row.range.end - row.range.start) * this.stateController.zoomFactor
+                        width: this.getPixels(row.range.end - row.range.start)
                     }
                     comp.update(opts);
                 }
@@ -159,10 +159,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const opts: TimeGraphStyledRect = {
                             height: el.height,
                             position: {
-                                x: (start - this.unitController.viewRange.start) * this.stateController.zoomFactor,
+                                x: this.getPixels(start - this.unitController.viewRange.start),
                                 y: el.position.y
                             },
-                            width: (end - start) * this.stateController.zoomFactor
+                            width: this.getPixels(end - start)
                         }
                         el.update(opts);
                     }
@@ -181,10 +181,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
-                x: row.range.start * this.stateController.zoomFactor,
+                x: this.getPixels(row.range.start),
                 y: (height * rowIndex)
             },
-            width: length * this.stateController.zoomFactor,
+            width: this.getPixels(length),
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
@@ -194,8 +194,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.addChild(rowComponent);
         this.rowComponents.set(row, rowComponent);
         row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel, elementIndex: number) => {
-            const start = rowElementModel.range.start * this.stateController.zoomFactor;
-            const end = rowElementModel.range.end * this.stateController.zoomFactor;
+            const start = this.getPixels(rowElementModel.range.start);
+            const end = this.getPixels(rowElementModel.range.end);
             const range: TimelineChart.TimeGraphRange = {
                 start,
                 end
@@ -203,6 +203,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
             const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
             this.rowElementComponents.set(rowElementModel, el);
+            el.model.selected && (this.selectedElementModel = el.model);
             this.addElementInteractions(el);
             this.addChild(el);
         });
@@ -254,6 +255,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.rows = rows;
     }
 
+    protected updateElementStyle(model: TimelineChart.TimeGraphRowElementModel) {
+        const style = this.providers.rowElementStyleProvider && this.providers.rowElementStyleProvider(this.selectedElementModel);
+        const component = this.rowElementComponents.get(model);
+        component && style && (component.style = style);
+    }
+
     registerRowElementMouseInteractions(interactions: TimeGraphRowElementMouseInteractions) {
         this.rowElementMouseInteractions = interactions;
     }
@@ -288,9 +295,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     selectRowElement(model: TimelineChart.TimeGraphRowElementModel) {
         if (this.selectedElementModel) {
             delete this.selectedElementModel.selected;
+            this.updateElementStyle(this.selectedElementModel);
         }
         this.selectedElementModel = model;
         model.selected = true;
+        this.updateElementStyle(this.selectedElementModel);
         const el = this.getElementById(model.id);
         if (el) {
             this.selectRow(el.row.model);

@@ -53,5 +53,9 @@ export abstract class TimeGraphLayer {
         this.layer.removeChild(child.displayObject);
     }
 
+    protected getPixels(ticks: number){
+        return ticks * this.stateController.zoomFactor;
+    }
+
     protected afterAddToContainer() { }
 }
