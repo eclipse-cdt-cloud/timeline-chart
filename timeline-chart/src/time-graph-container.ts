@@ -21,6 +21,8 @@ export class TimeGraphContainer {
 
     protected layers: TimeGraphLayer[];
 
+    private application: PIXI.Application;
+
     constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController, protected extCanvas?: HTMLCanvasElement) {
         let canvas: HTMLCanvasElement
         if (!extCanvas) {
@@ -35,7 +37,7 @@ export class TimeGraphContainer {
         canvas.id = config.id;
         canvas.className = `time-graph-canvas ${this.config.classNames || ''}`;
         const ratio = window.devicePixelRatio;
-        const application = new PIXI.Application({
+        this.application = new PIXI.Application({
             width: canvas.width,
             height: canvas.height,
             view: canvas,
@@ -43,12 +45,13 @@ export class TimeGraphContainer {
             transparent: config.transparent,
             antialias: true,
             roundPixels: false,
-            resolution: ratio
+            resolution: ratio,
+            autoResize: true
         });
-        application.stage.height = config.height;
+        this.application.stage.height = config.height;
 
-        this.stage = application.stage;
-        this._canvas = application.view;
+        this.stage = this.application.stage;
+        this._canvas = this.application.view;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
 
@@ -57,6 +60,13 @@ export class TimeGraphContainer {
 
     get canvas(): HTMLCanvasElement {
         return this._canvas;
+    }
+
+    // if canvas size has changed displayWidth need to be updated for zoomfactor
+    reInitCanvasSize(newWidth: number){
+        this.application.renderer.resize(newWidth, this.config.height);
+        this.stateController.updateDisplayWidth();
+        this.layers.forEach(l => l.update());
     }
 
     addLayer(layer: TimeGraphLayer) {

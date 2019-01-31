@@ -58,4 +58,6 @@ export abstract class TimeGraphLayer {
     }
 
     protected afterAddToContainer() { }
+
+    abstract update(): void;
 }

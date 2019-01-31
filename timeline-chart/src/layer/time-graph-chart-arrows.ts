@@ -45,7 +45,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         })
     }
 
-    protected update(): void {
+    update(): void {
         if (this.arrows) {
             for (const arrow of this.arrows.keys()) {
                 this.updateArrow(arrow);

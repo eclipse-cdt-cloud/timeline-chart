@@ -113,7 +113,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    update() { }
+    update() {
+        this.updateScaleAndPosition();
+    }
 
     protected async maybeFetchNewData() {
         const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
