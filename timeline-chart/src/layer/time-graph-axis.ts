@@ -7,12 +7,17 @@ export class TimeGraphAxis extends TimeGraphLayer {
     protected scaleComponent: TimeGraphAxisScale;
 
 
-    constructor(id: string, protected style?: { color?: number }) {
+    constructor(id: string, protected style?: { color?: number, lineColor?: number }) {
         super(id);
     }
 
     protected getOptions() {
-        const color = this.style && this.style.color ? this.style.color : undefined;
+        let color;
+        let lineColor;
+        if(this.style){
+            color = this.style.color;
+            lineColor = this.style.lineColor;
+        }
         return {
             height: this.stateController.canvasDisplayHeight,
             width: this.stateController.canvasDisplayWidth,
@@ -20,7 +25,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
                 x: 0,
                 y: 0
             },
-            color
+            color,
+            lineColor
         }
     }
 

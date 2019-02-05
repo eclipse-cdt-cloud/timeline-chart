@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
 import { TimeGraphLayer } from "./layer/time-graph-layer";
+import { TimeGraphRectangle } from "./components/time-graph-rectangle";
 
 export interface TimeGraphContainerOptions {
     id: string
@@ -56,6 +57,18 @@ export class TimeGraphContainer {
         this.stateController = new TimeGraphStateController(canvas, unitController);
 
         this.layers = [];
+
+        const background = new TimeGraphRectangle({
+            opacity: 0,
+            position: {
+                x:0, y:0
+            },
+            height: this.canvas.height,
+            width: this.canvas.width,
+            color: 0x550000
+        });
+        background.render();
+        this.stage.addChild(background.displayObject);
     }
 
     get canvas(): HTMLCanvasElement {

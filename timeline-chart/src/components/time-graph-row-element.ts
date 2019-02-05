@@ -37,7 +37,8 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             position: this.position,
             width,
             borderRadius: 2,
-            borderWidth: style.borderWidth || 0
+            borderWidth: style.borderWidth || 0,
+            borderColor: style.borderColor || 0x000000
         };
     }
 
@@ -66,7 +67,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     update(opts?: TimeGraphStyledRect) {
-        if(opts){
+        if (opts) {
             this._options.position = opts.position;
             this._options.width = opts.width;
         }

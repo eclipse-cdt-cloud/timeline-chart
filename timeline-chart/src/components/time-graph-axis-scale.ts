@@ -4,6 +4,10 @@ import { TimeGraphStateController } from "../time-graph-state-controller";
 import * as _ from "lodash";
 import { TimelineChart } from "../time-graph-model";
 
+export interface TimeGraphAxisStyle extends TimeGraphStyledRect {
+    lineColor?: number
+}
+
 export class TimeGraphAxisScale extends TimeGraphComponent {
 
     protected mouseStartY: number;
@@ -13,7 +17,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     protected labels: PIXI.Text[];
 
     constructor(id: string,
-        protected _options: TimeGraphStyledRect,
+        protected _options: TimeGraphAxisStyle,
         protected unitController: TimeGraphUnitController,
         protected stateController: TimeGraphStateController) {
         super(id);
@@ -74,7 +78,8 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                     if (this.unitController.numberTranslator) {
                         const label = this.unitController.numberTranslator(absolutePosition);
                         const text = new PIXI.Text(label, {
-                            fontSize: 10
+                            fontSize: 10,
+                            fill: lineColor
                         });
                         text.x = position.x + 5;
                         text.y = this._options.height - (2 * lineHeight);
@@ -104,7 +109,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             width: this._options.width,
             position: this._options.position
         });
-        this.renderVerticalLines(10, 0x000000);
+        this.renderVerticalLines(10, this._options.lineColor || 0x000000);
     }
 
     zoom(zoomStep: number) {

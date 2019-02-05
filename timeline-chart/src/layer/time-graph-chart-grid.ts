@@ -5,7 +5,7 @@ export class TimeGraphChartGrid extends TimeGraphLayer {
 
     protected gridComponent: TimeGraphGrid;
 
-    constructor(id: string, protected rowHeight: number) {
+    constructor(id: string, protected rowHeight: number, protected lineColor?: number) {
         super(id);
     }
 
@@ -13,7 +13,8 @@ export class TimeGraphChartGrid extends TimeGraphLayer {
         this.gridComponent = new TimeGraphGrid('', {
             height: this.stateController.canvasDisplayHeight,
             position: { x: 0, y: 0 },
-            width: this.stateController.canvasDisplayWidth
+            width: this.stateController.canvasDisplayWidth,
+            lineColor: this.lineColor
         }, this.rowHeight, this.unitController, this.stateController);
         this.addChild(this.gridComponent);
         this.unitController.onViewRangeChanged(() => this.update());

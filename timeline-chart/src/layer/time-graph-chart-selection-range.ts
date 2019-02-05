@@ -13,7 +13,7 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
     }
 
     protected updateScaleAndPosition() {
-        if (this.unitController.selectionRange) {
+        if (this.unitController.selectionRange && this.selectionRange) {
             this.selectionRange.rectOptions.position.x = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
             this.selectionRange.rectOptions.width = this.getPixels(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
             this.selectionRange.update();

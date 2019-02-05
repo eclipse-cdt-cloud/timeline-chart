@@ -195,20 +195,29 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }).bind(this));
         this.addChild(rowComponent);
         this.rowComponents.set(row, rowComponent);
-        row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel, elementIndex: number) => {
-            const start = this.getPixels(rowElementModel.range.start);
-            const end = this.getPixels(rowElementModel.range.end);
-            const range: TimelineChart.TimeGraphRange = {
-                start,
-                end
-            };
-            const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
-            const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
-            this.rowElementComponents.set(rowElementModel, el);
-            el.model.selected && (this.selectedElementModel = el.model);
+        let selectedElement: TimeGraphRowElement | undefined;
+        row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
+            const el = this.createNewRowElement(rowElementModel, rowComponent);
+            el.model.selected && (this.selectedElementModel = el.model) && (selectedElement = el);
             this.addElementInteractions(el);
-            this.addChild(el);
+            !el.model.selected && this.addChild(el);
         });
+        if (selectedElement) {
+            this.addChild(selectedElement);
+        }
+    }
+
+    protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphRowElementModel, rowComponent: TimeGraphRow) {
+        const start = this.getPixels(rowElementModel.range.start);
+        const end = this.getPixels(rowElementModel.range.end);
+        const range: TimelineChart.TimeGraphRange = {
+            start,
+            end
+        };
+        const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
+        const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
+        this.rowElementComponents.set(rowElementModel, el);
+        return el;
     }
 
     protected addElementInteractions(el: TimeGraphRowElement) {
@@ -258,7 +267,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected updateElementStyle(model: TimelineChart.TimeGraphRowElementModel) {
-        const style = this.providers.rowElementStyleProvider && this.providers.rowElementStyleProvider(this.selectedElementModel);
+        const style = this.providers.rowElementStyleProvider && this.providers.rowElementStyleProvider(model);
         const component = this.rowElementComponents.get(model);
         component && style && (component.style = style);
     }
@@ -304,7 +313,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.updateElementStyle(this.selectedElementModel);
         const el = this.getElementById(model.id);
         if (el) {
-            this.selectRow(el.row.model);
+            const row = el.row;
+            if (row) {
+                const newEl = this.createNewRowElement(model, row);
+                this.removeChild(el);
+                this.addChild(newEl);
+                this.selectRow(newEl.row.model);
+            }
         }
         this.handleSelectedRowElementChange();
     }

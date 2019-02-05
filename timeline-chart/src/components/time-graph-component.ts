@@ -38,6 +38,8 @@ export abstract class TimeGraphComponent {
     protected _displayObject: PIXI.Graphics;
     protected _options: TimeGraphComponentOptions;
 
+    protected graphicsData: PIXI.GraphicsData;
+
     constructor(protected _id: string, displayObject?: PIXI.Graphics) {
         this._displayObject = displayObject || new PIXI.Graphics();
     }
@@ -68,7 +70,11 @@ export abstract class TimeGraphComponent {
         const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
-        this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
+
+        const r = new PIXI.RoundedRectangle(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
+        this.graphicsData = this.displayObject.drawShape(r);
+
+        // this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
         this.displayObject.endFill();
     }
 

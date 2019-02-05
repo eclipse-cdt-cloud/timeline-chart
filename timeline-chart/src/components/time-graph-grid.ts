@@ -3,10 +3,14 @@ import { TimeGraphRect } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
+export interface TimeGraphGridStyle extends TimeGraphRect {
+    lineColor?: number
+}
+
 export class TimeGraphGrid extends TimeGraphAxisScale {
 
     constructor(id: string,
-        protected _options: TimeGraphRect,
+        protected _options: TimeGraphGridStyle,
         protected rowHeight: number,
         protected unitController: TimeGraphUnitController,
         protected stateController: TimeGraphStateController) {
@@ -16,6 +20,6 @@ export class TimeGraphGrid extends TimeGraphAxisScale {
     protected addEvents() { }
 
     render(): void {
-        this.renderVerticalLines(this.stateController.canvasDisplayHeight, 0xdddddd);
+        this.renderVerticalLines(this.stateController.canvasDisplayHeight,  this._options.lineColor || 0xdddddd);
     }
 }
