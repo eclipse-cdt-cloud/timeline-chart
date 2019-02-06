@@ -28,9 +28,18 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     protected addEvents() {
         const mouseMove = _.throttle(event => {
             if (this.mouseIsDown) {
-                const delta = event.data.global.y - this.mouseStartY;
+                /**
+                    Zoom around MousePosition on drag up/down
+                    left here as an additional option
+                    to be added later
+                */
+                // const delta = event.data.global.y - this.mouseStartY;
+                // const zoomStep = (delta / 100);
+                // this.zoomAroundMousePointerOnDrag(zoomStep);
+
+                const delta = event.data.global.x - this.mouseStartX;
                 const zoomStep = (delta / 100);
-                this.zoom(zoomStep);
+                this.zoomAroundLeftViewBorder(zoomStep);
             }
         }, 40);
         this.addEvent('mousedown', event => {
@@ -54,7 +63,10 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         const maxSteps = canvasDisplayWidth / minCanvasStepWidth;
         const realStepLength = viewRangeLength / maxSteps;
         const log = Math.log10(realStepLength);
-        const logRounded = Math.round(log);
+        let logRounded = Math.round(log);
+        if(this.unitController.discreteScale){
+            logRounded = Math.abs(logRounded);
+        }
         const normalizedStepLength = Math.pow(10, logRounded);
         const residual = realStepLength / normalizedStepLength;
         const steps = this.unitController.scaleSteps || [1, 1.5, 2, 2.5, 5, 10];
@@ -112,7 +124,21 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         this.renderVerticalLines(10, this._options.lineColor || 0x000000);
     }
 
-    zoom(zoomStep: number) {
+    zoomAroundLeftViewBorder(zoomStep: number) {
+        const oldViewRangeLength = this.oldViewRange.end - this.oldViewRange.start;
+        const newViewRangeLength = oldViewRangeLength / (1 + (zoomStep));
+        let start = this.oldViewRange.start;
+        let end = start + newViewRangeLength;
+        if (end > this.unitController.absoluteRange) {
+            end = this.unitController.absoluteRange;
+        }
+        this.unitController.viewRange = {
+            start,
+            end
+        }
+    }
+
+    zoomAroundMousePointerOnDrag(zoomStep: number) {
         const oldViewRangeLength = this.oldViewRange.end - this.oldViewRange.start;
         const newViewRangeLength = oldViewRangeLength / (1 + (zoomStep));
         const normZoomFactor = newViewRangeLength / oldViewRangeLength;

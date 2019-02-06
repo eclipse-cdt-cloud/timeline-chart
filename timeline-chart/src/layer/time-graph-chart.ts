@@ -36,6 +36,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected fetching: boolean;
 
     protected shiftKeyDown: boolean;
+    protected ctrlKeyDown: boolean;
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
@@ -46,37 +47,25 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected afterAddToContainer() {
-        this.shiftKeyDown = false
+        this.shiftKeyDown = false;
+        this.ctrlKeyDown = false;
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
+            this.ctrlKeyDown = event.ctrlKey;
         });
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
+            this.ctrlKeyDown = event.ctrlKey;
         });
         const mw = (ev: WheelEvent) => {
-            if (this.shiftKeyDown) {
-                const shiftStep = ev.deltaY;
-                let verticalOffset = this.rowController.verticalOffset + shiftStep;
-                if (verticalOffset < 0) {
-                    verticalOffset = 0;
-                }
-                if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
-                    verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
-                }
-                this.rowController.verticalOffset = verticalOffset;
-            } else {
+            if (this.ctrlKeyDown) {
                 let newViewRangeLength = this.unitController.viewRangeLength;
                 let xOffset = 0;
                 let moveX = false;
-                if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) {
-                    xOffset = -(ev.deltaX / this.stateController.zoomFactor);
-                    moveX = true;
-                } else {
-                    const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
-                    const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
-                    newViewRangeLength += deltaLength;
-                    xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
-                }
+                const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
+                const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
+                newViewRangeLength += deltaLength;
+                xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
                 let start = this.unitController.viewRange.start - xOffset;
                 if (start < 0) {
                     start = 0;
@@ -92,6 +81,37 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     start,
                     end
                 }
+            } else if (this.shiftKeyDown) {
+                let newViewRangeLength = this.unitController.viewRangeLength;
+                let xOffset = 0;
+                let moveX = false;
+                xOffset = -(ev.deltaY / this.stateController.zoomFactor);
+                moveX = true;
+                let start = this.unitController.viewRange.start - xOffset;
+                if (start < 0) {
+                    start = 0;
+                }
+                let end = start + newViewRangeLength;
+                if (end > this.unitController.absoluteRange) {
+                    end = this.unitController.absoluteRange;
+                    if (moveX) {
+                        start = end - newViewRangeLength;
+                    }
+                }
+                this.unitController.viewRange = {
+                    start,
+                    end
+                }
+            } else {
+                const shiftStep = ev.deltaY;
+                let verticalOffset = this.rowController.verticalOffset + shiftStep;
+                if (verticalOffset < 0) {
+                    verticalOffset = 0;
+                }
+                if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
+                    verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
+                }
+                this.rowController.verticalOffset = verticalOffset;
             }
             ev.preventDefault();
         }
@@ -208,8 +228,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphRowElementModel, rowComponent: TimeGraphRow) {
-        const start = this.getPixels(rowElementModel.range.start);
-        const end = this.getPixels(rowElementModel.range.end);
+        const start = this.getPixels(rowElementModel.range.start - this.unitController.viewRange.start);
+        const end = this.getPixels(rowElementModel.range.end - this.unitController.viewRange.start);
         const range: TimelineChart.TimeGraphRange = {
             start,
             end
@@ -317,6 +337,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (row) {
                 const newEl = this.createNewRowElement(model, row);
                 this.removeChild(el);
+                this.addElementInteractions(newEl);
                 this.addChild(newEl);
                 this.selectRow(newEl.row.model);
             }
