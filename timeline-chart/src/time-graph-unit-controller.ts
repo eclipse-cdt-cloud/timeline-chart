@@ -9,7 +9,6 @@ export class TimeGraphUnitController {
 
     numberTranslator?: (theNumber: number) => string;
     scaleSteps?: number[]
-    discreteScale?: boolean;
 
     constructor(public absoluteRange: number, viewRange?: TimelineChart.TimeGraphRange) {
         this.viewRangeChangedHandlers = [];
