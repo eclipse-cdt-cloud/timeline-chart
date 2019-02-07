@@ -27,6 +27,11 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
         this.unitController.onSelectionRangeChange(() => this.update());
     }
 
+    protected removeSelectionRange() {
+        this.removeChildren();
+        delete this.selectionRange;
+    }
+
     update() {
         if (this.unitController.selectionRange) {
             const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
@@ -57,9 +62,10 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
                     })
                 }
             } else {
-                this.removeChildren();
-                delete this.selectionRange;
+                this.removeSelectionRange();
             }
+        } else {
+            this.removeSelectionRange();
         }
     }
 }

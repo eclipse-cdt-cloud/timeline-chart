@@ -111,7 +111,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             return rowElementModel.range.start > cursorPosition;
         });
         if (nextIndex < states.length) {
-            const newPos = states[nextIndex].range.start;
+            const newPos = states[nextIndex] ? states[nextIndex].range.start : this.unitController.absoluteRange;
             if (this.unitController.selectionRange && this.shiftKeyDown) {
                 this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
             } else {

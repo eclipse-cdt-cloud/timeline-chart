@@ -50,10 +50,12 @@ export abstract class TimeGraphLayer {
     }
 
     protected removeChild(child: TimeGraphComponent) {
+        const idx = this.children.findIndex(c => c === child);
+        idx && this.children.splice(idx, 1);
         this.layer.removeChild(child.displayObject);
     }
 
-    protected getPixels(ticks: number){
+    protected getPixels(ticks: number) {
         return ticks * this.stateController.zoomFactor;
     }
 

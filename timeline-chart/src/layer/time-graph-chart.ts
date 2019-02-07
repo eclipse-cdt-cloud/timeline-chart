@@ -323,23 +323,25 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return this.selectedElementModel;
     }
 
-    selectRowElement(model: TimelineChart.TimeGraphRowElementModel) {
+    selectRowElement(model: TimelineChart.TimeGraphRowElementModel | undefined) {
         if (this.selectedElementModel) {
             delete this.selectedElementModel.selected;
             this.updateElementStyle(this.selectedElementModel);
         }
-        this.selectedElementModel = model;
-        model.selected = true;
-        this.updateElementStyle(this.selectedElementModel);
-        const el = this.getElementById(model.id);
-        if (el) {
-            const row = el.row;
-            if (row) {
-                const newEl = this.createNewRowElement(model, row);
-                this.removeChild(el);
-                this.addElementInteractions(newEl);
-                this.addChild(newEl);
-                this.selectRow(newEl.row.model);
+        if (model) {
+            this.selectedElementModel = model;
+            model.selected = true;
+            this.updateElementStyle(this.selectedElementModel);
+            const el = this.getElementById(model.id);
+            if (el) {
+                const row = el.row;
+                if (row) {
+                    const newEl = this.createNewRowElement(model, row);
+                    this.removeChild(el);
+                    this.addElementInteractions(newEl);
+                    this.addChild(newEl);
+                    this.selectRow(newEl.row.model);
+                }
             }
         }
         this.handleSelectedRowElementChange();
