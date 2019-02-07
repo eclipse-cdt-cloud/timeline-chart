@@ -37,6 +37,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             this.mouseIsDown = true;
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
+            this.chartLayer.selectRowElement(undefined);
             if (this.shiftKeyDown) {
                 const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
                 this.unitController.selectionRange = {
