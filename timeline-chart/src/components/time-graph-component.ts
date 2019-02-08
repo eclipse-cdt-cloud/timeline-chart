@@ -67,6 +67,18 @@ export abstract class TimeGraphComponent {
     abstract render(): void;
 
     protected rect(opts: TimeGraphStyledRect) {
+        const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
+        this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
+        this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+
+        const r = new PIXI.Rectangle(position.x + 0.5, position.y + 0.5, width, height);
+        this.graphicsData = this.displayObject.drawShape(r);
+
+        // this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
+        this.displayObject.endFill();
+    }
+
+    protected roundedRect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));

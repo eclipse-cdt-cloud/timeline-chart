@@ -218,24 +218,27 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         let selectedElement: TimeGraphRowElement | undefined;
         row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
             const el = this.createNewRowElement(rowElementModel, rowComponent);
-            el.model.selected && (this.selectedElementModel = el.model) && (selectedElement = el);
-            this.addElementInteractions(el);
-            !el.model.selected && this.addChild(el);
+            if (el) {
+                el.model.selected && (this.selectedElementModel = el.model) && (selectedElement = el);
+                this.addElementInteractions(el);
+                !el.model.selected && this.addChild(el);
+            }
         });
         if (selectedElement) {
             this.addChild(selectedElement);
         }
     }
 
-    protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphRowElementModel, rowComponent: TimeGraphRow) {
+    protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphRowElementModel, rowComponent: TimeGraphRow): TimeGraphRowElement | undefined {
         const start = this.getPixels(rowElementModel.range.start - this.unitController.viewRange.start);
         const end = this.getPixels(rowElementModel.range.end - this.unitController.viewRange.start);
+        let el: TimeGraphRowElement | undefined;
         const range: TimelineChart.TimeGraphRange = {
             start,
             end
         };
         const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
-        const el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
+        el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
         this.rowElementComponents.set(rowElementModel, el);
         return el;
     }
@@ -345,10 +348,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 const row = el.row;
                 if (row) {
                     const newEl = this.createNewRowElement(model, row);
-                    this.removeChild(el);
-                    this.addElementInteractions(newEl);
-                    this.addChild(newEl);
-                    this.selectRow(newEl.row.model);
+                    if (newEl) {
+                        this.removeChild(el);
+                        this.addElementInteractions(newEl);
+                        this.addChild(newEl);
+                        this.selectRow(newEl.row.model);
+                    }
                 }
             }
         }
