@@ -292,11 +292,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         component && style && (component.style = style);
     }
 
+    protected updateRowStyle(model: TimelineChart.TimeGraphRowModel) {
+        const style = this.providers.rowStyleProvider && this.providers.rowStyleProvider(model);
+        const component = this.rowComponents.get(model);
+        component && style && (component.style = style);
+    }
+
     registerRowElementMouseInteractions(interactions: TimeGraphRowElementMouseInteractions) {
         this.rowElementMouseInteractions = interactions;
     }
 
-    onSelectedRowElementChanged(handler: (el: TimelineChart.TimeGraphRowElementModel) => void) {
+    onSelectedRowElementChanged(handler: (el: TimelineChart.TimeGraphRowElementModel | undefined) => void) {
         this.selectedElementChangedHandler.push(handler);
     }
 
@@ -314,9 +320,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     selectRow(row: TimelineChart.TimeGraphRowModel) {
         if (this.rowController.selectedRow) {
             delete this.rowController.selectedRow.selected;
+            this.updateRowStyle(this.rowController.selectedRow);
         }
         this.rowController.selectedRow = row;
         row.selected = true;
+        this.updateRowStyle(row);
     }
 
     getSelectedRowElement(): TimelineChart.TimeGraphRowElementModel {

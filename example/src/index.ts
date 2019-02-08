@@ -88,7 +88,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
         timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
         if (selectedElement) {
             for (const row of timeGraph.rows) {
-                const selEl = row.states.find(el => el.id === selectedElement.id);
+                const selEl = row.states.find(el => !!selectedElement && el.id === selectedElement.id);
                 if (selEl) {
                     selEl.selected = true;
                     break;
@@ -148,11 +148,15 @@ timeGraphChart.registerRowElementMouseInteractions({
         }
     }
 });
-let selectedElement: TimeGraphRowElement;
+let selectedElement: TimeGraphRowElement | undefined;
 timeGraphChart.onSelectedRowElementChanged((model) => {
-    const el = timeGraphChart.getElementById(model.id);
-    if (el) {
-        selectedElement = el;
+    if (model) {
+        const el = timeGraphChart.getElementById(model.id);
+        if (el) {
+            selectedElement = el;
+        }
+    } else {
+        selectedElement = undefined;
     }
 })
 
