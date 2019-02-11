@@ -74,7 +74,27 @@ export abstract class TimeGraphComponent {
         const r = new PIXI.Rectangle(position.x + 0.5, position.y + 0.5, width, height);
         this.graphicsData = this.displayObject.drawShape(r);
 
-        // this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
+        this.displayObject.endFill();
+    }
+
+    protected rectTruncated(opts: TimeGraphStyledRect) {
+        const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
+        this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
+        this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+
+        const xpos = position.x + 0.5;
+        const ypos = position.y + 0.5;
+        const edge = 2;
+
+        const r = new PIXI.Polygon(
+            xpos + edge, ypos,
+            xpos + width, ypos,
+            xpos + width, ypos + height,
+            xpos, ypos + height,
+            xpos, ypos + edge,
+            xpos + edge, ypos);
+        this.graphicsData = this.displayObject.drawShape(r);
+
         this.displayObject.endFill();
     }
 
@@ -86,7 +106,6 @@ export abstract class TimeGraphComponent {
         const r = new PIXI.RoundedRectangle(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
         this.graphicsData = this.displayObject.drawShape(r);
 
-        // this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
         this.displayObject.endFill();
     }
 

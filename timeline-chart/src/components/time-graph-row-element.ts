@@ -50,7 +50,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         return this._row;
     }
 
-    get style(){
+    get style() {
         return this._style;
     }
 
@@ -79,6 +79,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     render() {
-        this.rect(this._options);
+        if (this._options.width < 10) {
+            this.rect(this._options);
+        } else {
+            this.rectTruncated(this._options);
+        }
     }
 }
