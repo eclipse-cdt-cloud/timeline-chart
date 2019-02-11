@@ -79,10 +79,6 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     render() {
-        if (this._options.width < 10) {
-            this.rect(this._options);
-        } else {
-            this.rectTruncated(this._options);
-        }
+        this.rect(this._options);
     }
 }
