@@ -126,7 +126,8 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
         return {
             color: style.color,
             height: style.height,
-            borderWidth: model.selected ? 1 : 0
+            borderWidth: model.selected ? 1 : 0,
+            minWidthForLabels: 100
         };
     },
     rowStyleProvider: (row: TimelineChart.TimeGraphRowModel) => {

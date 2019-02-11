@@ -7,6 +7,8 @@ export interface TimeGraphRowElementStyle {
     height?: number
     borderWidth?: number
     borderColor?: number
+    minWidthForLabels?: number
+    renderLabels?: boolean
 }
 
 export class TimeGraphRowElement extends TimeGraphComponent {
@@ -14,7 +16,11 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     height: number;
     position: TimeGraphElementPosition;
 
-    label: PIXI.Text;
+    protected label: PIXI.Text;
+    protected labelCharWidths: number[] = [];
+    protected labelStyle: PIXI.TextStyle;
+    protected dotsWidth: number;
+    protected minWidthForLabels: number;
 
     protected _options: TimeGraphStyledRect;
 
@@ -32,6 +38,17 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             x: this.range.start,
             y: this._row.position.y + ((this.row.height - this.height) / 2)
         };
+        if (_style.renderLabels) {
+            this.minWidthForLabels = _style.minWidthForLabels || 40;
+            this.labelStyle = new PIXI.TextStyle({ fontSize: this.height * 0.75 });
+            const dotsMetrics = PIXI.TextMetrics.measureText('...', this.labelStyle);
+            this.dotsWidth = dotsMetrics.width;
+            const chars = this.model.label ? this.model.label.split('') : [];
+            chars.forEach(char => {
+                const { width } = PIXI.TextMetrics.measureText(char, this.labelStyle);
+                this.labelCharWidths.push(width);
+            });
+        }
         const width = this.range.end - this.range.start;
         this._options = {
             color: _style.color,
@@ -81,24 +98,24 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     renderLabel() {
-        if (this.model.label && this._options.width > 20) {
+        if (this.model.label && this._options.width > this.minWidthForLabels) {
             if (this.label && this.label.texture) {
                 this.label.destroy();
             }
-            const style = new PIXI.TextStyle({ fontSize: this._options.height * 0.75 });
-            const chars = this.model.label.split('');
+
             let truncated = false;
-            const dotsMetrics = PIXI.TextMetrics.measureText('...', style);
-            const dotsWidth = dotsMetrics.width;
-            let newLabel = chars.reduce((prev: string, curr: string) => {
-                const { width } = PIXI.TextMetrics.measureText(prev, style);
-                if (width + dotsWidth < this._options.width - 5) {
-                    return prev + curr;
-                } else {
+            let splitAt = 0;
+
+            this.labelCharWidths.reduce((prev: number, curr: number, idx: number) => {
+                const w = prev + curr;
+                if ((w + this.dotsWidth > this._options.width - 5) && !truncated) {
                     truncated = true;
-                    return prev;
+                    splitAt = idx;
                 }
+                return w;
             });
+
+            let newLabel = truncated ? this.model.label.slice(0, splitAt) : this.model.label;
             newLabel = truncated ? newLabel + '...' : newLabel;
             this.label = new PIXI.Text(newLabel, {
                 fontSize: this._options.height * 0.75,
@@ -115,6 +132,6 @@ export class TimeGraphRowElement extends TimeGraphComponent {
 
     render() {
         this.rect(this._options);
-        this.renderLabel();
+        this.style.renderLabels && this.renderLabel();
     }
 }
