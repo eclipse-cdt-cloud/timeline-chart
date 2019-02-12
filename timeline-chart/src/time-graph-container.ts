@@ -11,7 +11,7 @@ export interface TimeGraphContainerOptions {
     backgroundColor?: number
     transparent?: boolean
     classNames?: string
-}
+} //
 
 export class TimeGraphContainer {
 
