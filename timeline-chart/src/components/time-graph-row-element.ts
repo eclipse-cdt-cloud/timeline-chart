@@ -7,20 +7,12 @@ export interface TimeGraphRowElementStyle {
     height?: number
     borderWidth?: number
     borderColor?: number
-    minWidthForLabels?: number
-    renderLabels?: boolean
 }
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 
     height: number;
     position: TimeGraphElementPosition;
-
-    protected label: PIXI.Text;
-    protected labelCharWidths: number[] = [];
-    protected labelStyle: PIXI.TextStyle;
-    protected dotsWidth: number;
-    protected minWidthForLabels: number;
 
     protected _options: TimeGraphStyledRect;
 
@@ -38,17 +30,6 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             x: this.range.start,
             y: this._row.position.y + ((this.row.height - this.height) / 2)
         };
-        if (_style.renderLabels) {
-            this.minWidthForLabels = _style.minWidthForLabels || 40;
-            this.labelStyle = new PIXI.TextStyle({ fontSize: this.height * 0.75 });
-            const dotsMetrics = PIXI.TextMetrics.measureText('...', this.labelStyle);
-            this.dotsWidth = dotsMetrics.width;
-            const chars = this.model.label ? this.model.label.split('') : [];
-            chars.forEach(char => {
-                const { width } = PIXI.TextMetrics.measureText(char, this.labelStyle);
-                this.labelCharWidths.push(width);
-            });
-        }
         const width = this.range.end - this.range.start;
         this._options = {
             color: _style.color,
@@ -97,41 +78,18 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         super.update();
     }
 
-    renderLabel() {
-        if (this.model.label && this._options.width > this.minWidthForLabels) {
-            if (this.label && this.label.texture) {
-                this.label.destroy();
-            }
-
-            let truncated = false;
-            let splitAt = 0;
-
-            this.labelCharWidths.reduce((prev: number, curr: number, idx: number) => {
-                const w = prev + curr;
-                if ((w + this.dotsWidth > this._options.width - 5) && !truncated) {
-                    truncated = true;
-                    splitAt = idx;
-                }
-                return w;
-            });
-
-            let newLabel = truncated ? this.model.label.slice(0, splitAt) : this.model.label;
-            newLabel = truncated ? newLabel + '...' : newLabel;
-            this.label = new PIXI.Text(newLabel, {
-                fontSize: this._options.height * 0.75,
-                fill: 0x000000
-            });
-            this.label.x = this._options.position.x + 2;
-            this.label.y = this._options.position.y;
-
-            this._displayObject.addChild(this.label);
-        } else if (this.label && this.label.texture) {
-            this.label.destroy();
-        }
-    }
-
     render() {
         this.rect(this._options);
-        this.style.renderLabels && this.renderLabel();
+        if (this._options.width > 20) {
+            this.displayObject.beginFill(0x000000);
+            const x = this._options.position.x + 0.5;
+            const y = this._options.position.y + 0.5;
+            this.displayObject.drawPolygon([
+                x, y,
+                x + 4, y,
+                x, y + 4
+            ]);
+            this.displayObject.endFill();
+        }
     }
 }
