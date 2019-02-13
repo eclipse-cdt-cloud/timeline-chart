@@ -78,14 +78,16 @@ export abstract class TimeGraphComponent {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+        if (width > 20) {
+            const xpos = position.x + 0.5;
+            const ypos = position.y + 0.5;
+            const edge = 2;
 
-        const xpos = position.x + 0.5;
-        const ypos = position.y + 0.5;
-        const edge = 2;
-
-        this.displayObject.drawPolygon([xpos + edge, ypos,
-        xpos + width, ypos, xpos + width, ypos + height, xpos, ypos + height, xpos, ypos + edge, xpos + edge, ypos]);
-
+            this.displayObject.drawPolygon([xpos + edge, ypos,
+            xpos + width, ypos, xpos + width, ypos + height, xpos, ypos + height, xpos, ypos + edge, xpos + edge, ypos]);
+        } else {
+            this.displayObject.drawRect(position.x + 0.5, position.y + 0.5, width, height);
+        }
         this.displayObject.endFill();
     }
 

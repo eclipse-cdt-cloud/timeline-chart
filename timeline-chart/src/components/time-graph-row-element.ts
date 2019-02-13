@@ -79,17 +79,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     }
 
     render() {
+        // this.rectTruncated(this._options);
         this.rect(this._options);
-        if (this._options.width > 20) {
-            this.displayObject.beginFill(0x000000);
-            const x = this._options.position.x + 0.5;
-            const y = this._options.position.y + 0.5;
-            this.displayObject.drawPolygon([
-                x, y,
-                x + 4, y,
-                x, y + 4
-            ]);
-            this.displayObject.endFill();
-        }
     }
 }
