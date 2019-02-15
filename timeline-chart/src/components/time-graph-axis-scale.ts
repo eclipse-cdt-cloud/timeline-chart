@@ -72,7 +72,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         return stepLength;
     }
 
-    protected renderVerticalLines(lineColor: number, lineStyle: (label: string) => { lineHeight: number }) {
+    protected renderVerticalLines(lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
         if (this.unitController.viewRangeLength > 0) {
             const stepLength = this.getStepLength();
             const steps = Math.trunc(this.unitController.absoluteRange / stepLength) + 1;
@@ -84,17 +84,19 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                         x: xpos,
                         y: this._options.height
                     };
-                    let label = '';
+                    let label;
                     if (this.unitController.numberTranslator) {
                         label = this.unitController.numberTranslator(absolutePosition);
-                        const text = new PIXI.Text(label, {
-                            fontSize: 10,
-                            fill: lineColor
-                        });
-                        text.x = position.x + 5;
-                        text.y = this._options.height - (2 * lineStyle(label).lineHeight);
-                        this.labels.push(text);
-                        this._displayObject.addChild(text);
+                        if (label) {
+                            const text = new PIXI.Text(label, {
+                                fontSize: 10,
+                                fill: lineColor
+                            });
+                            text.x = position.x + 5;
+                            text.y = this._options.height - (2 * lineStyle(label).lineHeight);
+                            this.labels.push(text);
+                            this._displayObject.addChild(text);
+                        }
                     }
                     this.vline({
                         position,
@@ -119,7 +121,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             width: this._options.width,
             position: this._options.position
         });
-        this.renderVerticalLines(this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' ? 5 : 10 }));
+        this.renderVerticalLines(this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' || l === undefined ? 5 : 10 }));
     }
 
     zoomAroundLeftViewBorder(zoomStep: number) {

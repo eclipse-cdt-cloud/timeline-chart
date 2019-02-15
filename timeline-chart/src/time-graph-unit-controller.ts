@@ -7,7 +7,7 @@ export class TimeGraphUnitController {
     protected selectionRangeChangedHandlers: ((newRange?: TimelineChart.TimeGraphRange) => void)[];
     protected _selectionRange?: TimelineChart.TimeGraphRange;
 
-    numberTranslator?: (theNumber: number) => string;
+    numberTranslator?: (theNumber: number) => string | undefined;
     scaleSteps?: number[]
 
     constructor(public absoluteRange: number, viewRange?: TimelineChart.TimeGraphRange) {
