@@ -28,6 +28,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 this.navigateOrSelectLeft();
             } else if (event.keyCode === 39) {
                 this.navigateOrSelectRight();
+            } else if(event.keyCode === 38){
+                this.navigateUp();
+            } else if(event.keyCode === 40){
+                this.navigateDown();
             }
         });
         document.addEventListener('keyup', (event: KeyboardEvent) => {
@@ -121,6 +125,40 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         }
         this.maybeCenterCursor();
         this.chartLayer.selectRowElement(states[nextIndex]);
+    }
+
+    protected navigateDown(){
+        const rows = this.chartLayer.getRowModels();
+        let selectedRow = this.rowController.selectedRow;
+        const idx = rows.findIndex(row => row === selectedRow);
+        if(idx < rows.length){
+            this.chartLayer.selectRow(rows[idx + 1]);
+        }
+        selectedRow = this.rowController.selectedRow;
+        const state = selectedRow.states.find(state => {
+            if(this.unitController.selectionRange){
+                return state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
+            }
+            return false;
+        });
+        state && this.chartLayer.selectRowElement(state);
+    }
+
+    protected navigateUp(){
+        const rows = this.chartLayer.getRowModels();
+        let selectedRow = this.rowController.selectedRow;
+        const idx = rows.findIndex(row => row === selectedRow);
+        if(idx > 0){
+            this.chartLayer.selectRow(rows[idx - 1]);
+        }
+        selectedRow = this.rowController.selectedRow;
+        const state = selectedRow.states.find(state => {
+            if(this.unitController.selectionRange){
+                return state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
+            }
+            return false;
+        })
+        state && this.chartLayer.selectRowElement(state);
     }
 
     centerCursor() {

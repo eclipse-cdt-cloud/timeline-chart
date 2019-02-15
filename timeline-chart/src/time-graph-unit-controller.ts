@@ -7,6 +7,10 @@ export class TimeGraphUnitController {
     protected selectionRangeChangedHandlers: ((newRange?: TimelineChart.TimeGraphRange) => void)[];
     protected _selectionRange?: TimelineChart.TimeGraphRange;
 
+    /**
+     *  Create a string from the given number, which is shown in TimeAxis.
+     *  Or return undefined to not show any text for that number.
+     */
     numberTranslator?: (theNumber: number) => string | undefined;
     scaleSteps?: number[]
 
