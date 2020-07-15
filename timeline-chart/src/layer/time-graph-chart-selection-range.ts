@@ -2,7 +2,7 @@ import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphLayer } from "./time-graph-layer";
 
 export class TimeGraphChartSelectionRange extends TimeGraphLayer {
-    protected selectionRange: TimeGraphRectangle;
+    protected selectionRange?: TimeGraphRectangle;
     protected color: number = 0x0000ff;
 
     constructor(id: string, style?: { color?: number }) {

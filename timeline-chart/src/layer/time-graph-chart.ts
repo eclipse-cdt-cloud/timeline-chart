@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js"
+
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimelineChart } from "../time-graph-model";
@@ -6,11 +8,11 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 
 export interface TimeGraphRowElementMouseInteractions {
-    click?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
-    mouseover?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
-    mouseout?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
-    mousedown?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
-    mouseup?: (el: TimeGraphRowElement, ev: PIXI.interaction.InteractionEvent) => void
+    click?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
+    mouseover?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
+    mouseout?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
+    mousedown?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
+    mouseup?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
 }
 
 export interface TimeGraphChartProviders {
@@ -210,7 +212,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
-        rowComponent.displayObject.on('click', ((e: PIXI.interaction.InteractionEvent) => {
+        rowComponent.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
             this.selectRow(row);
         }).bind(this));
         this.addChild(rowComponent);
@@ -245,28 +247,28 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected addElementInteractions(el: TimeGraphRowElement) {
         el.displayObject.interactive = true;
-        el.displayObject.on('click', ((e: PIXI.interaction.InteractionEvent) => {
+        el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
             this.selectRowElement(el.model);
             if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.click) {
                 this.rowElementMouseInteractions.click(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mouseover', ((e: PIXI.interaction.InteractionEvent) => {
+        el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
             if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseover) {
                 this.rowElementMouseInteractions.mouseover(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mouseout', ((e: PIXI.interaction.InteractionEvent) => {
+        el.displayObject.on('mouseout', ((e: PIXI.InteractionEvent) => {
             if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseout) {
                 this.rowElementMouseInteractions.mouseout(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mousedown', ((e: PIXI.interaction.InteractionEvent) => {
+        el.displayObject.on('mousedown', ((e: PIXI.InteractionEvent) => {
             if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mousedown) {
                 this.rowElementMouseInteractions.mousedown(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mouseup', ((e: PIXI.interaction.InteractionEvent) => {
+        el.displayObject.on('mouseup', ((e: PIXI.InteractionEvent) => {
             if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseup) {
                 this.rowElementMouseInteractions.mouseup(el, e);
             }

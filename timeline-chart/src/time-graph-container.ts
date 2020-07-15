@@ -1,4 +1,5 @@
-import * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js"
+
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
 import { TimeGraphLayer } from "./layer/time-graph-layer";
@@ -45,11 +46,9 @@ export class TimeGraphContainer {
             backgroundColor: config.backgroundColor,
             transparent: config.transparent,
             antialias: true,
-            roundPixels: false,
             resolution: ratio,
-            autoResize: true
+            autoDensity: true
         });
-        this.application.stage.height = config.height;
 
         this.stage = this.application.stage;
         this._canvas = this.application.view;
@@ -59,13 +58,13 @@ export class TimeGraphContainer {
         this.layers = [];
 
         const background = new TimeGraphRectangle({
-            opacity: 0,
+            opacity: 1,
             position: {
                 x:0, y:0
             },
             height: this.canvas.height,
             width: this.canvas.width,
-            color: 0x550000
+            color: config.backgroundColor,
         });
         background.render();
         this.stage.addChild(background.displayObject);

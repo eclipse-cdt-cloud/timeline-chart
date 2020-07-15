@@ -1,5 +1,7 @@
+import * as PIXI from "pixi.js"
+
 export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
-export type TimeGraphInteractionHandler = (event: PIXI.interaction.InteractionEvent) => void;
+export type TimeGraphInteractionHandler = (event: PIXI.InteractionEvent) => void;
 
 export type TimeGraphComponentOptions = {}
 
@@ -117,7 +119,7 @@ export abstract class TimeGraphComponent {
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
         displayObject.interactive = true;
-        displayObject.on(event, ((e: PIXI.interaction.InteractionEvent) => {
+        displayObject.on(event, ((e: PIXI.InteractionEvent) => {
             if (handler) {
                 handler(e);
             }
