@@ -10,7 +10,6 @@
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.4",
     "@types/node": "^8.0.26",
-    "@types/pixi.js": "^4.8.2",
     "file-loader": "^2.0.0",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^5.2.2",
@@ -20,7 +19,7 @@
   },
   "dependencies": {
     "lodash.throttle": "^4.1.1",
-    "pixi.js": "^4.8.2",
+    "pixi.js": "^5.0.0",
     "timeline-chart": "^0.0.2"
   }
 }

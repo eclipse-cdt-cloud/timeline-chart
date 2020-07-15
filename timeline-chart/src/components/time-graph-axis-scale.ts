@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js"
+
 import { TimeGraphComponent, TimeGraphInteractionHandler, TimeGraphStyledRect, TimeGraphComponentOptions } from "./time-graph-component";
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";

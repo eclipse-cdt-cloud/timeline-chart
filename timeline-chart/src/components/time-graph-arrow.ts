@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js"
+
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphComponentOptions } from "./time-graph-component";
 
 export interface TimeGraphArrowCoordinates extends TimeGraphComponentOptions {
