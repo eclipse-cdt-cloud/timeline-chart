@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more informa        newPos = states[elIndex].range.start;tion, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "firefox",
+            "request": "launch",
+            "name": "Start in Firefox",
+            "reAttach": true,
+            "webRoot": "${workspaceRoot}",
+            "url": "http://localhost:8080",
+            "pathMappings": [
+                {
+                    "url": "webpack:///timeline-chart",
+                    "path": "${workspaceFolder}/timeline-chart"
+                }
+            ]
+        }
+    ]
+}
