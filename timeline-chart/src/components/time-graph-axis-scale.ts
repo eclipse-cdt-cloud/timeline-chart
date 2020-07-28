@@ -77,11 +77,15 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
     protected renderVerticalLines(lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
         if (this.unitController.viewRangeLength > 0) {
             const stepLength = this.getStepLength();
-            const steps = Math.trunc(this.unitController.absoluteRange / stepLength) + 1;
-            for (let i = 0; i < steps; i++) {
+            const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
+            const zoomFactor = this.stateController.zoomFactor;
+            const viewRangeStart = this.unitController.viewRange.start;
+            const iLo: number = Math.floor(viewRangeStart / stepLength);
+            const iHi: number = Math.ceil((canvasDisplayWidth / zoomFactor + viewRangeStart) / stepLength);
+            for (let i = iLo; i < iHi; i++) {
                 const absolutePosition = stepLength * i;
-                const xpos = (absolutePosition - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-                if (xpos >= 0 && xpos < this.stateController.canvasDisplayWidth) {
+                const xpos = (absolutePosition - viewRangeStart) * zoomFactor;
+                if (xpos >= 0 && xpos < canvasDisplayWidth) {
                     const position = {
                         x: xpos,
                         y: this._options.height
