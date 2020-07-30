@@ -1,6 +1,7 @@
 {
     "version": "0.0.1",
     "private": true,
+    "license": "MIT",
     "scripts": {
         "prepare": "yarn build",
         "build": "lerna run build",
@@ -9,6 +10,20 @@
         "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact --skip-git",
         "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary=next --npm-tag=next --skip-git --yes"
     },
+    "keywords": [
+        "gantt",
+        "timeline",
+        "tracing",
+        "trace"
+    ],
+    "repository": {
+       "type": "git",
+       "url": "https://github.com/theia-ide/timeline-chart"
+    },
+    "bugs": {
+        "url": "https://github.com/theia-ide/timeline-chart/issues"
+    },
+    "homepage": "https://github.com/theia-ide/timeline-chart",
     "devDependencies": {
         "@types/pixi.js": "^5.0.0",
         "lerna": "2.11.0",

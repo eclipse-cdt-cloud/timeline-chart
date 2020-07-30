@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Start in Chrome",
+            "webRoot": "${workspaceRoot}",
+            "url": "http://localhost:8080",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+            "timeline-chart:///./js/": "${workspaceRoot}/timeline-chart/lib/**/.js",
+            "timeline-chart:///js/": "${workspaceRoot}/timeline-chart/lib/**/.js"
+            }
+            },
+        {
             "type": "firefox",
             "request": "launch",
             "name": "Start in Firefox",
