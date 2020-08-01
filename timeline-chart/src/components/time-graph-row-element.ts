@@ -47,7 +47,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
 
         if (this._model.label) {
             const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2);
-            const labelTextObj = new PIXI.BitmapText(this._model.label, { fontName: fontName ? fontName : "LabelFont8White" });
+            const labelTextObj = new PIXI.BitmapText(this._model.label, { fontName: fontName ? fontName : TimeGraphRowElement.fontController.getDefaultFontName() });
             this.textWidth = labelTextObj.getLocalBounds().width;
         }
     }
