@@ -4,25 +4,46 @@ export class FontController {
     private fontFamily: string;
     private fontNameMap: Map<number, Map<string, string>>;
     private fontColorMap: Map<number, string>;
+    private defaultFontName: string = "LabelFont8White";
 
     constructor(fontFamily: string = "\"Lucida Console\", Monaco, monospace") {
         this.fontFamily = fontFamily;
         this.fontNameMap = new Map<number, Map<string, string>>();
         this.fontColorMap = new Map<number, string>();
 
-        PIXI.BitmapFont.from("LabelFont8Black", { fontFamily: this.fontFamily, fontSize: 8, fill: "black", fontWeight: 900 }, { chars: PIXI.BitmapFont.ASCII });
-        PIXI.BitmapFont.from("LabelFont8White", { fontFamily: this.fontFamily, fontSize: 8, fill: "white", fontWeight: 900 }, { chars: PIXI.BitmapFont.ASCII });
-        let defaultFontMap = new Map<string, string>();
-        defaultFontMap.set("black", "LabelFont8Black");
-        defaultFontMap.set("white", "LabelFont8White");
-        this.fontNameMap.set(8, defaultFontMap);
+        const defaultFontSize = 8;
+        this.updateFontNameMap(defaultFontSize);
     }
 
-    getFontName(color: number, height: number): string {
+    getDefaultFontName(): string {
+        return this.defaultFontName;
+    }
+
+    createFontName(fontColor: string, fontSize: number): string {
+        const fontName = "LabelFont" + fontSize.toString() + fontColor;
+        const fontStyle = {
+            fontFamily: this.fontFamily,
+            fontSize: fontSize,
+            fill: fontColor === "White" ? "white" : "black",
+            fontWeight: 900
+        };
+        PIXI.BitmapFont.from(fontName, fontStyle, { chars: PIXI.BitmapFont.ASCII });
+        return fontName;
+    }
+
+    updateFontNameMap(size: number) {
+        let color2FontMap = new Map<string, string>();
+        color2FontMap.set("black", this.createFontName("Black", size));
+        color2FontMap.set("white", this.createFontName("White", size));
+        this.fontNameMap.set(size, color2FontMap);
+    }
+
+    getFontName(color: number, size: number): string {
         let fontColor = this.fontColorMap.get(color);
         if (!fontColor) {
             let colorInHex = color.toString(16);
-            for (let i = 0; i < 6 - colorInHex.length; ++i) {
+            const numZeros = 6 - colorInHex.length;
+            for (let i = 0; i < numZeros; ++i) {
                 colorInHex = "0" + colorInHex;
             }
             const result = /([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(colorInHex);
@@ -40,20 +61,12 @@ export class FontController {
         }
 
         let fontName: string | undefined;
-        if (height) {
-            if (!this.fontNameMap.has(height)) {
-                const blackFont = "LabelFont" + height.toString() + "Black";
-                const whiteFont = "LabelFont" + height.toString() + "White";
-                PIXI.BitmapFont.from(blackFont, { fontFamily: this.fontFamily, fontSize: height, fill: "black", fontWeight: 900 }, { chars: PIXI.BitmapFont.ASCII });
-                PIXI.BitmapFont.from(whiteFont, { fontFamily: this.fontFamily, fontSize: height, fill: "white", fontWeight: 900 }, { chars: PIXI.BitmapFont.ASCII });
-
-                let color2FontMap = new Map<string, string>();
-                color2FontMap.set("black", blackFont);
-                color2FontMap.set("white", whiteFont);
-                this.fontNameMap.set(height, color2FontMap);
+        if (size) {
+            if (!this.fontNameMap.has(size)) {
+                this.updateFontNameMap(size);
             }
-            const height2FontMap = this.fontNameMap.get(height);
-            fontName = height2FontMap ? height2FontMap.get(fontColor) : undefined;
+            const size2FontMap = this.fontNameMap.get(size);
+            fontName = size2FontMap ? size2FontMap.get(fontColor) : undefined;
         }
         return fontName ? fontName : "";
     }
