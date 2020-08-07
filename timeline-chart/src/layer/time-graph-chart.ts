@@ -36,6 +36,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected providedResolution: number;
 
     protected fetching: boolean;
+    protected allowToUpdateChart: boolean;
 
     protected shiftKeyDown: boolean;
     protected ctrlKeyDown: boolean;
@@ -46,6 +47,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         super(id, rowController);
         this.providedRange = { start: 0, end: 0 };
         this.providedResolution = 1;
+        this.allowToUpdateChart = false;
     }
 
     protected afterAddToContainer() {
@@ -139,13 +141,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.updateScaleAndPosition();
     }
 
+    updateChart() {
+        this.allowToUpdateChart = true;
+        this.maybeFetchNewData();
+    }
+
     protected async maybeFetchNewData() {
         const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
         const viewRange = this.unitController.viewRange;
         if (viewRange && (
             viewRange.start < this.providedRange.start ||
             viewRange.end > this.providedRange.end ||
-            resolution < this.providedResolution
+            resolution < this.providedResolution ||
+            this.allowToUpdateChart
         )) {
             this.fetching = true;
             const rowData = await this.providers.dataProvider(viewRange, resolution);
