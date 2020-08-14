@@ -39,7 +39,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
         });
-        
+
         this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
             this.mouseIsDown = true;
             const mouseX = event.data.global.x;
@@ -89,47 +89,51 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     protected navigateOrSelectLeft() {
         const row = this.rowController.selectedRow;
-        const states = row.states;
-        const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
-            const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
-            return rowElementModel.range.start >= selStart;
-        });
-        let newPos = 0;
-        let elIndex = 0;
-        if (states.length == 0)
-            return false;
-        if (nextIndex > 0) {
-            elIndex = nextIndex - 1;
-        } else if (nextIndex === -1) {
-            elIndex = states.length - 1;
-        }
-        newPos = states[elIndex].range.start;
-        if (this.unitController.selectionRange && this.shiftKeyDown) {
-            this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
-        } else {
-            this.unitController.selectionRange = { start: newPos, end: newPos };
-        }
-        this.maybeCenterCursor();
-        this.chartLayer.selectRowElement(states[elIndex]);
-    }
-
-    protected navigateOrSelectRight() {
-        const row = this.rowController.selectedRow;
-        const states = row.states;
-        const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
-            const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
-            return rowElementModel.range.start > cursorPosition;
-        });
-        if (nextIndex < states.length) {
-            const newPos = states[nextIndex] ? states[nextIndex].range.start : this.unitController.absoluteRange;
+        if (row) {
+            const states = row.states;
+            const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
+                const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
+                return rowElementModel.range.start >= selStart;
+            });
+            let newPos = 0;
+            let elIndex = 0;
+            if (states.length == 0)
+                return false;
+            if (nextIndex > 0) {
+                elIndex = nextIndex - 1;
+            } else if (nextIndex === -1) {
+                elIndex = states.length - 1;
+            }
+            newPos = states[elIndex].range.start;
             if (this.unitController.selectionRange && this.shiftKeyDown) {
                 this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
             } else {
                 this.unitController.selectionRange = { start: newPos, end: newPos };
             }
+            this.maybeCenterCursor();
+            this.chartLayer.selectRowElement(states[elIndex]);
         }
-        this.maybeCenterCursor();
-        this.chartLayer.selectRowElement(states[nextIndex]);
+    }
+
+    protected navigateOrSelectRight() {
+        const row = this.rowController.selectedRow;
+        if (row) {
+            const states = row.states;
+            const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
+                const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
+                return rowElementModel.range.start > cursorPosition;
+            });
+            if (nextIndex < states.length) {
+                const newPos = states[nextIndex] ? states[nextIndex].range.start : this.unitController.absoluteRange;
+                if (this.unitController.selectionRange && this.shiftKeyDown) {
+                    this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
+                } else {
+                    this.unitController.selectionRange = { start: newPos, end: newPos };
+                }
+            }
+            this.maybeCenterCursor();
+            this.chartLayer.selectRowElement(states[nextIndex]);
+        }
     }
 
     protected navigateDown(){

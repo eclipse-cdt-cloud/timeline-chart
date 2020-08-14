@@ -342,20 +342,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.updateElementStyle(this.selectedElementModel);
         }
         if (model) {
-            this.selectedElementModel = model;
-            model.selected = true;
-            this.updateElementStyle(this.selectedElementModel);
             const el = this.getElementById(model.id);
             if (el) {
                 const row = el.row;
                 if (row) {
-                    const newEl = this.createNewRowElement(model, row);
-                    if (newEl) {
-                        this.removeChild(el);
-                        this.addElementInteractions(newEl);
-                        this.addChild(newEl);
-                        this.selectRow(newEl.row.model);
-                    }
+                    this.selectedElementModel = el.model;
+                    el.model.selected = true;
+                    this.updateElementStyle(this.selectedElementModel);
+                    this.selectRow(row.model);
                 }
             }
         }
