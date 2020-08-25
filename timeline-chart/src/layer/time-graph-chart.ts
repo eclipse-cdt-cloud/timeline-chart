@@ -326,6 +326,20 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
         return element as TimeGraphRowElement;
     }
+    
+    getRowVerticalOffset(row: TimelineChart.TimeGraphRowModel): number {
+        const rowComponent: TimeGraphRow | undefined = this.rowComponents.get(row);
+        return (rowComponent ? rowComponent.position.y : 0)
+    }
+
+    getRowHeight(row: TimelineChart.TimeGraphRowModel): number {
+        const rowComponent: TimeGraphRow | undefined = this.rowComponents.get(row);
+        return (rowComponent ? rowComponent.height : 0);
+    }
+
+    getPosition(): PIXI.ObservablePoint {
+        return this.layer.position;
+    }
 
     selectRow(row: TimelineChart.TimeGraphRowModel) {
         if (this.rowController.selectedRow) {
