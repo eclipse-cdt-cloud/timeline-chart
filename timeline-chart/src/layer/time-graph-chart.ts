@@ -21,6 +21,13 @@ export interface TimeGraphChartProviders {
     rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
 
+export const keyBoardNavs: Record<string, Array<string>> = {
+    "zoomin": ['w', 'i'],
+    "zoomout": ['s', 'k'],
+    "panleft": ['a', 'j'],
+    "panright": ['d', 'l']
+}
+
 export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 export class TimeGraphChart extends TimeGraphChartLayer {
@@ -50,38 +57,103 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected afterAddToContainer() {
         this.shiftKeyDown = false;
         this.ctrlKeyDown = false;
+
+        let mousePositionX = 1;
+        let mousePositionY = 1;
+        const moveLeft = -1;
+        const moveRight = 1;
+        const horizontalDelta = 3;
+        let triggerKeyEvent = false;
+
+        const moveTimeGraph = (direction: number) => {
+            const moveFactor = horizontalDelta / this.stateController.zoomFactor;
+            let start = this.unitController.viewRange.start + (moveFactor * direction);
+            let end = this.unitController.viewRange.end + (moveFactor * direction);
+            if (start < 0) {
+                end = end - start;
+                start = 0;
+            }
+            if (end > this.unitController.absoluteRange) {
+                start = start - end + this.unitController.absoluteRange;
+                end = this.unitController.absoluteRange;
+            }
+            this.unitController.viewRange = {
+                start,
+                end
+            }
+        }
+        const adjustZoom = (zoomPosition: number, deltaLength: number) => {
+            let newViewRangeLength = this.unitController.viewRangeLength;
+            let xOffset = 0;
+
+            newViewRangeLength += deltaLength;
+            xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
+            let start = this.unitController.viewRange.start - xOffset;
+            if (start < 0) {
+                start = 0;
+            }
+            let end = start + newViewRangeLength;
+            if (end > this.unitController.absoluteRange) {
+                end = this.unitController.absoluteRange;
+            }
+            this.unitController.viewRange = {
+                start,
+                end
+            }
+        };
+
+        document.addEventListener('mousemove', (event: MouseEvent) => {
+            mousePositionX = event.offsetX;
+            mousePositionY = event.offsetY;
+        })
+
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
             this.ctrlKeyDown = event.ctrlKey;
+            let keyPressed = event.key;
+
+            if (triggerKeyEvent) {
+                if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
+                    const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
+                    const deltaLength = -(mousePositionY / this.stateController.zoomFactor);
+                    adjustZoom(zoomPosition, deltaLength);
+
+                } else if (keyBoardNavs['zoomout'].indexOf(keyPressed) >= 0) {
+                    const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
+                    const deltaLength = (mousePositionY / this.stateController.zoomFactor);
+                    adjustZoom(zoomPosition, deltaLength);
+
+                } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
+                    moveTimeGraph(moveLeft);
+
+                } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
+                    moveTimeGraph(moveRight);
+                }
+
+                event.preventDefault();
+            }
+
         });
+
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
             this.ctrlKeyDown = event.ctrlKey;
         });
+
+        this.stage.addListener('mouseover', (event: MouseEvent) => {
+            triggerKeyEvent = true;
+        });
+
+        this.stage.addListener('mouseout', (event: MouseEvent) => {
+            triggerKeyEvent = false;
+        });
+
         const mw = (ev: WheelEvent) => {
             if (this.ctrlKeyDown) {
-                let newViewRangeLength = this.unitController.viewRangeLength;
-                let xOffset = 0;
-                let moveX = false;
                 const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
                 const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
-                newViewRangeLength += deltaLength;
-                xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
-                let start = this.unitController.viewRange.start - xOffset;
-                if (start < 0) {
-                    start = 0;
-                }
-                let end = start + newViewRangeLength;
-                if (end > this.unitController.absoluteRange) {
-                    end = this.unitController.absoluteRange;
-                    if (moveX) {
-                        start = end - newViewRangeLength;
-                    }
-                }
-                this.unitController.viewRange = {
-                    start,
-                    end
-                }
+                adjustZoom(zoomPosition, deltaLength);
+
             } else if (this.shiftKeyDown) {
                 let newViewRangeLength = this.unitController.viewRangeLength;
                 let xOffset = 0;
