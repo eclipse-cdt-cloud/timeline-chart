@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js"
+import * as keyboardKey from "keyboard-key"
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";
 import { TimelineChart } from "../time-graph-model";
@@ -26,13 +27,13 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.stage.interactive = true;
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
-            if (event.keyCode === 37) {
+            if (event.keyCode === keyboardKey.ArrowLeft) {
                 this.navigateOrSelectLeft();
-            } else if (event.keyCode === 39) {
+            } else if (event.keyCode === keyboardKey.ArrowRight) {
                 this.navigateOrSelectRight();
-            } else if(event.keyCode === 38){
+            } else if (event.keyCode === keyboardKey.ArrowUp) {
                 this.navigateUp();
-            } else if(event.keyCode === 40){
+            } else if (event.keyCode === keyboardKey.ArrowDown) {
                 this.navigateDown();
             }
         });
@@ -136,16 +137,16 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         }
     }
 
-    protected navigateDown(){
+    protected navigateDown() {
         const rows = this.chartLayer.getRowModels();
         let selectedRow = this.rowController.selectedRow;
         const idx = rows.findIndex(row => row === selectedRow);
-        if(idx < rows.length){
+        if (idx < rows.length) {
             this.chartLayer.selectRow(rows[idx + 1]);
         }
         selectedRow = this.rowController.selectedRow;
         const state = selectedRow.states.find(state => {
-            if(this.unitController.selectionRange){
+            if (this.unitController.selectionRange) {
                 return state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
             }
             return false;
@@ -153,16 +154,16 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         state && this.chartLayer.selectRowElement(state);
     }
 
-    protected navigateUp(){
+    protected navigateUp() {
         const rows = this.chartLayer.getRowModels();
         let selectedRow = this.rowController.selectedRow;
         const idx = rows.findIndex(row => row === selectedRow);
-        if(idx > 0){
+        if (idx > 0) {
             this.chartLayer.selectRow(rows[idx - 1]);
         }
         selectedRow = this.rowController.selectedRow;
         const state = selectedRow.states.find(state => {
-            if(this.unitController.selectionRange){
+            if (this.unitController.selectionRange) {
                 return state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
             }
             return false;
@@ -200,7 +201,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             if (!this.firstCursor) {
                 this.firstCursor = new TimeGraphCursor(firstCursorOptions);
                 this.addChild(this.firstCursor);
-            }else{
+            } else {
                 this.firstCursor.update(firstCursorOptions);
             }
             if (secondCursorPosition !== firstCursorPosition) {
@@ -215,10 +216,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 if (!this.secondCursor) {
                     this.secondCursor = new TimeGraphCursor(secondCursorOptions);
                     this.addChild(this.secondCursor);
-                }else{
+                } else {
                     this.secondCursor.update(secondCursorOptions);
                 }
-            } else if(!!this.secondCursor){
+            } else if (!!this.secondCursor) {
                 this.removeChild(this.secondCursor);
                 delete this.secondCursor;
             }
