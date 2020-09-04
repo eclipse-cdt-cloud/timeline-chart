@@ -1,5 +1,5 @@
 {
-    "version": "0.0.2",
+    "version": "0.1.0",
     "private": true,
     "license": "MIT",
     "scripts": {
@@ -18,8 +18,8 @@
         "trace"
     ],
     "repository": {
-       "type": "git",
-       "url": "https://github.com/theia-ide/timeline-chart"
+        "type": "git",
+        "url": "https://github.com/theia-ide/timeline-chart"
     },
     "bugs": {
         "url": "https://github.com/theia-ide/timeline-chart/issues"
