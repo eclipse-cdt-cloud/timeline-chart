@@ -7,6 +7,7 @@
         "build": "lerna run build",
         "watch": "lerna run watch",
         "start": "lerna run start",
+        "test": "echo 'Should run tests'",
         "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact --skip-git",
         "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary=next --npm-tag=next --skip-git --yes"
     },
