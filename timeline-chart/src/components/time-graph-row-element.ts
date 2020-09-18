@@ -34,7 +34,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             x: this.range.start,
             y: this._row.position.y + ((this.row.height - this.height) / 2)
         };
-        // min width of a state should never be less than 1(for visibility)
+        // min width of a state should never be less than 1 (for visibility)
         const width = Math.max(1, this.range.end - this.range.start);
         this._options = {
             color: _style.color,

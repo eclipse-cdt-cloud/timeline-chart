@@ -263,7 +263,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                                 x: this.getPixels(start - this.unitController.viewRange.start),
                                 y: el.position.y
                             },
-                            // min width of a state should never be less than (for visibility)
+                            // min width of a state should never be less than 1 (for visibility)
                             width: Math.max(1, this.getPixels(end - start))
                         }
                         el.update(opts);
