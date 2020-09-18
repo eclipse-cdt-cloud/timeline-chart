@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "lodash.throttle": "^4.1.1",
-    "pixi.js": "^5.0.0",
     "timeline-chart": "^0.1.0"
   }
 }

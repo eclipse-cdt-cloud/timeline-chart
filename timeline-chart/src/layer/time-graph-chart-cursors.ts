@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import * as PIXI from "pixi.js-legacy"
 import * as keyboardKey from "keyboard-key"
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";

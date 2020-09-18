@@ -2,7 +2,7 @@ import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphElementPosition } fro
 import { TimeGraphRow } from "./time-graph-row";
 import { TimelineChart } from "../time-graph-model";
 import { FontController } from "../time-graph-font-controller"
-import * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js-legacy";
 
 export interface TimeGraphRowElementStyle {
     color?: number

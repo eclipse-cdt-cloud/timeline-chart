@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import * as PIXI from "pixi.js-legacy"
 
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
