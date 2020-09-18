@@ -9,9 +9,10 @@
   },
   "dependencies": {
     "@types/lodash.throttle": "^4.1.4",
+    "glob": "^7.1.6",
     "keyboard-key": "1.1.0",
     "lodash.throttle": "^4.1.1",
-    "pixi.js": "^5.0.0",
+    "pixi.js-legacy": "^5.3.3",
     "rimraf": "latest"
   }
 }

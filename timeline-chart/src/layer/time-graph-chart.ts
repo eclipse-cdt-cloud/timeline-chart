@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import * as PIXI from "pixi.js-legacy"
 
 import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
