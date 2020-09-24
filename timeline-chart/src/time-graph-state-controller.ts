@@ -24,8 +24,8 @@ export class TimeGraphStateController {
 
     constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
         this.ratio = window.devicePixelRatio;
-        this._canvasDisplayWidth = canvas.width / this.ratio;
-        this._canvasDisplayHeight = canvas.height / this.ratio;
+        this._canvasDisplayWidth = this.canvas.width / this.ratio;
+        this._canvasDisplayHeight = this.canvas.height / this.ratio;
         this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
         this.oldPositionOffset = { x: 0, y: 0 };
@@ -70,6 +70,10 @@ export class TimeGraphStateController {
     */
     get canvasDisplayHeight() {
         return this._canvasDisplayHeight;
+    }
+
+    updateDisplayHeight() {
+        this._canvasDisplayHeight = this.canvas.height / this.ratio;
     }
 
     get initialZoomFactor(): number {

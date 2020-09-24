@@ -75,9 +75,13 @@ export class TimeGraphContainer {
     }
 
     // if canvas size has changed displayWidth need to be updated for zoomfactor
-    reInitCanvasSize(newWidth: number){
-        this.application.renderer.resize(newWidth, this.config.height);
+    reInitCanvasSize(newWidth: number, newHeight?: number) {
+        if (newHeight === undefined) {
+            newHeight = this.config.height;
+        }
+        this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
+        this.stateController.updateDisplayHeight();
         this.layers.forEach(l => l.update());
     }
 

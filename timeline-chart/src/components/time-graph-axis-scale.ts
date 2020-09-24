@@ -88,7 +88,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                 if (xpos >= 0 && xpos < canvasDisplayWidth) {
                     const position = {
                         x: xpos,
-                        y: this._options.height
+                        y: this._options.position.y
                     };
                     let label;
                     if (this.unitController.numberTranslator) {
@@ -106,7 +106,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                     }
                     this.vline({
                         position,
-                        height: lineStyle(label).lineHeight * (-1),
+                        height: lineStyle(label).lineHeight,
                         color: lineColor
                     });
                 }
