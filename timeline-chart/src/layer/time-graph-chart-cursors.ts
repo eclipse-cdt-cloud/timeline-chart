@@ -25,8 +25,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.mouseIsDown = false;
         this.shiftKeyDown = false
         this.stage.interactive = true;
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
+
+        const keyDownHandler = (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
+            // TODO: keyCode is deprecated. We should change these.
             if (event.keyCode === keyboardKey.ArrowLeft) {
                 this.navigateOrSelectLeft();
             } else if (event.keyCode === keyboardKey.ArrowRight) {
@@ -36,10 +38,14 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             } else if (event.keyCode === keyboardKey.ArrowDown) {
                 this.navigateDown();
             }
-        });
-        document.addEventListener('keyup', (event: KeyboardEvent) => {
+        };
+
+        const keyUpHandler = (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
-        });
+        };
+
+        this.onCanvasEvent('keydown', keyDownHandler);
+        this.onCanvasEvent('keyup', keyUpHandler);
 
         this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
             this.mouseIsDown = true;

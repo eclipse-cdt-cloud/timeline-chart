@@ -66,12 +66,15 @@ const chartHTMLContainer = document.createElement('div');
 chartHTMLContainer.id = 'main_chart';
 container.appendChild(chartHTMLContainer);
 
+const chartCanvas = document.createElement('canvas');
+chartCanvas.tabIndex = 1;
+
 const timeGraphChartContainer = new TimeGraphContainer({
     id: timeGraph.id + '_chart',
     height: styleConfig.mainHeight,
     width: styleConfig.mainWidth,
     backgroundColor: styleConfig.chartBackgroundColor
-}, unitController);
+}, unitController, chartCanvas);
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
