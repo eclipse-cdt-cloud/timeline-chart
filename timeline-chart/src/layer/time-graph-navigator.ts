@@ -79,8 +79,9 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent {
     }
 
     render(): void {
+        const MIN_NAVIGATOR_WIDTH = 20;
         const position = { x: this.unitController.viewRange.start * this.stateController.absoluteResolution, y: 0 };
-        const width = this.unitController.viewRangeLength * this.stateController.absoluteResolution;
+        const width = Math.max(MIN_NAVIGATOR_WIDTH, this.unitController.viewRangeLength * this.stateController.absoluteResolution);
         this.rect({
             height: 20,
             position,
