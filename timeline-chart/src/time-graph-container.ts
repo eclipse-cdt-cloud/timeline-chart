@@ -32,6 +32,8 @@ export class TimeGraphContainer {
         } else {
             canvas = extCanvas;
         }
+
+        const noWebgl2 = !PIXI.utils.isWebGLSupported() || !canvas.getContext('webgl2');
         canvas.style.width = config.width + 'px';
         canvas.style.height = config.height + 'px';
         canvas.width = config.width;
@@ -47,7 +49,8 @@ export class TimeGraphContainer {
             transparent: config.transparent,
             antialias: true,
             resolution: ratio,
-            autoDensity: true
+            autoDensity: true,
+            forceCanvas: noWebgl2
         });
 
         this.stage = this.application.stage;
@@ -60,7 +63,7 @@ export class TimeGraphContainer {
         const background = new TimeGraphRectangle({
             opacity: 1,
             position: {
-                x:0, y:0
+                x: 0, y: 0
             },
             height: this.canvas.height,
             width: this.canvas.width,
