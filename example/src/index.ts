@@ -9,7 +9,7 @@ import { TimeGraphChartSelectionRange } from "timeline-chart/lib/layer/time-grap
 import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
 // import { timeGraph } from "timeline-chart/lib/test-data";
 import { TimelineChart } from "timeline-chart/lib/time-graph-model";
-import { TimeGraphRowElement, TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
+import { TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
 import { TestDataProvider } from "./test-data-provider";
 import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
@@ -86,15 +86,6 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
         const newRange: TimelineChart.TimeGraphRange = { start, end };
         const newResolution: number = resolution * 0.1;
         timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
-        if (selectedElement) {
-            for (const row of timeGraph.rows) {
-                const selEl = row.states.find(el => !!selectedElement && el.id === selectedElement.id);
-                if (selEl) {
-                    selEl.selected = true;
-                    break;
-                }
-            }
-        }
         return {
             rows: timeGraph.rows,
             range: newRange,
@@ -149,17 +140,6 @@ timeGraphChart.registerRowElementMouseInteractions({
         }
     }
 });
-let selectedElement: TimeGraphRowElement | undefined;
-timeGraphChart.onSelectedRowElementChanged((model) => {
-    if (model) {
-        const el = timeGraphChart.getElementById(model.id);
-        if (el) {
-            selectedElement = el;
-        }
-    } else {
-        selectedElement = undefined;
-    }
-})
 
 const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
 timeGraphChartContainer.addLayer(timeGraphChartArrows);
