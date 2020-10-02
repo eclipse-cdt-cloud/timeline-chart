@@ -286,18 +286,22 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }).bind(this));
         this.addChild(rowComponent);
         this.rowComponents.set(row, rowComponent);
-        let selectedElement: TimeGraphRowElement | undefined;
+        if (this.rowController.selectedRow && this.rowController.selectedRow.id === row.id) {
+            this.selectRow(row);
+        }
         row.states.forEach((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
             const el = this.createNewRowElement(rowElementModel, rowComponent);
             if (el) {
-                el.model.selected && (this.selectedElementModel = el.model) && (selectedElement = el);
                 this.addElementInteractions(el);
-                !el.model.selected && this.addChild(el);
+                this.addChild(el);
+                if (this.selectedElementModel && this.rowController.selectedRow
+                    && this.rowController.selectedRow.id === row.id
+                    && this.selectedElementModel.range.start === el.model.range.start
+                    && this.selectedElementModel.range.end === el.model.range.end) {
+                    this.selectRowElement(el.model);
+                }
             }
         });
-        if (selectedElement) {
-            this.addChild(selectedElement);
-        }
     }
 
     protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphRowElementModel, rowComponent: TimeGraphRow): TimeGraphRowElement | undefined {
