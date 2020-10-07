@@ -87,59 +87,49 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     }
 
     protected maybeCenterCursor() {
-        const selection = this.unitController.selectionRange;
-        const view = this.unitController.viewRange;
-        if (selection && (selection.start < view.start || selection.start > view.end)) {
-            this.centerCursor();
+        if (this.unitController.selectionRange) {
+            const cursorPosition = this.unitController.selectionRange.end;
+            if (cursorPosition < this.unitController.viewRange.start || cursorPosition > this.unitController.viewRange.end) {
+                this.centerCursor();
+            }
         }
     };
 
     protected navigateOrSelectLeft() {
         const row = this.rowController.selectedRow;
-        if (row) {
-            const states = row.states;
-            const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
-                const selStart = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
-                return rowElementModel.range.start >= selStart;
-            });
-            let newPos = 0;
-            let elIndex = 0;
-            if (states.length == 0)
-                return false;
-            if (nextIndex > 0) {
-                elIndex = nextIndex - 1;
-            } else if (nextIndex === -1) {
-                elIndex = states.length - 1;
-            }
-            newPos = states[elIndex].range.start;
-            if (this.unitController.selectionRange && this.shiftKeyDown) {
-                this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
+        if (row && this.unitController.selectionRange) {
+            const cursorPosition = this.unitController.selectionRange.end;
+            const prevState = row.states.slice().reverse().find((rowElementModel: TimelineChart.TimeGraphRowElementModel) => cursorPosition > rowElementModel.range.end ||
+                (cursorPosition > rowElementModel.range.start && cursorPosition <= rowElementModel.range.end));
+
+            if (prevState) {
+                const newPos = cursorPosition > prevState.range.end ? prevState.range.end : prevState.range.start;
+                this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : newPos, end: newPos };
+                this.chartLayer.selectRowElement(prevState);
             } else {
-                this.unitController.selectionRange = { start: newPos, end: newPos };
+                this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : row.prevPossibleState, end: row.prevPossibleState };
+                this.chartLayer.setNavigationFlag(true);
             }
             this.maybeCenterCursor();
-            this.chartLayer.selectRowElement(states[elIndex]);
         }
     }
 
     protected navigateOrSelectRight() {
         const row = this.rowController.selectedRow;
-        if (row) {
-            const states = row.states;
-            const nextIndex = states.findIndex((rowElementModel: TimelineChart.TimeGraphRowElementModel) => {
-                const cursorPosition = this.unitController.selectionRange ? (this.shiftKeyDown ? this.unitController.selectionRange.end : this.unitController.selectionRange.start) : 0;
-                return rowElementModel.range.start > cursorPosition;
-            });
-            if (nextIndex < states.length) {
-                const newPos = states[nextIndex] ? states[nextIndex].range.start : this.unitController.absoluteRange;
-                if (this.unitController.selectionRange && this.shiftKeyDown) {
-                    this.unitController.selectionRange = { start: this.unitController.selectionRange.start, end: newPos };
-                } else {
-                    this.unitController.selectionRange = { start: newPos, end: newPos };
-                }
+        if (row && this.unitController.selectionRange) {
+            const cursorPosition = this.unitController.selectionRange.end;
+            const nextState = row.states.find((rowElementModel: TimelineChart.TimeGraphRowElementModel) => cursorPosition < rowElementModel.range.start ||
+                (cursorPosition >= rowElementModel.range.start && cursorPosition < rowElementModel.range.end));
+
+            if (nextState) {
+                const newPos = cursorPosition < nextState.range.start ? nextState.range.start : nextState.range.end;
+                this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : newPos, end: newPos };
+                this.chartLayer.selectRowElement(nextState);
+            } else {
+                this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : row.nextPossibleState, end: row.nextPossibleState };
+                this.chartLayer.setNavigationFlag(true);
             }
             this.maybeCenterCursor();
-            this.chartLayer.selectRowElement(states[nextIndex]);
         }
     }
 
@@ -179,11 +169,22 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     centerCursor() {
         if (this.unitController.selectionRange) {
-            const cursorPosition = this.unitController.selectionRange.start;
+            const cursorPosition = this.unitController.selectionRange.end;
             const halfViewRangeLength = this.unitController.viewRangeLength / 2;
+            let startViewRange = cursorPosition - halfViewRangeLength;
+            let endViewRange = cursorPosition + halfViewRangeLength;
+
+            if (startViewRange < 0) {
+                endViewRange -= startViewRange;
+                startViewRange = 0;
+            } else if (endViewRange > this.unitController.absoluteRange) {
+                startViewRange -= (endViewRange - this.unitController.absoluteRange);
+                endViewRange = this.unitController.absoluteRange;
+            }
+
             this.unitController.viewRange = {
-                start: cursorPosition - halfViewRangeLength,
-                end: cursorPosition + halfViewRangeLength
+                start: startViewRange,
+                end: endViewRange
             }
         }
     }

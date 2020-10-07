@@ -19,6 +19,8 @@ export namespace TimelineChart {
         states: TimeGraphRowElementModel[]
         selected?: boolean
         readonly data?: { [key: string]: any }
+        prevPossibleState: number
+        nextPossibleState: number
     }
 
     export interface TimeGraphRowElementModel {
