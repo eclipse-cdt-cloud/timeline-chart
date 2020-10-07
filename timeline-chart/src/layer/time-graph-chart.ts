@@ -44,12 +44,15 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected fetching: boolean;
 
+    protected isNavigating: boolean;
+
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
         protected rowController: TimeGraphRowController) {
         super(id, rowController);
         this.providedRange = { start: 0, end: 0 };
         this.providedResolution = 1;
+        this.isNavigating = false;
     }
 
     protected afterAddToContainer() {
@@ -223,6 +226,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.setRowModel(rowData.rows);
                 this.removeChildren();
                 this.addRows(this.rows, this.rowController.rowHeight);
+                if (this.isNavigating) {
+                    this.selectStateInNavigation();
+                }
             }
             this.fetching = false;
         }
@@ -427,5 +433,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         }
         this.handleSelectedRowElementChange();
+    }
+
+    setNavigationFlag(flag: boolean) {
+        this.isNavigating = flag;
+    }
+
+    protected selectStateInNavigation() {
+        const row = this.rowController.selectedRow;
+        if (row && this.unitController.selectionRange) {
+            const cursorPosition = this.unitController.selectionRange.end;
+            const rowElement = row.states.find((rowElementModel: TimelineChart.TimeGraphRowElementModel) => rowElementModel.range.start === cursorPosition || rowElementModel.range.end === cursorPosition);
+            this.selectRowElement(rowElement);
+        }
+        this.setNavigationFlag(false);
     }
 }

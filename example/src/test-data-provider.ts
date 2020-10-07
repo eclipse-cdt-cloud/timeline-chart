@@ -167,6 +167,8 @@ export class TestDataProvider {
             const states: TimelineChart.TimeGraphRowElementModel[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
             let hasStates = false;
+            let prevPossibleState = 0;
+            let nextPossibleState = this.totalLength;
             if (row) {
                 hasStates = !!row.states.length;
                 row.states.forEach((state: any, stateIndex: number) => {
@@ -182,6 +184,12 @@ export class TestDataProvider {
                             });
                         }
                     }
+                    if (stateIndex === 0) {
+                        prevPossibleState = state.startTime - entry.startTime;
+                    }
+                    if (stateIndex === row.states.length - 1) {
+                        nextPossibleState = state.startTime + state.duration - entry.startTime;
+                    }
                 });
             }
             rows.push({
@@ -195,9 +203,11 @@ export class TestDataProvider {
                 data: {
                     type: entry.type,
                     hasStates
-                }
+                },
+                prevPossibleState,
+                nextPossibleState
             });
-        })
+        });
         let arrows: TimelineChart.TimeGraphArrow[] = [];
         timeGraphArrows.forEach(arrow => {
             arrows.push({
@@ -208,13 +218,13 @@ export class TestDataProvider {
                     end: arrow.range.end - this.absoluteStart
                 }
             });
-        })
+        });
 
         return {
             id: "",
             arrows,
             rows,
             totalLength: this.totalLength
-        }
+        };
     }
 }
