@@ -43,8 +43,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected providedResolution: number;
 
     protected fetching: boolean;
-    protected shiftKeyDown: boolean;
-    protected ctrlKeyDown: boolean;
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
@@ -55,9 +53,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected afterAddToContainer() {
-        this.shiftKeyDown = false;
-        this.ctrlKeyDown = false;
-
         let mousePositionX = 1;
         let mousePositionY = 1;
         const moveLeft = -1;
@@ -108,8 +103,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         };
 
         const keyDownHandler = (event: KeyboardEvent) => {
-            this.shiftKeyDown = event.shiftKey;
-            this.ctrlKeyDown = event.ctrlKey;
             let keyPressed = event.key;
 
             if (triggerKeyEvent) {
@@ -135,11 +128,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         };
 
-        const keyUpHandler = (event: KeyboardEvent) => {
-            this.shiftKeyDown = event.shiftKey;
-            this.ctrlKeyDown = event.ctrlKey;
-        };
-
         this.stage.addListener('mouseover', (event: MouseEvent) => {
             triggerKeyEvent = true;
         });
@@ -149,12 +137,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
 
         const mouseWheelHandler = (ev: WheelEvent) => {
-            if (this.ctrlKeyDown) {
+            if (ev.ctrlKey) {
                 const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
                 const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
                 adjustZoom(zoomPosition, deltaLength);
 
-            } else if (this.shiftKeyDown) {
+            } else if (ev.shiftKey) {
                 let newViewRangeLength = this.unitController.viewRangeLength;
                 let xOffset = 0;
                 let moveX = false;
@@ -191,7 +179,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.onCanvasEvent('mousemove', mouseMoveHandler);
         this.onCanvasEvent('keydown', keyDownHandler);
-        this.onCanvasEvent('keyup', keyUpHandler);
         this.onCanvasEvent('mousewheel', mouseWheelHandler);
         this.onCanvasEvent('wheel', mouseWheelHandler);
 
