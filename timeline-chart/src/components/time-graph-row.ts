@@ -19,7 +19,8 @@ export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentC
         protected _options: TimeGraphStyledRect,
         protected _rowIndex: number,
         public readonly model: TimelineChart.TimeGraphRowModel,
-        protected _style: TimeGraphRowStyle = { lineOpacity: 0.5, lineThickness: 1, backgroundOpacity: 0 }) {
+        // PIXI 5 doesn't handle events on elements with opacity 0. As a workaround set it to 0.001
+        protected _style: TimeGraphRowStyle = { lineOpacity: 0.5, lineThickness: 1, backgroundOpacity: 0.001 }) {
         super(id);
     }
 
