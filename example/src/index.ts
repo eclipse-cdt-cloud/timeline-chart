@@ -136,7 +136,8 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
     rowStyleProvider: (row: TimelineChart.TimeGraphRowModel) => {
         return {
             backgroundColor: 0xe0ddcf,
-            backgroundOpacity: row.selected ? 0.6 : 0,
+            // PIXI 5 doesn't handle events on elements with opacity 0. As a workaround set it to 0.001
+            backgroundOpacity: row.selected ? 0.6 : 0.001,
             lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
             lineThickness: row.data && row.data.hasStates ? 1 : 3
         }
