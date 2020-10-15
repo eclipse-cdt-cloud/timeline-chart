@@ -6,7 +6,7 @@ export class FontController {
     private fontColorMap: Map<number, string>;
     private defaultFontName: string = "LabelFont8White";
 
-    constructor(fontFamily: string = "\"Lucida Console\", Monaco, monospace") {
+    constructor(fontFamily: string = "Verdana") {
         this.fontFamily = fontFamily;
         this.fontNameMap = new Map<number, Map<string, string>>();
         this.fontColorMap = new Map<number, string>();
@@ -62,6 +62,8 @@ export class FontController {
 
         let fontName: string | undefined;
         if (size) {
+            const MIN_FONT_SIZE = 6;
+            size = Math.max(size, MIN_FONT_SIZE);
             if (!this.fontNameMap.has(size)) {
                 this.updateFontNameMap(size);
             }
