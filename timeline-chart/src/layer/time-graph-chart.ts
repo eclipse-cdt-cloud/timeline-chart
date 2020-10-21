@@ -214,7 +214,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                             x: this.getPixels(row.range.start - this.unitController.viewRange.start),
                             y: comp.position.y
                         },
-                        width: this.getPixels(row.range.end - row.range.start)
+                        width: this.getPixels(row.range.end) - this.getPixels(row.range.start)
                     }
                     comp.update(opts);
                 }
@@ -230,7 +230,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                                 y: el.position.y
                             },
                             // min width of a state should never be less than 1 (for visibility)
-                            width: Math.max(1, this.getPixels(end - start))
+                            width: Math.max(1, this.getPixels(end) - this.getPixels(start)),
+                            displayWidth: this.getPixels(Math.min(this.unitController.viewRange.end, end)) - this.getPixels(Math.max(this.unitController.viewRange.start, start))
                         }
                         el.update(opts);
                     }
@@ -245,14 +246,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected addRow(row: TimelineChart.TimeGraphRowModel, height: number, rowIndex: number) {
         const rowId = 'row_' + rowIndex;
-        const length = row.range.end - row.range.start;
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
                 x: this.getPixels(row.range.start),
                 y: (height * rowIndex)
             },
-            width: this.getPixels(length),
+            width: this.getPixels(row.range.end) - this.getPixels(row.range.start),
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
@@ -287,8 +287,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             start,
             end
         };
+        const displayStart = this.getPixels(Math.max(rowElementModel.range.start, this.unitController.viewRange.start));
+        const displayEnd = this.getPixels(Math.min(rowElementModel.range.end, this.unitController.viewRange.end));
+        const displayWidth = displayEnd - displayStart;
         const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
-        el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle);
+        el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle, displayWidth);
         this.rowElementComponents.set(rowElementModel, el);
         return el;
     }
