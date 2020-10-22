@@ -58,42 +58,36 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected afterAddToContainer() {
         let mousePositionX = 1;
         let mousePositionY = 1;
-        const moveLeft = -1;
-        const moveRight = 1;
         const horizontalDelta = 3;
         let triggerKeyEvent = false;
 
-        const moveTimeGraph = (direction: number) => {
-            const moveFactor = horizontalDelta / this.stateController.zoomFactor;
-            let start = this.unitController.viewRange.start + (moveFactor * direction);
-            let end = this.unitController.viewRange.end + (moveFactor * direction);
-            if (start < 0) {
-                end = end - start;
-                start = 0;
-            }
+        const moveHorizontally = (magnitude: number) => {
+            const xOffset = -(magnitude / this.stateController.zoomFactor);
+            let start = Math.max(0, this.unitController.viewRange.start - xOffset);
+            let end = start + this.unitController.viewRangeLength;
             if (end > this.unitController.absoluteRange) {
-                start = start - end + this.unitController.absoluteRange;
                 end = this.unitController.absoluteRange;
+                start = end - this.unitController.viewRangeLength;
             }
             this.unitController.viewRange = {
                 start,
                 end
             }
         }
-        const adjustZoom = (zoomPosition: number, deltaLength: number) => {
-            let newViewRangeLength = this.unitController.viewRangeLength;
-            let xOffset = 0;
 
-            newViewRangeLength += deltaLength;
-            xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
-            let start = this.unitController.viewRange.start - xOffset;
-            if (start < 0) {
-                start = 0;
+        const moveVertically = (magnitude: number) => {
+            let verticalOffset = Math.max(0, this.rowController.verticalOffset + magnitude);
+            if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
+                verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
             }
-            let end = start + newViewRangeLength;
-            if (end > this.unitController.absoluteRange) {
-                end = this.unitController.absoluteRange;
-            }
+            this.rowController.verticalOffset = verticalOffset;
+        }
+
+        const adjustZoom = (zoomPosition: number, deltaLength: number) => {
+            const newViewRangeLength = this.unitController.viewRangeLength + deltaLength;
+            const xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
+            const start = Math.max(0, this.unitController.viewRange.start - xOffset);
+            const end = Math.min(start + newViewRangeLength, this.unitController.absoluteRange);
             this.unitController.viewRange = {
                 start,
                 end
@@ -120,15 +114,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     adjustZoom(zoomPosition, deltaLength);
 
                 } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
-                    moveTimeGraph(moveLeft);
+                    moveHorizontally(-horizontalDelta);
 
                 } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
-                    moveTimeGraph(moveRight);
+                    moveHorizontally(horizontalDelta);
                 }
-
                 event.preventDefault();
             }
-
         };
 
         this.stage.addListener('mouseover', (event: MouseEvent) => {
@@ -146,36 +138,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 adjustZoom(zoomPosition, deltaLength);
 
             } else if (ev.shiftKey) {
-                let newViewRangeLength = this.unitController.viewRangeLength;
-                let xOffset = 0;
-                let moveX = false;
-                xOffset = -(ev.deltaY / this.stateController.zoomFactor);
-                moveX = true;
-                let start = this.unitController.viewRange.start - xOffset;
-                if (start < 0) {
-                    start = 0;
-                }
-                let end = start + newViewRangeLength;
-                if (end > this.unitController.absoluteRange) {
-                    end = this.unitController.absoluteRange;
-                    if (moveX) {
-                        start = end - newViewRangeLength;
-                    }
-                }
-                this.unitController.viewRange = {
-                    start,
-                    end
-                }
+                moveHorizontally(ev.deltaY);
             } else {
-                const shiftStep = ev.deltaY;
-                let verticalOffset = this.rowController.verticalOffset + shiftStep;
-                if (verticalOffset < 0) {
-                    verticalOffset = 0;
+                if (Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) {
+                    moveVertically(ev.deltaY);
+                } else {
+                    moveHorizontally(ev.deltaX);
                 }
-                if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
-                    verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
-                }
-                this.rowController.verticalOffset = verticalOffset;
             }
             ev.preventDefault();
         };
