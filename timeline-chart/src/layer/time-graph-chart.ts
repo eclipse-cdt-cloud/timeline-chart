@@ -188,18 +188,22 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             update
         )) {
             this.fetching = true;
-            const rowData = await this.providers.dataProvider(viewRange, resolution);
-            if (rowData) {
-                this.providedResolution = rowData.resolution;
-                this.providedRange = rowData.range;
-                this.setRowModel(rowData.rows);
-                this.removeChildren();
-                this.addRows(this.rows, this.rowController.rowHeight);
-                if (this.isNavigating) {
-                    this.selectStateInNavigation();
+            try {
+                const rowData = await this.providers.dataProvider(viewRange, resolution);
+                if (rowData) {
+                    this.providedResolution = rowData.resolution;
+                    this.providedRange = rowData.range;
+                    this.setRowModel(rowData.rows);
+                    this.removeChildren();
+                    this.addRows(this.rows, this.rowController.rowHeight);
+                    if (this.isNavigating) {
+                        this.selectStateInNavigation();
+                    }
                 }
+            } finally {
+                this.fetching = false;
+                this.isNavigating = false;
             }
-            this.fetching = false;
         }
     }
 
