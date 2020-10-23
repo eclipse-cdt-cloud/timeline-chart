@@ -71,7 +71,7 @@ export abstract class TimeGraphComponent {
     protected rect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
         this.displayObject.drawRect(position.x + 0.5, position.y + 0.5, width, height);
         this.displayObject.endFill();
     }
@@ -79,7 +79,7 @@ export abstract class TimeGraphComponent {
     protected rectTruncated(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
         if (width > 20) {
             const xpos = position.x + 0.5;
             const ypos = position.y + 0.5;
@@ -96,7 +96,7 @@ export abstract class TimeGraphComponent {
     protected roundedRect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), (opacity !== undefined ? opacity : 1));
+        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
 
         this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
 
@@ -105,16 +105,25 @@ export abstract class TimeGraphComponent {
 
     protected hline(opts: TimeGraphHorizontalLine) {
         const { position, width, thickness, color, opacity } = opts;
-        this.displayObject.lineStyle(thickness || 1, color || 0x000000, (opacity !== undefined ? opacity : 1));
+        this.displayObject.lineStyle(thickness || 1, color || 0x000000, this.getPIXIOpacity(opacity));
         this.displayObject.moveTo(position.x, position.y + 0.5);
         this.displayObject.lineTo(position.x + width, position.y + 0.5);
     }
 
     protected vline(opts: TimeGraphVerticalLine) {
         const { position, height, thickness, color, opacity } = opts;
-        this.displayObject.lineStyle(thickness || 1, color || 0x000000, (opacity !== undefined ? opacity : 1));
+        this.displayObject.lineStyle(thickness || 1, color || 0x000000, this.getPIXIOpacity(opacity));
         this.displayObject.moveTo(position.x + 0.5, position.y);
         this.displayObject.lineTo(position.x + 0.5, position.y + height);
+    }
+
+    /**
+     * Get the PIXIjs friendly opacity. This is a workaround to PIXIjs 5 setting opacity to 0 meaning interractions are not recognized.
+     * 
+     * @param opacity a number meaning the desired opacity. If it is undefined, assume it is 100% opacity
+     */
+    private getPIXIOpacity(opacity: number | undefined): number | undefined {
+        return (opacity !== undefined ? opacity == 0 ? 0.001 : opacity : 1);
     }
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
