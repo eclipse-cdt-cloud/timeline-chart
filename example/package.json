@@ -2,6 +2,7 @@
   "name": "timeline-chart-example",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",  
   "scripts": {
     "build": "webpack --mode=development",
     "watch": "webpack --watch --mode=development",
