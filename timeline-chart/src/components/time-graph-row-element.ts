@@ -16,6 +16,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     height: number;
     position: TimeGraphElementPosition;
     textWidth: number = 0;
+    MAX_HEIGHT: number = 16;
     static fontController: FontController = new FontController();
 
     protected _options: TimeGraphStyledRect;
@@ -30,6 +31,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     ) {
         super(id, displayObject);
         this.height = _style.height || 14;
+        this.height = Math.min(this.height, this.MAX_HEIGHT);
         this.position = {
             x: this.range.start,
             y: this._row.position.y + ((this.row.height - this.height) / 2)
