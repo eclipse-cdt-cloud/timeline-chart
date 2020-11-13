@@ -11,6 +11,7 @@ export interface TimeGraphElementStyle {
     borderWidth?: number
     borderColor?: number
     borderRadius?: number
+    displayWidth?: number
 }
 export interface TimeGraphElementPosition {
     x: number

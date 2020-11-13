@@ -1,7 +1,7 @@
 import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphElementPosition } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
 import { TimelineChart } from "../time-graph-model";
-import { FontController } from "../time-graph-font-controller"
+import { FontController } from "../time-graph-font-controller";
 import * as PIXI from "pixi.js-legacy";
 
 export interface TimeGraphRowElementStyle {
@@ -13,9 +13,8 @@ export interface TimeGraphRowElementStyle {
 
 export class TimeGraphRowElement extends TimeGraphComponent {
 
-    height: number;
-    position: TimeGraphElementPosition;
-    textWidth: number = 0;
+    protected _height: number;
+    protected _position: TimeGraphElementPosition;
     static fontController: FontController = new FontController();
 
     protected _options: TimeGraphStyledRect;
@@ -26,78 +25,77 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
         protected _style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
+        protected displayWidth: number,
         displayObject?: PIXI.Graphics
     ) {
         super(id, displayObject);
-        this.height = _style.height || 14;
-        this.height = Math.min(this.height, _row.height -1);
-        this.position = {
+        this._height = _style.height || 14;
+        this._height = _row.height === 0 ? 0 : Math.min(this._height, _row.height - 1);
+        this._position = {
             x: this.range.start,
-            y: this._row.position.y + ((this.row.height - this.height) / 2)
+            y: this._row.position.y + ((this.row.height - this._height) / 2)
         };
         // min width of a state should never be less than 1 (for visibility)
         const width = Math.max(1, this.range.end - this.range.start);
         this._options = {
             color: _style.color,
-            height: this.height,
-            position: this.position,
+            height: this._height,
+            position: this._position,
             width,
+            displayWidth,
             borderRadius: 2,
             borderWidth: _style.borderWidth || 0,
             borderColor: _style.borderColor || 0x000000
         };
-
-        if (this._model.label) {
-            const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2);
-            const labelTextObj = new PIXI.BitmapText(this._model.label, { fontName: fontName ? fontName : TimeGraphRowElement.fontController.getDefaultFontName() });
-            this.textWidth = labelTextObj.getLocalBounds().width;
-        }
     }
 
     renderLabel() {
-        const position = this._options.position;
-        const width = this._options.width;
-        const textWidth = this.textWidth;
-        const labelText = this._model.label;
+        if (!this._model.label) {
+            return;
+        }
         const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2);
-
-        if (this.displayObject.children.length) {
-            let textObj = this.displayObject.getChildAt(0) as PIXI.BitmapText;
-            textObj.x = position.x;
-            textObj.y = position.y;
+        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName ? fontName : TimeGraphRowElement.fontController.getDefaultFontName() });
+        const textWidth = textObj.getLocalBounds().width;
+        const position = {
+            x: this._options.position.x + this._options.width < 0 ? this._options.position.x : Math.max(0, this._options.position.x),
+            y: this._options.position.y
         }
-        if (textWidth && labelText) {
-            if (width <= 0.1 * textWidth && this.displayObject.children.length) {
-                this.displayObject.removeChildAt(0);
-            }
-            else if (width > 0.1 * textWidth) {
-                let textObjX = position.x + 0.5;
-                let textObjY = position.y + 0.5;
-                let textStr = "";
+        const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
+        const labelText = this._model.label;
 
-                if (width > textWidth) {
-                    textObjX = position.x + (width - textWidth) / 2;
-                    textStr = labelText;
-                }
-                else {
-                    let textScaler = width / textWidth;
-                    let index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
-                    let partialLabel = labelText.substr(0, Math.max(index - 4, 0));
-                    if (partialLabel.length > 0) {
-                        textStr = partialLabel.concat("...");
-                    }
-                }
+        let textObjX = position.x + 0.5;
+        const textObjY = position.y + 0.5;
+        let displayLabel = "";
 
-                if (this.displayObject.children.length !== 0) {
-                    this.displayObject.removeChildAt(0);
-                }
-
-                this.displayObject.addChild(new PIXI.BitmapText(textStr, { fontName: fontName }));
-                let textObj = this.displayObject.getChildAt(0) as PIXI.BitmapText;
-                textObj.x = textObjX;
-                textObj.y = textObjY;
+        if (displayWidth > textWidth) {
+            textObjX = position.x + (displayWidth - textWidth) / 2;
+            displayLabel = labelText;
+        }
+        else {
+            const textScaler = displayWidth / textWidth;
+            const index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
+            const partialLabel = labelText.substr(0, Math.max(index - 3, 0));
+            if (partialLabel.length > 0) {
+                displayLabel = partialLabel.concat("...");
             }
         }
+
+        textObj.text = displayLabel;
+        textObj.x = textObjX;
+        textObj.y = textObjY;
+        this.displayObject.addChild(textObj);
+    }
+
+    clearLabel() {
+        this.displayObject.removeChildren();
+    }
+
+    get height(): number {
+        return this._height;
+    }
+
+    get position(): TimeGraphElementPosition {
+        return this._position;
     }
 
     get model(): TimelineChart.TimeGraphRowElementModel {
@@ -132,13 +130,18 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         if (opts) {
             this._options.position = opts.position;
             this._options.width = opts.width;
+            this._options.displayWidth = opts.displayWidth;
         }
         super.update();
     }
 
     render() {
-        // this.rectTruncated(this._options);
         this.rect(this._options);
         this.renderLabel();
+    }
+
+    clear() {
+        this.clearLabel();
+        super.clear()
     }
 }
