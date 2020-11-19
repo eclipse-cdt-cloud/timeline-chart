@@ -544,10 +544,26 @@ export const timeGraphStates = {
                         "duration": 3987863,
                         "value": -2147483648
                     }
+                ],
+                "annotations": [
+                    {
+                        "range": {
+                            "start": 1332170682486039800,
+                            "end": 1332170682486039800
+                        }
+                    }
                 ]
             },
             {
                 "entryID": 2,
+                "annotations": [
+                    {
+                        "range": {
+                            "start": 1332170682497734100,
+                            "end": 1332170682497734100
+                        }
+                    }
+                ],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -1687,6 +1703,7 @@ export const timeGraphStates = {
             },
             {
                 "entryID": 4,
+                "annotations": [],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -1825,6 +1842,7 @@ export const timeGraphStates = {
             },
             {
                 "entryID": 5,
+                "annotations": [],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2103,6 +2121,7 @@ export const timeGraphStates = {
             },
             {
                 "entryID": 6,
+                "annotations": [],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2241,6 +2260,7 @@ export const timeGraphStates = {
             },
             {
                 "entryID": 7,
+                "annotations": [],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2281,6 +2301,7 @@ export const timeGraphStates = {
             },
             {
                 "entryID": 8,
+                "annotations": [],
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2383,7 +2404,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 9,
+                "annotations": [], "entryId": 9,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2423,7 +2444,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 10,
+                "annotations": [], "entryId": 10,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2475,7 +2496,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 12,
+                "annotations": [], "entryId": 12,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2501,7 +2522,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 13,
+                "annotations": [], "entryId": 13,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2513,7 +2534,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 14,
+                "annotations": [], "entryId": 14,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2525,7 +2546,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 15,
+                "annotations": [], "entryId": 15,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2537,7 +2558,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 16,
+                "annotations": [], "entryId": 16,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2549,7 +2570,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 17,
+                "annotations": [], "entryId": 17,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2561,7 +2582,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 18,
+                "annotations": [], "entryId": 18,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2573,7 +2594,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 19,
+                "annotations": [], "entryId": 19,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2585,7 +2606,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 20,
+                "annotations": [], "entryId": 20,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2597,7 +2618,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 21,
+                "annotations": [], "entryId": 21,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2609,7 +2630,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 22,
+                "annotations": [], "entryId": 22,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2621,7 +2642,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 23,
+                "annotations": [], "entryId": 23,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2633,7 +2654,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 24,
+                "annotations": [], "entryId": 24,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2645,7 +2666,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 25,
+                "annotations": [], "entryId": 25,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2657,7 +2678,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 26,
+                "annotations": [], "entryId": 26,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2669,7 +2690,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 27,
+                "annotations": [], "entryId": 27,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2681,7 +2702,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 28,
+                "annotations": [], "entryId": 28,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -2938,7 +2959,8 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 29,
+                "annotations": [],
+                "entryId": 29,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -3237,7 +3259,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 30,
+                "annotations": [], "entryId": 30,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -3494,7 +3516,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 31,
+                "annotations": [], "entryId": 31,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -3653,7 +3675,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 32,
+                "annotations": [], "entryId": 32,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -3854,7 +3876,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 33,
+                "annotations": [], "entryId": 33,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4013,7 +4035,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 34,
+                "annotations": [], "entryId": 34,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4074,7 +4096,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 35,
+                "annotations": [], "entryId": 35,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4219,7 +4241,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 36,
+                "annotations": [], "entryId": 36,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4280,7 +4302,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 37,
+                "annotations": [], "entryId": 37,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4327,7 +4349,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 38,
+                "annotations": [], "entryId": 38,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4423,7 +4445,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 39,
+                "annotations": [], "entryId": 39,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4470,7 +4492,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 40,
+                "annotations": [], "entryId": 40,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4482,7 +4504,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 41,
+                "annotations": [], "entryId": 41,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4494,7 +4516,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 42,
+                "annotations": [], "entryId": 42,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4506,7 +4528,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 43,
+                "annotations": [], "entryId": 43,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4518,7 +4540,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 44,
+                "annotations": [], "entryId": 44,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4530,7 +4552,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 45,
+                "annotations": [], "entryId": 45,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4542,7 +4564,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 46,
+                "annotations": [], "entryId": 46,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4554,7 +4576,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 47,
+                "annotations": [], "entryId": 47,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4566,7 +4588,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 48,
+                "annotations": [], "entryId": 48,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -4578,7 +4600,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 49,
+                "annotations": [], "entryId": 49,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -5332,7 +5354,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 50,
+                "annotations": [], "entryId": 50,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7024,7 +7046,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 52,
+                "annotations": [], "entryId": 52,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7099,7 +7121,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 53,
+                "annotations": [], "entryId": 53,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7174,7 +7196,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 54,
+                "annotations": [], "entryId": 54,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7326,7 +7348,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 55,
+                "annotations": [], "entryId": 55,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7478,7 +7500,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 56,
+                "annotations": [], "entryId": 56,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7490,7 +7512,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 57,
+                "annotations": [], "entryId": 57,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7502,7 +7524,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 58,
+                "annotations": [], "entryId": 58,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7514,7 +7536,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 59,
+                "annotations": [], "entryId": 59,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7526,7 +7548,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 60,
+                "annotations": [], "entryId": 60,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7538,7 +7560,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 61,
+                "annotations": [], "entryId": 61,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7550,7 +7572,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 62,
+                "annotations": [], "entryId": 62,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7562,7 +7584,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 63,
+                "annotations": [], "entryId": 63,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7574,7 +7596,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 64,
+                "annotations": [], "entryId": 64,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7586,7 +7608,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 65,
+                "annotations": [], "entryId": 65,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7598,7 +7620,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 66,
+                "annotations": [], "entryId": 66,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7659,7 +7681,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 67,
+                "annotations": [], "entryId": 67,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7720,7 +7742,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 68,
+                "annotations": [], "entryId": 68,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -7977,7 +7999,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 69,
+                "annotations": [], "entryId": 69,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8234,7 +8256,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 70,
+                "annotations": [], "entryId": 70,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8400,7 +8422,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 71,
+                "annotations": [], "entryId": 71,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8566,7 +8588,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 72,
+                "annotations": [], "entryId": 72,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8683,7 +8705,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 73,
+                "annotations": [], "entryId": 73,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8800,7 +8822,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 74,
+                "annotations": [], "entryId": 74,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8812,7 +8834,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 75,
+                "annotations": [], "entryId": 75,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8824,7 +8846,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 76,
+                "annotations": [], "entryId": 76,
                 "states": [
                     {
                         "activeProperties": 0,
@@ -8836,7 +8858,7 @@ export const timeGraphStates = {
                 ]
             },
             {
-                "entryID": 77,
+                "annotations": [], "entryId": 77,
                 "states": [
                     {
                         "activeProperties": 0,
