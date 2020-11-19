@@ -1,0 +1,143 @@
+import * as PIXI from "pixi.js-legacy"
+import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphComponentOptions } from "./time-graph-component";
+import { TimeGraphRow } from "./time-graph-row"
+
+export interface TimeGraphAnnotationComponentOptions extends TimeGraphComponentOptions {
+    position: TimeGraphElementPosition
+}
+
+export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
+    symbol?: string
+    size?: number
+    color?: number
+}
+
+/*
+ * This is only implementing a subset of the tick elements so far
+ */
+export class TimeGraphAnnotationComponent extends TimeGraphComponent {
+
+    // TODO: make a map of the display objects
+    // e.g. cross-14-black etc... 
+    // and then use this._displayObject.addChild(cross-14-black) in the draw.
+    // if performance is an issue
+
+    protected _size: number;
+
+    constructor(id: string,
+        protected _options: TimeGraphAnnotationComponentOptions,
+        protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross' },
+        protected _row: TimeGraphRow,
+        displayObject?: PIXI.Graphics) {
+        super(id, displayObject);
+        this._size = _style.size || 7;
+        // called to ensure consistency. Only the X component is used from options.
+        this.update(_options);
+    }
+
+    update(opts: TimeGraphAnnotationComponentOptions, style?: TimeGraphAnnotationStyle): void {
+        if (opts) {
+            this._options.position.x = opts.position.x;
+            this._options.position.y = this._row.position.y + (this._row.height * 0.5);
+        }
+        if (style) {
+            this._style.color = style.color;
+            this._style.size = style.size;
+            this._style.symbol = style.symbol;
+        }
+        super.update();
+    }
+
+    render(): void {
+        const { symbol } = this._style as TimeGraphAnnotationStyle;
+        const size = this._size;
+        const x = this._options.position.x;
+        const y = this._options.position.y;
+        if (symbol == 'circle') {
+            this.drawCircle(x, y, size);
+        } else if (symbol == 'cross') {
+            this.drawCross(x, y, size);
+        } else if (symbol == 'plus') {
+            this.drawPlus(x, y, size);
+        } else if (symbol == 'diamond') {
+            this.drawDiamond(x, y, size);
+        }
+    }
+
+    private drawCircle(x: number, y: number, radius: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        this._displayObject.drawCircle(x, y, radius);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+
+    // thickness = 20
+    private drawCross(x: number, y: number, size: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        // Root of two thickness
+        const thickness = 0.14 * size;
+
+        this._displayObject.drawPolygon([
+            x - size, y - size + thickness,
+            x - thickness, y,
+            x - size, y + size - thickness,
+            x - size + thickness, y + size,
+            x, y + thickness,
+            x + size - thickness, y + size,
+            x + size, y + size - thickness,
+            x + thickness, y,
+            x + size, y - size + thickness,
+            x + size - thickness, y - size,
+            x, y - thickness,
+            x - size + thickness, y - size,
+            x - size, y - size + thickness,
+        ]);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+
+    // thickness = 20%
+    private drawPlus(x: number, y: number, size: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        // half thickness
+        const thickness = 0.1 * size;
+        this._displayObject.drawPolygon([
+            x - thickness, y - size,
+            x - thickness, y - thickness,
+            x - size, y - thickness,
+            x - size, y + thickness,
+            x - thickness, y + thickness,
+            x - thickness, y + size,
+            x + thickness, y + size,
+            x + thickness, y + thickness,
+            x + size, y + thickness,
+            x + size, y - thickness,
+            x + thickness, y - thickness,
+            x + thickness, y - size,
+            x - thickness, y - size,
+        ]);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+
+    private drawDiamond(x: number, y: number, size: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        this._displayObject.drawPolygon([
+            x - size, y,
+            x, y - size,
+            x + size, y,
+            x, y + size,
+            x - size, y
+        ]);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+}

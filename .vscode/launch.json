@@ -3,6 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more informa        newPos = states[elIndex].range.start;tion, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "runtimeExecutable": "custom",
     "configurations": [
         {
             "type": "chrome",
@@ -11,6 +12,7 @@
             "webRoot": "${workspaceRoot}",
             "url": "http://localhost:8080",
             "sourceMaps": true,
+            "runtimeExecutable": "custom",
             "sourceMapPathOverrides": {
             "timeline-chart:///./js/": "${workspaceRoot}/timeline-chart/lib/**/.js",
             "timeline-chart:///js/": "${workspaceRoot}/timeline-chart/lib/**/.js"

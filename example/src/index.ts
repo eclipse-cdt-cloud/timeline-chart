@@ -95,7 +95,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
             resolution: newResolution
         };
     },
-    rowElementStyleProvider: (model: TimelineChart.TimeGraphRowElementModel) => {
+    rowElementStyleProvider: (model: TimelineChart.TimeGraphState) => {
         const styles: TimeGraphRowElementStyle[] = [
             {
                 color: 0x11ad1b,

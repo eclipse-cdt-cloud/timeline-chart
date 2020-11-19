@@ -16,14 +16,15 @@ export namespace TimelineChart {
         id: number
         name: string
         range: TimeGraphRange
-        states: TimeGraphRowElementModel[]
+        states: TimeGraphState[]
+        annotations: TimeGraphAnnotation[]
         selected?: boolean
         readonly data?: { [key: string]: any }
         prevPossibleState: number
         nextPossibleState: number
     }
 
-    export interface TimeGraphRowElementModel {
+    export interface TimeGraphState {
         readonly id: string
         readonly range: TimeGraphRange
         readonly label: string
@@ -37,5 +38,13 @@ export namespace TimelineChart {
         range: TimeGraphRange
         data?: { [key: string]: any }
         // Q: Can I select an arrow?
+    }
+
+    export interface TimeGraphAnnotation {
+        readonly id: string
+        readonly range: TimeGraphRange
+        readonly label: string
+        selected?: boolean
+        readonly data?: { [key: string]: any }
     }
 }

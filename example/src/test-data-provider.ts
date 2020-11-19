@@ -64,6 +64,11 @@ export namespace TestData {
          * Array of states
          */
         states: TimeGraphState[];
+
+        /**
+         * Array of markers
+         */
+        annotations: TimeGraphAnnotation[];
     }
 
     /**
@@ -87,6 +92,23 @@ export namespace TestData {
          */
         value: number;
 
+    }
+
+    /**
+      * Time graph state
+      */
+    export interface TimeGraphAnnotation {
+        /**
+         * Start time of the state
+         */
+        startTime: number;
+
+        duration: number;
+
+        /**
+         * Label to apply to the state
+         */
+        label: string | null;
     }
 
     /**
@@ -163,8 +185,9 @@ export class TestDataProvider {
         const rows: TimelineChart.TimeGraphRowModel[] = [];
         const range = opts.range || { start: 0, end: this.totalLength };
         const resolution = opts.resolution || this.totalLength / this.canvasDisplayWidth;
-        timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number) => {
-            const states: TimelineChart.TimeGraphRowElementModel[] = [];
+        timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number): void => {
+            const states: TimelineChart.TimeGraphState[] = [];
+            const annotations: TimelineChart.TimeGraphAnnotation[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
             let hasStates = false;
             let prevPossibleState = 0;
@@ -191,6 +214,24 @@ export class TestDataProvider {
                         nextPossibleState = state.startTime + state.duration - entry.startTime;
                     }
                 });
+
+                const _annotations = row.annotations;
+                if (!!_annotations) {
+                    _annotations.forEach((annotation: any, annotationIndex: number) => {
+                        const start = annotation.range.start - entry.startTime;
+                        if (range.start < start && range.end > start) {
+                            annotations.push({
+                                id: 'mark_' + rowIndex + '_' + annotationIndex,
+                                range: {
+                                    start: annotation.range.start - this.absoluteStart,
+                                    end: annotation.range.end - this.absoluteStart
+                                },
+                                label: '',
+                            });
+                        }
+                    });
+                }
+
             }
             rows.push({
                 id: entry.id,
@@ -200,6 +241,7 @@ export class TestDataProvider {
                     end: entry.endTime - entry.startTime
                 },
                 states,
+                annotations,
                 data: {
                     type: entry.type,
                     hasStates

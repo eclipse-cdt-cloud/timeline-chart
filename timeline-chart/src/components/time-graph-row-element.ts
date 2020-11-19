@@ -21,7 +21,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
 
     constructor(
         id: string,
-        protected _model: TimelineChart.TimeGraphRowElementModel,
+        protected _model: TimelineChart.TimeGraphState,
         protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
         protected _style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
@@ -98,7 +98,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         return this._position;
     }
 
-    get model(): TimelineChart.TimeGraphRowElementModel {
+    get model(): TimelineChart.TimeGraphState {
         return this._model;
     }
 

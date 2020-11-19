@@ -99,7 +99,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const prevState = row.states.slice().reverse().find((rowElementModel: TimelineChart.TimeGraphRowElementModel) => cursorPosition > rowElementModel.range.end ||
+            const prevState = row.states.slice().reverse().find((rowElementModel: TimelineChart.TimeGraphState) => cursorPosition > rowElementModel.range.end ||
                 (cursorPosition > rowElementModel.range.start && cursorPosition <= rowElementModel.range.end));
 
             if (prevState) {
@@ -118,7 +118,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const nextState = row.states.find((rowElementModel: TimelineChart.TimeGraphRowElementModel) => cursorPosition < rowElementModel.range.start ||
+            const nextState = row.states.find((rowElementModel: TimelineChart.TimeGraphState) => cursorPosition < rowElementModel.range.start ||
                 (cursorPosition >= rowElementModel.range.start && cursorPosition < rowElementModel.range.end));
 
             if (nextState) {
