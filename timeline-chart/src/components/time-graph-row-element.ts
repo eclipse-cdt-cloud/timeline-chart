@@ -30,6 +30,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
     ) {
         super(id, displayObject);
         this._height = _style.height || 14;
+        this._height = _row.height === 0 ? 0 : Math.min(this._height, _row.height - 1);
         this._position = {
             x: this.range.start,
             y: this._row.position.y + ((this.row.height - this._height) / 2)
