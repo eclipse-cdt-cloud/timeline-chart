@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "private": true,
     "license": "MIT",
     "scripts": {
@@ -27,7 +27,7 @@
     "homepage": "https://github.com/theia-ide/timeline-chart",
     "devDependencies": {
         "@types/pixi.js": "^5.0.0",
-        "lerna": "2.11.0",
+        "lerna": "3.22.1",
         "typescript": "^3.2.2"
     },
     "workspaces": [
