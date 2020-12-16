@@ -86,7 +86,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.unitController.onSelectionRangeChange(() => this.update());
     }
 
-    protected maybeCenterCursor() {
+    public maybeCenterCursor() {
         if (this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
             if (cursorPosition < this.unitController.viewRange.start || cursorPosition > this.unitController.viewRange.end) {
