@@ -91,9 +91,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             const xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
             const start = Math.max(0, this.unitController.viewRange.start - xOffset);
             const end = Math.min(start + newViewRangeLength, this.unitController.absoluteRange);
-            this.unitController.viewRange = {
-                start,
-                end
+            if (Math.trunc(start) !== Math.trunc(end)) {
+                this.unitController.viewRange = {
+                    start,
+                    end
+                }
             }
         };
 

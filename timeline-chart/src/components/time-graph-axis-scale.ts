@@ -138,9 +138,11 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         if (end > this.unitController.absoluteRange) {
             end = this.unitController.absoluteRange;
         }
-        this.unitController.viewRange = {
-            start,
-            end
+        if (Math.trunc(start) !== Math.trunc(end)) {
+            this.unitController.viewRange = {
+                start,
+                end
+            }
         }
     }
 
