@@ -65,6 +65,10 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
             this.drawPlus(x, y, size);
         } else if (symbol == 'diamond') {
             this.drawDiamond(x, y, size);
+        } else if (symbol == 'triangle') {
+            this.drawTriangle(x,y, size);
+        } else if (symbol == 'inverted-triangle') {
+            this.drawInvertedTriangle(x, y, size);
         } else {
             this.drawPlus(x, y, size);
         }
@@ -142,6 +146,32 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
             x + size, y,
             x, y + size,
             x - size, y
+        ]);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+
+    private drawTriangle(x: number, y: number, size: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        this._displayObject.drawPolygon([
+            x - size, y + size,
+            x, y - size,
+            x + size, y + size
+        ]);
+        this._displayObject.endFill();
+        //this._displayObject.cacheAsBitmap = true;
+    }
+
+    private drawInvertedTriangle(x: number, y: number, size: number): void {
+        this._displayObject.clear();
+        this._displayObject.beginFill(this._style.color);
+        this._displayObject.lineStyle(0);
+        this._displayObject.drawPolygon([
+            x + size, y - size,
+            x, y + size,
+            x - size, y - size
         ]);
         this._displayObject.endFill();
         //this._displayObject.cacheAsBitmap = true;
