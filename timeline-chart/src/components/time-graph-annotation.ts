@@ -53,6 +53,10 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
         const size = this._size;
         const x = this._options.position.x;
         const y = this._options.position.y;
+
+        if (symbol === undefined || symbol == 'none') {
+            return;
+        }
         if (symbol == 'circle') {
             this.drawCircle(x, y, size);
         } else if (symbol == 'cross') {
@@ -61,6 +65,8 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
             this.drawPlus(x, y, size);
         } else if (symbol == 'diamond') {
             this.drawDiamond(x, y, size);
+        } else {
+            this.drawPlus(x, y, size);
         }
     }
 
