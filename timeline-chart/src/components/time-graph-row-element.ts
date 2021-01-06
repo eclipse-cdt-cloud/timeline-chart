@@ -53,8 +53,9 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         if (!this._model.label) {
             return;
         }
-        const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2);
-        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName ? fontName : TimeGraphRowElement.fontController.getDefaultFontName() });
+        const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
+            TimeGraphRowElement.fontController.getDefaultFontName();
+        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName });
         const textWidth = textObj.getLocalBounds().width;
         const position = {
             x: this._options.position.x + this._options.width < 0 ? this._options.position.x : Math.max(0, this._options.position.x),
@@ -62,9 +63,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         }
         const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
         const labelText = this._model.label;
+        const textPadding = 0.5;
 
-        let textObjX = position.x + 0.5;
-        const textObjY = position.y + 0.5;
+        let textObjX = position.x + textPadding;
+        const textObjY = position.y + textPadding;
         let displayLabel = "";
 
         if (displayWidth > textWidth) {
@@ -80,10 +82,10 @@ export class TimeGraphRowElement extends TimeGraphComponent {
             }
         }
 
-        textObj.text = displayLabel;
-        textObj.x = textObjX;
-        textObj.y = textObjY;
-        this.displayObject.addChild(textObj);
+        const newTextObj = new PIXI.BitmapText(displayLabel, { fontName: fontName });
+        newTextObj.x = textObjX;
+        newTextObj.y = textObjY;
+        this.displayObject.addChild(newTextObj);
     }
 
     clearLabel() {
