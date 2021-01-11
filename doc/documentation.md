@@ -7,11 +7,11 @@
 
 # Components
 ## Time Controller
-* A central time controller that manages time-related properties, like the total time rang, viewed range, time cursor positions.
+* A central time controller that manages time-related properties, like the total time range, viewed range, time cursor positions.
 * It provides API for setting, reading and syncing the individual properties
 
 ## Time Cursor
-* Time Cursor T1 and optionally T2 are displayed as a vertical line spanning all rows. Range between T1 and T2 will be highlighted. Styling is be configurable through CSS.
+* Time Cursor T1 and optionally T2 are displayed as a vertical line spanning all rows. Range between T1 and T2 will be highlighted. Styling is configurable through CSS.
 * Time range selection (or range selection) has full read/write/listen API.
 * Rendering is configurable through CSS and separated from the actual data.
 Setting cursor T1 is doable by clicking anywhere in the main area. A mouse click while holding shift will set T2.
@@ -35,7 +35,7 @@ A reusable time axis component, that can be used independently of the other comp
 * General possibilities to add additional graphical layers (e.g. markers or icons) is foreseen.
 * The library provides with a pull hook, to lazily fetch data from any source.
 * Selection of elements (single units) is accessible with a full read/write/listen API.
-* Keystroke handling for navigation and time selection is supported. For a selected row, it possible to use left/right arrow to go from one time element start to end and vice versa. Using shift + left and right will do a time selection and the cursors T1 and T2 are drawn accordingly.
+* Keystroke handling for navigation and time selection is supported. For a selected row, it's possible to use left/right arrow to go from one element's start time to end and vice versa, as well as skipping to the next/previous element on that row. Using shift + left mouse click will select a time range and the cursors T1 and T2 are drawn accordingly.
 * WASD Keystrokes are avaliable for zooming and navigation.
 * The view is connected to a time controller instance and sync its viewport, zoom level cursors bi-directionally
 
@@ -43,6 +43,5 @@ A reusable time axis component, that can be used independently of the other comp
 * Library user can configure a data model provider which gets asked for data lazily depending on the viewport.
 * Data is prefetched for x and y dimensions to make scrolling smoother.
 * Data can be fetched for a given resolution, so the provider can optimize the amount of data provided.
-* The data model provider allows to provide an array of rows, containing an array of elements. An element has a start time and a length. Arbitrary additional data can be provided, which is then used for styling and registered handlers. E.g. the hover provider would look up certain fields to display hover.
-*The data model provider allows to provide an array of arrows, pointing from a point to another point. Here a point is a coordinate in the timeline graph consisting of a time and row number. Arrows can have arbitrary additional properties used for styling and registered handlers
-
+* The data model provider allows to provide an array of rows, containing an array of elements. An element has a start time and a length. Arbitrary additional data can be provided, which is then used for styling and registered handlers. E.g., the hover provider would look up certain fields to display hover text.
+* The data model provider allows to provide an array of arrows, pointing from a point to another point. Here a point is a coordinate in the timeline graph consisting of a time and row number. Arrows can have arbitrary additional properties used for styling and registered handlers.
