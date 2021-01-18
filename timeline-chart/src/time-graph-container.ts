@@ -25,6 +25,8 @@ export class TimeGraphContainer {
 
     private application: PIXI.Application;
 
+    private background: TimeGraphRectangle;
+
     constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController, protected extCanvas?: HTMLCanvasElement) {
         let canvas: HTMLCanvasElement
         if (!extCanvas) {
@@ -60,7 +62,7 @@ export class TimeGraphContainer {
 
         this.layers = [];
 
-        const background = new TimeGraphRectangle({
+        this.background = new TimeGraphRectangle({
             opacity: 1,
             position: {
                 x: 0, y: 0
@@ -69,8 +71,8 @@ export class TimeGraphContainer {
             width: this.canvas.width,
             color: config.backgroundColor,
         });
-        background.render();
-        this.stage.addChild(background.displayObject);
+        this.background.render();
+        this.stage.addChild(this.background.displayObject);
     }
 
     get canvas(): HTMLCanvasElement {
@@ -81,10 +83,17 @@ export class TimeGraphContainer {
     reInitCanvasSize(newWidth: number, newHeight?: number) {
         if (newHeight === undefined) {
             newHeight = this.config.height;
+        } else {
+            this.config.height = newHeight;
         }
+        this.config.width = newWidth;
+
         this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
         this.stateController.updateDisplayHeight();
+        this.background.displayObject.width = newWidth;
+        this.background.displayObject.height = newHeight;
+        this.background.update();
         this.layers.forEach(l => l.update());
     }
 
