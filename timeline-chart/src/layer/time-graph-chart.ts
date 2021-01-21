@@ -79,6 +79,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
 
         const moveVertically = (magnitude: number) => {
+            if (this.rowController.totalHeight <= this.stateController.canvasDisplayHeight) {
+                return;
+            }
             let verticalOffset = Math.max(0, this.rowController.verticalOffset + magnitude);
             if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
                 verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
