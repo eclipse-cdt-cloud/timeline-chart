@@ -20,6 +20,6 @@ export class TimeGraphGrid extends TimeGraphAxisScale {
     protected addEvents() { }
 
     render(): void {
-        this.renderVerticalLines(this._options.lineColor || 0xdddddd, () => ({ lineHeight: this.stateController.canvasDisplayHeight }));
+        this.renderVerticalLines(false, this._options.lineColor || 0xdddddd, () => ({ lineHeight: this.stateController.canvasDisplayHeight }));
     }
 }
