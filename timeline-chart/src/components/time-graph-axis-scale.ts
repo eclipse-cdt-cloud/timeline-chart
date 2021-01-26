@@ -74,7 +74,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         return stepLength;
     }
 
-    protected renderVerticalLines(lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
+    protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
         if (this.unitController.viewRangeLength > 0) {
             const stepLength = this.getStepLength();
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
@@ -91,7 +91,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                         y: this._options.position.y
                     };
                     let label;
-                    if (this.unitController.numberTranslator) {
+                    if (drawLabels && this.unitController.numberTranslator) {
                         label = this.unitController.numberTranslator(absolutePosition);
                         if (label) {
                             const text = new PIXI.Text(label, {
@@ -99,7 +99,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
                                 fill: lineColor
                             });
                             text.x = position.x + 5;
-                            text.y = this._options.height - (2 * lineStyle(label).lineHeight);
+                            text.y = position.y + lineStyle(label).lineHeight;
                             this.labels.push(text);
                             this._displayObject.addChild(text);
                         }
@@ -127,7 +127,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
             width: this._options.width,
             position: this._options.position
         });
-        this.renderVerticalLines(this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' || l === undefined ? 5 : 10 }));
+        this.renderVerticalLines(true, this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' || l === undefined ? 5 : 10 }));
     }
 
     zoomAroundLeftViewBorder(zoomStep: number) {
