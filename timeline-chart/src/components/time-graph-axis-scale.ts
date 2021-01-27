@@ -58,9 +58,9 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
         this.addEvent('mouseupoutside', moveEnd, this._displayObject);
     }
 
-    protected getStepLength(): number {
+    protected getStepLength(labelWidth: number): number {
         const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
-        const minCanvasStepWidth = 80;
+        const minCanvasStepWidth = Math.max(labelWidth, 80);
         const viewRangeLength = this.unitController.viewRangeLength;
         const maxSteps = canvasDisplayWidth / minCanvasStepWidth;
         const realStepLength = viewRangeLength / maxSteps;
@@ -76,7 +76,16 @@ export class TimeGraphAxisScale extends TimeGraphComponent {
 
     protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
         if (this.unitController.viewRangeLength > 0) {
-            const stepLength = this.getStepLength();
+            let labelWidth = 0;
+            if (this.unitController.numberTranslator) {
+                const label = this.unitController.numberTranslator(this.unitController.viewRangeLength);
+                if (label) {
+                    const style = new PIXI.TextStyle({ fontSize: 10 });
+                    const textMetrics = PIXI.TextMetrics.measureText(label, style);
+                    labelWidth = textMetrics.width;
+                }
+            }
+            const stepLength = this.getStepLength(labelWidth);
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
             const zoomFactor = this.stateController.zoomFactor;
             const viewRangeStart = this.unitController.viewRange.start;
