@@ -223,10 +223,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     const opts: TimeGraphRect = {
                         height: this.rowController.rowHeight,
                         position: {
-                            x: this.getPixels(row.range.start - this.unitController.viewRange.start),
+                            x: 0,
                             y: comp.position.y
                         },
-                        width: this.getPixels(row.range.end) - this.getPixels(row.range.start)
+                        width: this.stateController.canvasDisplayWidth
                     }
                     comp.update(opts);
                 }
@@ -275,10 +275,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(rowId, {
             position: {
-                x: this.getPixels(row.range.start),
+                x: 0,
                 y: (height * rowIndex)
             },
-            width: this.getPixels(row.range.end) - this.getPixels(row.range.start),
+            width: this.stateController.canvasDisplayWidth,
             height
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
