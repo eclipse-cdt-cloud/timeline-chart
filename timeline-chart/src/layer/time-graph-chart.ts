@@ -41,7 +41,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
     protected selectedElementModel: TimelineChart.TimeGraphState;
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState) => void)[] = [];
-
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
 
@@ -172,14 +171,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.maybeFetchNewData();
             }
         });
-        if (this.unitController.viewRangeLength) {
+        if (this.unitController.viewRangeLength && this.stateController.canvasDisplayWidth) {
             this.maybeFetchNewData();
         }
     }
 
     updateChart() {
         const update = true;
-        this.maybeFetchNewData(update);
+        if (this.unitController && this.stateController) {
+            this.maybeFetchNewData(update);
+        }
     }
 
     update() {
