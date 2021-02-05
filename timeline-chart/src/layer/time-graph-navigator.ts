@@ -38,7 +38,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
                 this.selectionRange.update(selectionOpts);
             }
         } else {
-            if(this.selectionRange){
+            if (this.selectionRange) {
                 this.selectionRange.clear();
             }
         }
@@ -60,14 +60,13 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent {
         }, this._displayObject);
         this.addEvent('mousemove', event => {
             if (this.mouseIsDown) {
-                const delta = (event.data.global.x - this.mouseStartX);
-                const start = this.oldViewStart + (delta / this.stateController.absoluteResolution);
-                const end = start + this.unitController.viewRangeLength;
-                if (end < this.unitController.absoluteRange && start > 0) {
-                    this.unitController.viewRange = {
-                        start,
-                        end
-                    }
+                const delta = event.data.global.x - this.mouseStartX;
+                var start = Math.max(this.oldViewStart + (delta / this.stateController.absoluteResolution), 0);
+                start = Math.min(start, this.unitController.absoluteRange - this.unitController.viewRangeLength);
+                const end = Math.min(start + this.unitController.viewRangeLength, this.unitController.absoluteRange)
+                this.unitController.viewRange = {
+                    start,
+                    end
                 }
             }
         }, this._displayObject);
@@ -80,7 +79,10 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent {
 
     render(): void {
         const MIN_NAVIGATOR_WIDTH = 20;
-        const position = { x: this.unitController.viewRange.start * this.stateController.absoluteResolution, y: 0 };
+        const xPos = this.unitController.viewRange.start * this.stateController.absoluteResolution;
+        const effectiveAbsoluteRange = this.unitController.absoluteRange * this.stateController.absoluteResolution;
+        // Avoid the navigator rendered outside of the range at high zoom levels when its width is capped to MIN_NAVIGATOR_WIDTH
+        const position = { x: Math.min(effectiveAbsoluteRange - MIN_NAVIGATOR_WIDTH, xPos), y: 0 };
         const width = Math.max(MIN_NAVIGATOR_WIDTH, this.unitController.viewRangeLength * this.stateController.absoluteResolution);
         this.rect({
             height: 20,
