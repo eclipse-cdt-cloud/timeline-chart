@@ -14,6 +14,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
         this.unitController.onSelectionRangeChange(() => this.update());
+        this.update();
     }
 
     update() {

@@ -25,6 +25,7 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
             this.updateScaleAndPosition();
         });
         this.unitController.onSelectionRangeChange(() => this.update());
+        this.update();
     }
 
     protected removeSelectionRange() {

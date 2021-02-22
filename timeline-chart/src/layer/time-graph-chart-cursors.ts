@@ -84,6 +84,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         });
         this.unitController.onViewRangeChanged(() => this.update());
         this.unitController.onSelectionRangeChange(() => this.update());
+        this.update();
     }
 
     public maybeCenterCursor() {
