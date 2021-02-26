@@ -10,6 +10,7 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
     symbol?: string
     size?: number
     color?: number
+    verticalAlign?: string
 }
 
 /*
@@ -18,15 +19,15 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
 export class TimeGraphAnnotationComponent extends TimeGraphComponent {
 
     // TODO: make a map of the display objects
-    // e.g. cross-14-black etc... 
-    // and then use this._displayObject.addChild(cross-14-black) in the draw.
+    // e.g. cross-14-black-middle etc...
+    // and then use this._displayObject.addChild(cross-14-black-middle) in the draw.
     // if performance is an issue
 
     protected _size: number;
 
     constructor(id: string,
         protected _options: TimeGraphAnnotationComponentOptions,
-        protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross' },
+        protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross', verticalAlign: 'middle' },
         protected _row: TimeGraphRow,
         displayObject?: PIXI.Graphics) {
         super(id, displayObject);
@@ -35,17 +36,21 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
         this.update(_options);
     }
 
-    update(opts: TimeGraphAnnotationComponentOptions, style?: TimeGraphAnnotationStyle): void {
+    update(opts: TimeGraphAnnotationComponentOptions): void {
         if (opts) {
             this._options.position.x = opts.position.x;
-            this._options.position.y = this._row.position.y + (this._row.height * 0.5);
-        }
-        if (style) {
-            this._style.color = style.color;
-            this._style.size = style.size;
-            this._style.symbol = style.symbol;
+            this.updateYPosition();
         }
         super.update();
+    }
+
+    private updateYPosition() {
+        const align = this._style.verticalAlign;
+        const size = this._style.size;
+        if (!!size) {
+            const offset = align == 'top' ? size : align == 'bottom' ? this._row.height - size : this._row.height / 2;
+            this._options.position.y = this._row.position.y + (offset);
+        }
     }
 
     render(): void {
@@ -66,7 +71,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
         } else if (symbol == 'diamond') {
             this.drawDiamond(x, y, size);
         } else if (symbol == 'triangle') {
-            this.drawTriangle(x,y, size);
+            this.drawTriangle(x, y, size);
         } else if (symbol == 'inverted-triangle') {
             this.drawInvertedTriangle(x, y, size);
         } else {
