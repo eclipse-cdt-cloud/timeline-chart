@@ -41,29 +41,14 @@ export class TimeGraphAxis extends TimeGraphLayer {
         const mw = _.throttle((ev: WheelEvent) => {
             if (this.controlKeyDown) {
                 // ZOOM AROUND MOUSE POINTER
-                let newViewRangeLength = this.unitController.viewRangeLength;
-                let xOffset = 0;
-                let moveX = false;
-                if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) {
-                    xOffset = -(ev.deltaX / this.stateController.zoomFactor);
-                    moveX = true;
-                } else {
-                    const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
-                    const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
-                    newViewRangeLength += deltaLength;
-                    xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
-                }
-                let start = this.unitController.viewRange.start - xOffset;
-                if (start < 0) {
-                    start = 0;
-                }
-                let end = start + newViewRangeLength;
-                if (end > this.unitController.absoluteRange) {
-                    end = this.unitController.absoluteRange;
-                    if (moveX) {
-                        start = end - newViewRangeLength;
-                    }
-                }
+                const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
+                const zoomIn = ev.deltaY < 0;
+                const newViewRangeLength = Math.max(1, Math.min(this.unitController.absoluteRange,
+                    this.unitController.viewRangeLength * (zoomIn ? 0.8 : 1.25)));
+                const center = this.unitController.viewRange.start + zoomPosition;
+                const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
+                    center - zoomPosition * newViewRangeLength / this.unitController.viewRangeLength));
+                const end = start + newViewRangeLength;    
                 this.unitController.viewRange = {
                     start,
                     end
@@ -83,6 +68,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
                 }
                 this.unitController.viewRange = { start, end }
             }
+            ev.preventDefault();
             return false;
         });
         this.onCanvasEvent('mousewheel', mw);

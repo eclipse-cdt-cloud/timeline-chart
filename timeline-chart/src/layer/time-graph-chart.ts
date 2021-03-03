@@ -59,7 +59,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected afterAddToContainer() {
         let mousePositionX = 1;
-        let mousePositionY = 1;
         const horizontalDelta = 3;
         let triggerKeyEvent = false;
 
@@ -88,11 +87,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.rowController.verticalOffset = verticalOffset;
         }
 
-        const adjustZoom = (zoomPosition: number, deltaLength: number) => {
-            const newViewRangeLength = this.unitController.viewRangeLength + deltaLength;
-            const xOffset = ((zoomPosition / this.unitController.viewRangeLength) * deltaLength);
-            const start = Math.max(0, this.unitController.viewRange.start - xOffset);
-            const end = Math.min(start + newViewRangeLength, this.unitController.absoluteRange);
+        const adjustZoom = (zoomPosition: number, zoomIn: boolean) => {
+            const newViewRangeLength = Math.max(1, Math.min(this.unitController.absoluteRange,
+                this.unitController.viewRangeLength * (zoomIn ? 0.8 : 1.25)));
+            const center = this.unitController.viewRange.start + zoomPosition;
+            const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
+                center - zoomPosition * newViewRangeLength / this.unitController.viewRangeLength));
+            const end = start + newViewRangeLength;
             if (Math.trunc(start) !== Math.trunc(end)) {
                 this.unitController.viewRange = {
                     start,
@@ -103,7 +104,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         const mouseMoveHandler = (event: MouseEvent) => {
             mousePositionX = event.offsetX;
-            mousePositionY = event.offsetY;
         };
 
         const keyDownHandler = (event: KeyboardEvent) => {
@@ -112,13 +112,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (triggerKeyEvent) {
                 if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
                     const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
-                    const deltaLength = -(mousePositionY / this.stateController.zoomFactor);
-                    adjustZoom(zoomPosition, deltaLength);
+                    adjustZoom(zoomPosition, true);
 
                 } else if (keyBoardNavs['zoomout'].indexOf(keyPressed) >= 0) {
                     const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
-                    const deltaLength = (mousePositionY / this.stateController.zoomFactor);
-                    adjustZoom(zoomPosition, deltaLength);
+                    adjustZoom(zoomPosition, false);
 
                 } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
                     moveHorizontally(-horizontalDelta);
@@ -141,8 +139,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
                 const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
-                const deltaLength = (ev.deltaY / this.stateController.zoomFactor);
-                adjustZoom(zoomPosition, deltaLength);
+                const zoomIn = ev.deltaY < 0;
+                adjustZoom(zoomPosition, zoomIn);
 
             } else if (ev.shiftKey) {
                 moveHorizontally(ev.deltaY);
