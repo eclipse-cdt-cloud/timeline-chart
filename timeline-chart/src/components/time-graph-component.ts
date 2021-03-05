@@ -59,6 +59,10 @@ export abstract class TimeGraphComponent {
         this._displayObject.clear();
     }
 
+    destroy() {
+        this._displayObject.destroy();
+    }
+
     update(opts?: TimeGraphComponentOptions) {
         if (opts) {
             this._options = opts;
