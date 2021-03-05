@@ -17,6 +17,11 @@ export class TimeGraphArrowComponent extends TimeGraphComponent {
         this.head = new PIXI.Graphics();
     }
 
+    destroy() {
+        this.head.destroy();
+        super.destroy();
+    }
+
     render(): void {
         const { start, end } = this._options as TimeGraphArrowCoordinates;
         this._displayObject.lineStyle(1, 0x000000);

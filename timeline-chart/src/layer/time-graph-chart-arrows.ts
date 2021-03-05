@@ -39,6 +39,9 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         if (!this.stateController) {
             throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
+        if (this.arrows) {
+            this.arrows.forEach(rowEl => rowEl.destroy());
+        }
         this.arrows = new Map();
         arrows.forEach(arrow => {
             this.addArrow(arrow);
