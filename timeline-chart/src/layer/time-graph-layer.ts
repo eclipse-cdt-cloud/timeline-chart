@@ -47,14 +47,14 @@ export abstract class TimeGraphLayer {
     }
 
     protected removeChildren() {
-        this.children.forEach(child => this.layer.removeChild(child.displayObject));
+        this.children.forEach(child => child.destroy());
         this.children = [];
     }
 
     protected removeChild(child: TimeGraphComponent) {
+        child.destroy();
         const idx = this.children.findIndex(c => c === child);
         idx && this.children.splice(idx, 1);
-        this.layer.removeChild(child.displayObject);
     }
 
     protected getPixels(ticks: number) {
