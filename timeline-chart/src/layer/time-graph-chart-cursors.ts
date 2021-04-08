@@ -8,7 +8,7 @@ import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChart } from "./time-graph-chart";
 
 export class TimeGraphChartCursors extends TimeGraphChartLayer {
-    protected mouseIsDown: boolean;
+    protected mouseSelecting: boolean = false;
     protected shiftKeyDown: boolean;
     protected firstCursor?: TimeGraphCursor;
     protected secondCursor?: TimeGraphCursor;
@@ -22,7 +22,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     }
 
     protected afterAddToContainer() {
-        this.mouseIsDown = false;
+        this.mouseSelecting = false;
         this.shiftKeyDown = false
         this.stage.interactive = true;
 
@@ -48,7 +48,12 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.onCanvasEvent('keyup', keyUpHandler);
 
         this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
-            this.mouseIsDown = true;
+            // if only left button is pressed with or without Shift key
+            if (event.data.button !== 0 || event.data.buttons !== 1 ||
+                event.data.originalEvent.ctrlKey || event.data.originalEvent.altKey) {
+                return;
+            }
+            this.mouseSelecting = true;
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
             this.chartLayer.selectRowElement(undefined);
@@ -66,7 +71,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         });
         this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
-            if (this.mouseIsDown && this.unitController.selectionRange) {
+            if (this.mouseSelecting && this.unitController.selectionRange) {
                 const mouseX = event.data.global.x;
                 const xStartPos = this.unitController.selectionRange.start;
                 const xEndPos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
@@ -76,12 +81,13 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 }
             }
         });
-        this.stage.on('mouseup', (event: PIXI.InteractionEvent) => {
-            this.mouseIsDown = false;
-        });
-        this.stage.on('mouseupoutside', (event: PIXI.InteractionEvent) => {
-            this.mouseIsDown = false;
-        });
+        const mouseUpHandler = (event: PIXI.InteractionEvent) => {
+            if (this.mouseSelecting && event.data.button === 0) {
+                this.mouseSelecting = false;
+            }
+        };
+        this.stage.on('mouseup', mouseUpHandler);
+        this.stage.on('mouseupoutside', mouseUpHandler);
         this.unitController.onViewRangeChanged(() => this.update());
         this.unitController.onSelectionRangeChange(() => this.update());
         this.update();

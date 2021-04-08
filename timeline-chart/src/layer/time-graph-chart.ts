@@ -48,6 +48,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected isNavigating: boolean;
 
+    protected mousePanning: boolean = false;
+    protected mouseButtons: number = 0;
+    protected mouseDownButton: number;
+    protected mouseStartX: number;
+
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
         protected rowController: TimeGraphRowController) {
@@ -107,9 +112,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         };
 
         const keyDownHandler = (event: KeyboardEvent) => {
-            let keyPressed = event.key;
-
+            const keyPressed = event.key;
             if (triggerKeyEvent) {
+                if (keyPressed === 'Control' && this.mouseButtons === 0 && !event.shiftKey && !event.altKey) {
+                    this.stage.cursor = 'grabbing';
+                } else if (this.stage.cursor === 'grabbing' && !this.mousePanning &&
+                    (keyPressed === 'Shift' || keyPressed === 'Alt')) {
+                    this.stage.cursor = 'default';
+                }
                 if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
                     const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
                     adjustZoom(zoomPosition, true);
@@ -127,6 +137,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 event.preventDefault();
             }
         };
+        const keyUpHandler = (event: KeyboardEvent) => {
+            const keyPressed = event.key;
+            if (triggerKeyEvent) {
+                if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control' ) {
+                    this.stage.cursor = 'default';
+                }
+            }
+        };
 
         this.stage.addListener('mouseover', (event: MouseEvent) => {
             triggerKeyEvent = true;
@@ -134,7 +152,46 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.stage.addListener('mouseout', (event: MouseEvent) => {
             triggerKeyEvent = false;
+            if (this.stage.cursor === 'grabbing' && !this.mousePanning) {
+                this.stage.cursor = 'default';
+            }
         });
+
+        this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
+            this.mouseButtons = event.data.buttons;
+            // if only middle button or only Ctrl+left button is pressed
+            if ((event.data.button !== 1 || event.data.buttons !== 4) &&
+                (event.data.button !== 0 || event.data.buttons !== 1 ||
+                    !event.data.originalEvent.ctrlKey ||
+                    event.data.originalEvent.shiftKey ||
+                    event.data.originalEvent.altKey ||
+                    this.stage.cursor !== 'grabbing')) {
+                return;
+            }
+            this.mousePanning = true;
+            this.mouseDownButton = event.data.button;
+            this.mouseStartX = event.data.global.x;
+            this.stage.cursor = 'grabbing';
+        });
+        this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
+            if (this.mousePanning) {
+                const horizontalDelta = this.mouseStartX - event.data.global.x;
+                moveHorizontally(horizontalDelta);
+                this.mouseStartX = event.data.global.x;
+            }
+        });
+        const mouseUpHandler = (event: PIXI.InteractionEvent) => {
+            this.mouseButtons = event.data.buttons;
+            if (event.data.button === this.mouseDownButton && this.mousePanning) {
+                this.mousePanning = false;
+                const orig = event.data.originalEvent;
+                if (!orig.ctrlKey || orig.shiftKey || orig.altKey) {
+                    this.stage.cursor = 'default';
+                }
+            }
+        };
+        this.stage.on('mouseup', mouseUpHandler);
+        this.stage.on('mouseupoutside', mouseUpHandler);
 
         const mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
@@ -156,6 +213,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.onCanvasEvent('mousemove', mouseMoveHandler);
         this.onCanvasEvent('keydown', keyDownHandler);
+        this.onCanvasEvent('keyup', keyUpHandler);
         this.onCanvasEvent('mousewheel', mouseWheelHandler);
         this.onCanvasEvent('wheel', mouseWheelHandler);
 
