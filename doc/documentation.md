@@ -36,8 +36,10 @@ A reusable time axis component, that can be used independently of the other comp
 * The library provides with a pull hook, to lazily fetch data from any source.
 * Selection of elements (single units) is accessible with a full read/write/listen API.
 * Keystroke handling for navigation and time selection is supported. For a selected row, it's possible to use left/right arrow to go from one element's start time to end and vice versa, as well as skipping to the next/previous element on that row. Using shift + left mouse click will select a time range and the cursors T1 and T2 are drawn accordingly.
-* WASD Keystrokes are avaliable for zooming and navigation.
-* The view is connected to a time controller instance and sync its viewport, zoom level cursors bi-directionally
+* WASD or IJKL keystrokes are available for zooming and navigation. The zooming is centered on the mouse cursor position.
+* Horizontal zooming can be performed using Ctrl+mouse wheel. The zooming is centered on the mouse cursor position.
+* Horizontal panning can be performed using the middle mouse button or Ctrl+left mouse button.
+* The view is connected to a time controller instance and synchronizes its viewport, zoom level cursors bi-directionally.
 
 ## Data Model
 * Library user can configure a data model provider which gets asked for data lazily depending on the viewport.
