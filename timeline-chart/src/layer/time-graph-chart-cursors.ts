@@ -9,6 +9,7 @@ import { TimeGraphChart } from "./time-graph-chart";
 
 export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected mouseSelecting: boolean = false;
+    protected mouseButtons: number = 0;
     protected shiftKeyDown: boolean;
     protected firstCursor?: TimeGraphCursor;
     protected secondCursor?: TimeGraphCursor;
@@ -27,6 +28,12 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.stage.interactive = true;
 
         const keyDownHandler = (event: KeyboardEvent) => {
+            if (event.key === 'Shift' && this.mouseButtons === 0 && !event.ctrlKey && !event.altKey) {
+                this.stage.cursor = 'crosshair';
+            } else if (this.stage.cursor === 'crosshair' && !this.mouseSelecting &&
+                (event.key === 'Control' || event.key === 'Alt')) {
+                this.stage.cursor = 'default';
+            }
             this.shiftKeyDown = event.shiftKey;
             // TODO: keyCode is deprecated. We should change these.
             if (event.keyCode === keyboardKey.ArrowLeft) {
@@ -42,22 +49,28 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
         const keyUpHandler = (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
+            if (this.stage.cursor === 'crosshair' && !this.mouseSelecting && event.key === 'Shift' ) {
+                this.stage.cursor = 'default';
+            }
         };
 
         this.onCanvasEvent('keydown', keyDownHandler);
         this.onCanvasEvent('keyup', keyUpHandler);
 
         this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
+            this.mouseButtons = event.data.buttons;
             // if only left button is pressed with or without Shift key
             if (event.data.button !== 0 || event.data.buttons !== 1 ||
                 event.data.originalEvent.ctrlKey || event.data.originalEvent.altKey) {
                 return;
             }
+            const extendSelection = event.data.originalEvent.shiftKey && this.stage.cursor === 'crosshair';
             this.mouseSelecting = true;
+            this.stage.cursor = 'crosshair';
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
             this.chartLayer.selectRowElement(undefined);
-            if (this.shiftKeyDown) {
+            if (extendSelection) {
                 const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
                 this.unitController.selectionRange = {
                     start,
@@ -82,8 +95,13 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         });
         const mouseUpHandler = (event: PIXI.InteractionEvent) => {
+            this.mouseButtons = event.data.buttons;
             if (this.mouseSelecting && event.data.button === 0) {
                 this.mouseSelecting = false;
+                const orig = event.data.originalEvent;
+                if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                    this.stage.cursor = 'default';
+                }
             }
         };
         this.stage.on('mouseup', mouseUpHandler);
