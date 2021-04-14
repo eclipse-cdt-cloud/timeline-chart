@@ -1,11 +1,16 @@
 import { TimeGraphAxisScale } from "../components/time-graph-axis-scale";
 import { TimeGraphLayer } from "./time-graph-layer";
 import * as _ from "lodash";
+import { TimelineChart } from "../time-graph-model";
 
 export class TimeGraphAxis extends TimeGraphLayer {
 
     protected scaleComponent: TimeGraphAxisScale;
     protected controlKeyDown: boolean;
+    private _updateHandler: { (): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
+    private _mouseWheelHandler: _.DebouncedFunc<(ev: WheelEvent) => boolean>;
+    private _keyUpHandler: { (event: KeyboardEvent): void; (this: Document, ev: KeyboardEvent): any; };
+    private _keyDownHandler: { (event: KeyboardEvent): void; (this: Document, ev: KeyboardEvent): any; };
 
     constructor(id: string, protected style?: { color?: number, lineColor?: number }) {
         super(id);
@@ -32,13 +37,15 @@ export class TimeGraphAxis extends TimeGraphLayer {
 
     protected afterAddToContainer() {
         this.controlKeyDown = false
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
+        this._keyDownHandler = (event: KeyboardEvent) => {
             this.controlKeyDown = event.ctrlKey;
-        });
-        document.addEventListener('keyup', (event: KeyboardEvent) => {
+        };
+        document.addEventListener('keydown', this._keyDownHandler);
+        this._keyUpHandler = (event: KeyboardEvent) => {
             this.controlKeyDown = event.ctrlKey;
-        });
-        const mw = _.throttle((ev: WheelEvent) => {
+        };
+        document.addEventListener('keyup', this._keyUpHandler);
+        this._mouseWheelHandler = _.throttle((ev: WheelEvent) => {
             if (this.controlKeyDown) {
                 // ZOOM AROUND MOUSE POINTER
                 const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
@@ -71,8 +78,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
             ev.preventDefault();
             return false;
         });
-        this.onCanvasEvent('mousewheel', mw);
-        this.onCanvasEvent('wheel', mw);
+        this.onCanvasEvent('mousewheel', this._mouseWheelHandler);
+        this.onCanvasEvent('wheel', this._mouseWheelHandler);
         this.scaleComponent = new TimeGraphAxisScale(
             this.id + '_scale',
             this.getOptions(),
@@ -81,11 +88,30 @@ export class TimeGraphAxis extends TimeGraphLayer {
         );
         this.addChild(this.scaleComponent);
 
-        this.unitController.onSelectionRangeChange(() => this.update());
-        this.unitController.onViewRangeChanged(() => this.update());
+        this._updateHandler = (): void => this.update();
+        this.unitController.onSelectionRangeChange(this._updateHandler);
+        this.unitController.onViewRangeChanged(this._updateHandler);
     }
 
     update() {
         this.scaleComponent.update(this.getOptions());
+    }
+
+    destroy() : void {
+        if (this.unitController) {
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+        }
+        if (this._mouseWheelHandler) {
+            this.removeOnCanvasEvent('mousewheel', this._mouseWheelHandler);
+            this.removeOnCanvasEvent('wheel', this._mouseWheelHandler);
+        }
+        if (this._keyDownHandler) {
+            document.removeEventListener('keydown', this._keyDownHandler);
+        }
+        if (this._keyUpHandler) {
+            document.removeEventListener('keyup', this._keyUpHandler);
+        }
+        super.destroy();
     }
 }

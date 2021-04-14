@@ -1,13 +1,12 @@
-import * as PIXI from "pixi.js-legacy"
-
-import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
-import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
-import { TimelineChart } from "../time-graph-model";
-import { TimeGraphComponent, TimeGraphRect, TimeGraphStyledRect } from "../components/time-graph-component";
-import { TimeGraphChartLayer } from "./time-graph-chart-layer";
-import { TimeGraphRowController } from "../time-graph-row-controller";
+import * as PIXI from "pixi.js-legacy";
 import { TimeGraphAnnotationComponent, TimeGraphAnnotationComponentOptions, TimeGraphAnnotationStyle } from "../components/time-graph-annotation";
+import { TimeGraphComponent, TimeGraphRect, TimeGraphStyledRect } from "../components/time-graph-component";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
+import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
+import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
+import { TimelineChart } from "../time-graph-model";
+import { TimeGraphRowController } from "../time-graph-row-controller";
+import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
 export interface TimeGraphRowElementMouseInteractions {
     click?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
@@ -57,6 +56,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseEndX: number;
     protected mouseZoomingStart: number;
     protected zoomingSelection?: TimeGraphRectangle;
+
+    private _stageMouseDownHandler: Function;
+    private _stageMouseMoveHandler: Function;
+    private _stageMouseUpHandler: Function;
+
+    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };    
+    private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };
+    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
+    private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void; };
+    private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void; };
+    private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
+    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
@@ -113,11 +124,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         };
 
-        const mouseMoveHandler = (event: MouseEvent) => {
+        this._mouseMoveHandler = (event: MouseEvent) => {
             mousePositionX = event.offsetX;
         };
 
-        const keyDownHandler = (event: KeyboardEvent) => {
+        this._keyDownHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
             if (triggerKeyEvent) {
                 if (keyPressed === 'Control' && this.mouseButtons === 0 && !event.shiftKey && !event.altKey) {
@@ -143,7 +154,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 event.preventDefault();
             }
         };
-        const keyUpHandler = (event: KeyboardEvent) => {
+        this._keyUpHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
             if (triggerKeyEvent) {
                 if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control' ) {
@@ -163,7 +174,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         });
 
-        this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
+        this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             // if only middle button or only Ctrl+left button is pressed
             if ((event.data.button !== 1 || event.data.buttons !== 4) &&
@@ -178,8 +189,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.mouseDownButton = event.data.button;
             this.mouseStartX = event.data.global.x;
             this.stage.cursor = 'grabbing';
-        });
-        this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
+        };
+        this.stage.on('mousedown', this._stageMouseDownHandler);
+
+        this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             if (this.mousePanning) {
                 if ((this.mouseDownButton == 1 && (this.mouseButtons & 4) === 0) ||
@@ -200,8 +213,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.mouseEndX = event.data.global.x;
                 this.updateZoomingSelection();
             }
-        });
-        const mouseUpHandler = (event: PIXI.InteractionEvent) => {
+        };
+        this.stage.on('mousemove', this._stageMouseMoveHandler);
+
+        this._stageMouseUpHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             if (event.data.button === this.mouseDownButton && this.mousePanning) {
                 this.mousePanning = false;
@@ -211,10 +226,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             }
         };
-        this.stage.on('mouseup', mouseUpHandler);
-        this.stage.on('mouseupoutside', mouseUpHandler);
+        this.stage.on('mouseup', this._stageMouseUpHandler);
+        this.stage.on('mouseupoutside', this._stageMouseUpHandler);
 
-        const mouseWheelHandler = (ev: WheelEvent) => {
+        this._mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
                 const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
                 const zoomIn = ev.deltaY < 0;
@@ -231,16 +246,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
             ev.preventDefault();
         };
-
-        this.onCanvasEvent('mousemove', mouseMoveHandler);
-        this.onCanvasEvent('keydown', keyDownHandler);
-        this.onCanvasEvent('keyup', keyUpHandler);
-        this.onCanvasEvent('mousewheel', mouseWheelHandler);
-        this.onCanvasEvent('wheel', mouseWheelHandler);
-        this.onCanvasEvent('contextmenu', (e: MouseEvent) => {
+        this._contextMenuHandler = (e: MouseEvent) => {
             e.preventDefault();
-        });
-        const mouseDownListener = (e: MouseEvent) => {
+        };
+
+        this._mouseDownHandler = (e: MouseEvent) => {
             this.mouseButtons = e.buttons;
             // if only right button is pressed
             if (e.button === 2 && e.buttons === 2 && this.stage.cursor === 'default') {
@@ -273,13 +283,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.updateZoomingSelection();
             }
         };
-        this.onCanvasEvent('mousedown', mouseDownListener);
+        this.onCanvasEvent('mousemove', this._mouseMoveHandler);
+        this.onCanvasEvent('keydown', this._keyDownHandler);
+        this.onCanvasEvent('keyup', this._keyUpHandler);
+        this.onCanvasEvent('mousedown', this._mouseDownHandler);
+        this.onCanvasEvent('mousewheel', this._mouseWheelHandler);
+        this.onCanvasEvent('wheel', this._mouseWheelHandler);
+        this.onCanvasEvent('contextmenu', this._contextMenuHandler);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
         });
 
-        this.unitController.onViewRangeChanged(() => {
+        this._viewRangeChangedHandler = () => {
             this.updateScaleAndPosition();
             if (!this.fetching && this.unitController.viewRangeLength !== 0) {
                 this.maybeFetchNewData();
@@ -287,7 +303,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (this.mouseZooming) {
                 this.updateZoomingSelection();
             }
-        });
+        };
+        this.unitController.onViewRangeChanged(this._viewRangeChangedHandler);
         if (this.unitController.viewRangeLength && this.stateController.canvasDisplayWidth) {
             this.maybeFetchNewData();
         }
@@ -323,6 +340,38 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             });
             this.addChild(this.zoomingSelection);
         }
+    }
+
+    destroy() {
+        if (this._viewRangeChangedHandler) {
+            this.unitController.removeViewRangeChangedHandler(this._viewRangeChangedHandler);
+        }
+        if (this._mouseMoveHandler) {
+            this.removeOnCanvasEvent('mousemove', this._mouseMoveHandler);
+        }
+        if (this._mouseDownHandler) {
+            this.removeOnCanvasEvent('mousedown', this._mouseDownHandler);
+        }
+        if (this._keyDownHandler) {
+            this.removeOnCanvasEvent('keydown', this._keyDownHandler);
+        }
+        if (this._keyUpHandler) {
+            this.removeOnCanvasEvent('keyup', this._keyUpHandler);
+        }
+        if (this._mouseWheelHandler) {
+            this.removeOnCanvasEvent('mousewheel', this._mouseWheelHandler);
+            this.removeOnCanvasEvent('wheel', this._mouseWheelHandler);
+        }
+        if (this._contextMenuHandler) {
+            this.removeOnCanvasEvent('contextmenu', this._contextMenuHandler);
+        }
+        if (this.stage) {
+            this.stage.off('mousedown', this._stageMouseDownHandler);
+            this.stage.off('mousemove', this._stageMouseMoveHandler);
+            this.stage.off('mouseup', this._stageMouseUpHandler);
+            this.stage.off('mouseupoutside', this._stageMouseUpHandler);
+        }
+        super.destroy();
     }
 
     protected async maybeFetchNewData(update?: boolean) {

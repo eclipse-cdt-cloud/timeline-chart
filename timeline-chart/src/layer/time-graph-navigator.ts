@@ -3,17 +3,20 @@ import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphInteractionHandler } 
 import { TimeGraphStateController } from "../time-graph-state-controller";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphLayer } from "./time-graph-layer";
+import { TimelineChart } from "../time-graph-model";
 
 export class TimeGraphNavigator extends TimeGraphLayer {
 
     protected navigatorHandle: TimeGraphNavigatorHandle;
     protected selectionRange?: TimeGraphRectangle;
+    private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
 
     afterAddToContainer() {
-        this.unitController.onViewRangeChanged(() => this.update());
+        this._updateHandler = (): void => this.update();
+        this.unitController.onViewRangeChanged(this._updateHandler);
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
-        this.unitController.onSelectionRangeChange(() => this.update());
+        this.unitController.onSelectionRangeChange(this._updateHandler);
         this.update();
     }
 
@@ -43,6 +46,14 @@ export class TimeGraphNavigator extends TimeGraphLayer {
                 this.selectionRange.clear();
             }
         }
+    }
+
+    destroy() : void {
+        if (this.unitController) {
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+        }
+        super.destroy();
     }
 }
 

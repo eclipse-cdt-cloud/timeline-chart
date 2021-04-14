@@ -15,6 +15,15 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected secondCursor?: TimeGraphCursor;
     protected color: number = 0x0000ff;
 
+    private _stageMouseDownHandler: Function;
+    private _stageMouseMoveHandler: Function;
+    private _stageMouseUpHandler: Function;
+    
+    private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
+    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
+    private _keyDownHandler: (event: KeyboardEvent) => void;
+    private _keyUpHandler: (event: KeyboardEvent) => void;
+
     constructor(id: string, protected chartLayer: TimeGraphChart, protected rowController: TimeGraphRowController, style?: { color?: number }) {
         super(id, rowController);
         if (style && style.color) {
@@ -27,7 +36,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.shiftKeyDown = false
         this.stage.interactive = true;
 
-        const keyDownHandler = (event: KeyboardEvent) => {
+        this._updateHandler = (): void => this.update();
+
+        this._keyDownHandler = (event: KeyboardEvent) => {
             if (event.key === 'Shift' && this.mouseButtons === 0 && !event.ctrlKey && !event.altKey) {
                 this.stage.cursor = 'crosshair';
             } else if (this.stage.cursor === 'crosshair' && !this.mouseSelecting &&
@@ -47,17 +58,17 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         };
 
-        const keyUpHandler = (event: KeyboardEvent) => {
+        this._keyUpHandler = (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
             if (this.stage.cursor === 'crosshair' && !this.mouseSelecting && event.key === 'Shift' ) {
                 this.stage.cursor = 'default';
             }
         };
 
-        this.onCanvasEvent('keydown', keyDownHandler);
-        this.onCanvasEvent('keyup', keyUpHandler);
+        this.onCanvasEvent('keydown', this._keyDownHandler);
+        this.onCanvasEvent('keyup', this._keyUpHandler);
 
-        this.stage.on('mousedown', (event: PIXI.InteractionEvent) => {
+        this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             // if only left button is pressed with or without Shift key
             if (event.data.button !== 0 || event.data.buttons !== 1 ||
@@ -82,8 +93,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     end: xpos
                 }
             }
-        });
-        this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
+        };
+        this.stage.on('mousedown', this._stageMouseDownHandler);
+        this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             if (this.mouseSelecting && this.unitController.selectionRange) {
                 if ((this.mouseButtons & 1) === 0) {
@@ -103,8 +115,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     end: xEndPos
                 }
             }
-        });
-        const mouseUpHandler = (event: PIXI.InteractionEvent) => {
+        }
+        this.stage.on('mousemove', this._stageMouseMoveHandler);
+    
+        this._stageMouseUpHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             if (this.mouseSelecting && event.data.button === 0) {
                 this.mouseSelecting = false;
@@ -114,10 +128,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 }
             }
         };
-        this.stage.on('mouseup', mouseUpHandler);
-        this.stage.on('mouseupoutside', mouseUpHandler);
+        this.stage.on('mouseup', this._stageMouseUpHandler);
+        this.stage.on('mouseupoutside', this._stageMouseUpHandler);
         // right mouse button is not detected on stage
-        this.onCanvasEvent('mousedown', (e: MouseEvent) => {
+        this._mouseDownHandler = (e: MouseEvent) => {
             this.mouseButtons = e.buttons;
             // if right button is pressed
             if (e.button === 2) {
@@ -130,10 +144,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 }
                 document.addEventListener('mouseup', mouseUpListener);
             }
-        });
-
-        this.unitController.onViewRangeChanged(() => this.update());
-        this.unitController.onSelectionRangeChange(() => this.update());
+        };
+        this.onCanvasEvent('mousedown', this._mouseDownHandler);
+        this.unitController.onViewRangeChanged(this._updateHandler);
+        this.unitController.onSelectionRangeChange(this._updateHandler);
         this.update();
     }
 
@@ -286,5 +300,28 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             delete this.firstCursor;
             delete this.secondCursor;
         }
+    }
+
+    destroy() : void {
+        if (this.unitController) {
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+        }
+        if (this._mouseDownHandler) {
+            this.removeOnCanvasEvent('mousedown', this._mouseDownHandler);
+        }
+        if (this._keyDownHandler) {
+            this.removeOnCanvasEvent('keydown', this._keyDownHandler);
+        }
+        if (this._keyUpHandler) {
+            this.removeOnCanvasEvent('mousedown', this._keyUpHandler);
+        }
+        if (this.stage) {
+            this.stage.off('mousedown', this._stageMouseDownHandler);
+            this.stage.off('mousemove', this._stageMouseMoveHandler);
+            this.stage.off('mouseup', this._stageMouseUpHandler);
+            this.stage.off('mouseupoutside', this._stageMouseUpHandler);
+        }
+        super.destroy();
     }
 }

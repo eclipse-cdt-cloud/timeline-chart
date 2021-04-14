@@ -46,6 +46,10 @@ export abstract class TimeGraphLayer {
         this.canvas.addEventListener(type, handler);
     }
 
+    protected removeOnCanvasEvent(type: string, handler: (event: Event) => void) {
+        this.canvas.removeEventListener(type, handler);
+    }
+
     protected removeChildren() {
         this.children.forEach(child => child.destroy());
         this.children = [];
@@ -62,6 +66,10 @@ export abstract class TimeGraphLayer {
     }
 
     protected afterAddToContainer() { }
+
+    destroy() { 
+        this.removeChildren();
+    }
 
     abstract update(): void;
 }
