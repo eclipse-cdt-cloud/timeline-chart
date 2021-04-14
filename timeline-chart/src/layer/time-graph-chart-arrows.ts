@@ -6,9 +6,11 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected arrows: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>;
+    private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; };
 
     protected afterAddToContainer() {
-        this.unitController.onViewRangeChanged(() => this.update());
+        this._updateHandler = (): void => this.update();
+        this.unitController.onViewRangeChanged(this._updateHandler);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
@@ -40,7 +42,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
             throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
         if (this.arrows) {
-            this.arrows.forEach(rowEl => rowEl.destroy());
+            this.removeChildren();
         }
         this.arrows = new Map();
         arrows.forEach(arrow => {
@@ -64,4 +66,10 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         }
     }
 
+    destroy() : void {
+        if (this.unitController) {
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+        }
+        super.destroy();
+    }
 }

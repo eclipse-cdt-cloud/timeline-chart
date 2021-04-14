@@ -33,8 +33,22 @@ export class TimeGraphUnitController {
         this.viewRangeChangedHandlers.push(handler);
     }
 
+    removeViewRangeChangedHandler(handler: (viewRange: TimelineChart.TimeGraphRange) => void) {
+        const index = this.viewRangeChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.viewRangeChangedHandlers.splice(index, 1);
+        }
+    }
+
     onSelectionRangeChange(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
         this.selectionRangeChangedHandlers.push(handler);
+    }
+
+    removeSelectionRangeChangedHandler(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
+        const index = this.selectionRangeChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.selectionRangeChangedHandlers.splice(index, 1);
+        }
     }
 
     get viewRange(): TimelineChart.TimeGraphRange {

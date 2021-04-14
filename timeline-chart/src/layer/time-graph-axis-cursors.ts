@@ -1,10 +1,12 @@
 import { TimeGraphAxisCursor } from "../components/time-graph-axis-cursor";
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphLayer } from "./time-graph-layer";
 
 export class TimeGraphAxisCursors extends TimeGraphLayer {
     protected firstCursor?: TimeGraphAxisCursor;
     protected secondCursor?: TimeGraphAxisCursor;
     protected color: number = 0x0000ff;
+    private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
 
     constructor(id: string, style?: { color?: number }) {
         super(id);
@@ -15,8 +17,9 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
     }
 
     afterAddToContainer() {
-        this.unitController.onViewRangeChanged(() => this.update());
-        this.unitController.onSelectionRangeChange(() => this.update());
+        this._updateHandler = (): void => this.update();
+        this.unitController.onViewRangeChanged(this._updateHandler);
+        this.unitController.onSelectionRangeChange(this._updateHandler);
         this.update();
     }
 
@@ -59,5 +62,13 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
             delete this.firstCursor;
             delete this.secondCursor;
         }
+    }
+
+    destroy(): void {
+        if (this.unitController) {
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+        }
+        super.destroy();
     }
 }

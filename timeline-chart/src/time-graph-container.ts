@@ -101,4 +101,9 @@ export class TimeGraphContainer {
         this.layers.push(layer);
         layer.initializeLayer(this._canvas, this.stage, this.stateController, this.unitController);
     }
+
+    destroy() {
+        this.layers.forEach(l => l.destroy());
+        this.application.destroy(true);
+    }
 }
