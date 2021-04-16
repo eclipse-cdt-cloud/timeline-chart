@@ -84,7 +84,17 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         });
         this.stage.on('mousemove', (event: PIXI.InteractionEvent) => {
+            this.mouseButtons = event.data.buttons;
             if (this.mouseSelecting && this.unitController.selectionRange) {
+                if ((this.mouseButtons & 1) === 0) {
+                    // handle missed button mouseup event
+                    this.mouseSelecting = false;
+                    const orig = event.data.originalEvent;
+                    if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                        this.stage.cursor = 'default';
+                    }
+                    return;
+                }
                 const mouseX = event.data.global.x;
                 const xStartPos = this.unitController.selectionRange.start;
                 const xEndPos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
@@ -106,6 +116,22 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         };
         this.stage.on('mouseup', mouseUpHandler);
         this.stage.on('mouseupoutside', mouseUpHandler);
+        // right mouse button is not detected on stage
+        this.onCanvasEvent('mousedown', (e: MouseEvent) => {
+            this.mouseButtons = e.buttons;
+            // if right button is pressed
+            if (e.button === 2) {
+                // this is the only way to detect mouseup outside of right button
+                const mouseUpListener = (e: MouseEvent) => {
+                    this.mouseButtons = e.buttons;
+                    if (e.button === 2) {
+                        document.removeEventListener('mouseup', mouseUpListener);
+                    }
+                }
+                document.addEventListener('mouseup', mouseUpListener);
+            }
+        });
+
         this.unitController.onViewRangeChanged(() => this.update());
         this.unitController.onSelectionRangeChange(() => this.update());
         this.update();
