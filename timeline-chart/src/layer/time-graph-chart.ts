@@ -347,6 +347,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         this.selectStateInNavigation();
                     }
                     if (this.mouseZooming) {
+                        delete this.zoomingSelection;
                         this.updateZoomingSelection();
                     }
                 }
