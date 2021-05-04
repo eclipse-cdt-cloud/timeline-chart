@@ -9,7 +9,7 @@ import { TimeGraphChartSelectionRange } from "timeline-chart/lib/layer/time-grap
 import { TimeGraphAxisCursors } from "timeline-chart/lib/layer/time-graph-axis-cursors";
 // import { timeGraph } from "timeline-chart/lib/test-data";
 import { TimelineChart } from "timeline-chart/lib/time-graph-model";
-import { TimeGraphRowElementStyle } from "timeline-chart/lib/components/time-graph-row-element";
+import { TimeGraphStateStyle } from "timeline-chart/lib/components/time-graph-state";
 import { TestDataProvider } from "./test-data-provider";
 import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-grid";
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
@@ -23,7 +23,7 @@ const styleConfig = {
     cursorColor: 0xb77f09
 }
 
-const styleMap = new Map<string, TimeGraphRowElementStyle>();
+const styleMap = new Map<string, TimeGraphStateStyle>();
 
 const container = document.getElementById('main');
 if (!container) {
@@ -95,8 +95,8 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
             resolution: newResolution
         };
     },
-    rowElementStyleProvider: (model: TimelineChart.TimeGraphState) => {
-        const styles: TimeGraphRowElementStyle[] = [
+    stateStyleProvider: (model: TimelineChart.TimeGraphState) => {
+        const styles: TimeGraphStateStyle[] = [
             {
                 color: 0x11ad1b,
                 height: rowHeight * 0.8
@@ -108,7 +108,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
                 height: rowHeight * 0.6
             }
         ];
-        let style: TimeGraphRowElementStyle | undefined = styles[0];
+        let style: TimeGraphStateStyle | undefined = styles[0];
         if (model.data && model.data.value) {
             const val = model.data.value;
             style = styleMap.get(val);
@@ -135,7 +135,7 @@ const timeGraphChart = new TimeGraphChart('timeGraphChart', {
 }, rowController);
 timeGraphChartContainer.addLayer(timeGraphChart);
 
-timeGraphChart.registerRowElementMouseInteractions({
+timeGraphChart.registerStateMouseInteractions({
     click: el => {
         console.log(el.model.label);
         if (el.model.data) {

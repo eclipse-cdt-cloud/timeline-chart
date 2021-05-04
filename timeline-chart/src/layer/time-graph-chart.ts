@@ -3,22 +3,22 @@ import { TimeGraphAnnotationComponent, TimeGraphAnnotationComponentOptions, Time
 import { TimeGraphComponent, TimeGraphRect, TimeGraphStyledRect } from "../components/time-graph-component";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
-import { TimeGraphRowElement, TimeGraphRowElementStyle } from "../components/time-graph-row-element";
+import { TimeGraphStateComponent, TimeGraphStateStyle } from "../components/time-graph-state";
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
-export interface TimeGraphRowElementMouseInteractions {
-    click?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
-    mouseover?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
-    mouseout?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
-    mousedown?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
-    mouseup?: (el: TimeGraphRowElement, ev: PIXI.InteractionEvent) => void
+export interface TimeGraphStateMouseInteractions {
+    click?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
+    mouseover?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
+    mouseout?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
+    mousedown?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
+    mouseup?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
 }
 
 export interface TimeGraphChartProviders {
     dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
-    rowElementStyleProvider?: (el: TimelineChart.TimeGraphState) => TimeGraphRowElementStyle | undefined
+    stateStyleProvider?: (el: TimelineChart.TimeGraphState) => TimeGraphStateStyle | undefined
     rowAnnotationStyleProvider?: (el: TimelineChart.TimeGraphAnnotation) => TimeGraphAnnotationStyle | undefined
     rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
@@ -36,10 +36,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected rows: TimelineChart.TimeGraphRowModel[];
     protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
-    protected rowStateComponents: Map<TimelineChart.TimeGraphState, TimeGraphRowElement>;
+    protected rowStateComponents: Map<TimelineChart.TimeGraphState, TimeGraphStateComponent>;
     protected rowAnnotationComponents: Map<TimelineChart.TimeGraphAnnotation, TimeGraphAnnotationComponent>;
-    protected rowElementMouseInteractions: TimeGraphRowElementMouseInteractions;
-    protected selectedElementModel: TimelineChart.TimeGraphState;
+    protected stateMouseInteractions: TimeGraphStateMouseInteractions;
+    protected selectedStateModel: TimelineChart.TimeGraphState;
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState) => void)[] = [];
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
@@ -458,8 +458,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    protected handleSelectedRowElementChange() {
-        this.selectedElementChangedHandler.forEach(handler => handler(this.selectedElementModel));
+    protected handleSelectedStateChange() {
+        this.selectedElementChangedHandler.forEach(handler => handler(this.selectedStateModel));
     }
 
     protected addRow(row: TimelineChart.TimeGraphRowModel, height: number, rowIndex: number) {
@@ -482,16 +482,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (this.rowController.selectedRow && this.rowController.selectedRow.id === row.id) {
             this.selectRow(row);
         }
-        row.states.forEach((rowElementModel: TimelineChart.TimeGraphState) => {
-            const el = this.createNewRowElement(rowElementModel, rowComponent);
+        row.states.forEach((stateModel: TimelineChart.TimeGraphState) => {
+            const el = this.createNewState(stateModel, rowComponent);
             if (el) {
                 this.addElementInteractions(el);
                 this.addChild(el);
-                if (this.selectedElementModel && this.rowController.selectedRow
+                if (this.selectedStateModel && this.rowController.selectedRow
                     && this.rowController.selectedRow.id === row.id
-                    && this.selectedElementModel.range.start === el.model.range.start
-                    && this.selectedElementModel.range.end === el.model.range.end) {
-                    this.selectRowElement(el.model);
+                    && this.selectedStateModel.range.start === el.model.range.start
+                    && this.selectedStateModel.range.end === el.model.range.end) {
+                    this.selectState(el.model);
                 }
             }
         });
@@ -512,51 +512,51 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return el;
     }
 
-    protected createNewRowElement(rowElementModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphRowElement | undefined {
-        const start = this.getPixels(rowElementModel.range.start - this.unitController.viewRange.start);
-        const end = this.getPixels(rowElementModel.range.end - this.unitController.viewRange.start);
-        let el: TimeGraphRowElement | undefined;
+    protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
+        const start = this.getPixels(stateModel.range.start - this.unitController.viewRange.start);
+        const end = this.getPixels(stateModel.range.end - this.unitController.viewRange.start);
+        let el: TimeGraphStateComponent | undefined;
         const range: TimelineChart.TimeGraphRange = {
             start,
             end
         };
-        const displayStart = this.getPixels(Math.max(rowElementModel.range.start, this.unitController.viewRange.start));
-        const displayEnd = this.getPixels(Math.min(rowElementModel.range.end, this.unitController.viewRange.end));
+        const displayStart = this.getPixels(Math.max(stateModel.range.start, this.unitController.viewRange.start));
+        const displayEnd = this.getPixels(Math.min(stateModel.range.end, this.unitController.viewRange.end));
         const displayWidth = displayEnd - displayStart;
-        const elementStyle = this.providers.rowElementStyleProvider ? this.providers.rowElementStyleProvider(rowElementModel) : undefined;
-        el = new TimeGraphRowElement(rowElementModel.id, rowElementModel, range, rowComponent, elementStyle, displayWidth);
-        this.rowStateComponents.set(rowElementModel, el);
+        const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
+        el = new TimeGraphStateComponent(stateModel.id, stateModel, range, rowComponent, elementStyle, displayWidth);
+        this.rowStateComponents.set(stateModel, el);
         return el;
     }
 
-    protected addElementInteractions(el: TimeGraphRowElement) {
+    protected addElementInteractions(el: TimeGraphStateComponent) {
         el.displayObject.interactive = true;
         el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
             if (!this.mousePanning && !this.mouseZooming) {
-                this.selectRowElement(el.model);
+                this.selectState(el.model);
             }
-            if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.click) {
-                this.rowElementMouseInteractions.click(el, e);
+            if (this.stateMouseInteractions && this.stateMouseInteractions.click) {
+                this.stateMouseInteractions.click(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
-            if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseover) {
-                this.rowElementMouseInteractions.mouseover(el, e);
+            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseover) {
+                this.stateMouseInteractions.mouseover(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseout', ((e: PIXI.InteractionEvent) => {
-            if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseout) {
-                this.rowElementMouseInteractions.mouseout(el, e);
+            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseout) {
+                this.stateMouseInteractions.mouseout(el, e);
             }
         }).bind(this));
         el.displayObject.on('mousedown', ((e: PIXI.InteractionEvent) => {
-            if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mousedown) {
-                this.rowElementMouseInteractions.mousedown(el, e);
+            if (this.stateMouseInteractions && this.stateMouseInteractions.mousedown) {
+                this.stateMouseInteractions.mousedown(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseup', ((e: PIXI.InteractionEvent) => {
-            if (this.rowElementMouseInteractions && this.rowElementMouseInteractions.mouseup) {
-                this.rowElementMouseInteractions.mouseup(el, e);
+            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseup) {
+                this.stateMouseInteractions.mouseup(el, e);
             }
         }).bind(this));
     }
@@ -579,7 +579,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected updateElementStyle(model: TimelineChart.TimeGraphState) {
-        const style = this.providers.rowElementStyleProvider && this.providers.rowElementStyleProvider(model);
+        const style = this.providers.stateStyleProvider && this.providers.stateStyleProvider(model);
         const component = this.rowStateComponents.get(model);
         component && style && (component.style = style);
     }
@@ -590,11 +590,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         component && style && (component.style = style);
     }
 
-    registerRowElementMouseInteractions(interactions: TimeGraphRowElementMouseInteractions) {
-        this.rowElementMouseInteractions = interactions;
+    registerStateMouseInteractions(interactions: TimeGraphStateMouseInteractions) {
+        this.stateMouseInteractions = interactions;
     }
 
-    onSelectedRowElementChanged(handler: (el: TimelineChart.TimeGraphState | undefined) => void) {
+    onSelectedStateChanged(handler: (el: TimelineChart.TimeGraphState | undefined) => void) {
         this.selectedElementChangedHandler.push(handler);
     }
 
@@ -602,11 +602,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return this.rows;
     }
 
-    getElementById(id: string): TimeGraphRowElement | undefined {
+    getElementById(id: string): TimeGraphStateComponent | undefined {
         const element: TimeGraphComponent | undefined = this.children.find((child) => {
             return child.id === id;
         });
-        return element as TimeGraphRowElement;
+        return element as TimeGraphStateComponent;
     }
 
     selectRow(row: TimelineChart.TimeGraphRowModel) {
@@ -619,28 +619,28 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.updateRowStyle(row);
     }
 
-    getSelectedRowElement(): TimelineChart.TimeGraphState {
-        return this.selectedElementModel;
+    getSelectedState(): TimelineChart.TimeGraphState {
+        return this.selectedStateModel;
     }
 
-    selectRowElement(model: TimelineChart.TimeGraphState | undefined) {
-        if (this.selectedElementModel) {
-            delete this.selectedElementModel.selected;
-            this.updateElementStyle(this.selectedElementModel);
+    selectState(model: TimelineChart.TimeGraphState | undefined) {
+        if (this.selectedStateModel) {
+            delete this.selectedStateModel.selected;
+            this.updateElementStyle(this.selectedStateModel);
         }
         if (model) {
             const el = this.getElementById(model.id);
             if (el) {
                 const row = el.row;
                 if (row) {
-                    this.selectedElementModel = el.model;
+                    this.selectedStateModel = el.model;
                     el.model.selected = true;
-                    this.updateElementStyle(this.selectedElementModel);
+                    this.updateElementStyle(this.selectedStateModel);
                     this.selectRow(row.model);
                 }
             }
         }
-        this.handleSelectedRowElementChange();
+        this.handleSelectedStateChange();
     }
 
     setNavigationFlag(flag: boolean) {
@@ -651,8 +651,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const rowElement = row.states.find((rowElementModel: TimelineChart.TimeGraphState) => rowElementModel.range.start === cursorPosition || rowElementModel.range.end === cursorPosition);
-            this.selectRowElement(rowElement);
+            const state = row.states.find((stateModel: TimelineChart.TimeGraphState) => stateModel.range.start === cursorPosition || stateModel.range.end === cursorPosition);
+            this.selectState(state);
         }
         this.setNavigationFlag(false);
     }

@@ -80,7 +80,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             this.stage.cursor = 'crosshair';
             const mouseX = event.data.global.x;
             const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
-            this.chartLayer.selectRowElement(undefined);
+            this.chartLayer.selectState(undefined);
             if (extendSelection) {
                 const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
                 this.unitController.selectionRange = {
@@ -164,13 +164,13 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const prevState = row.states.slice().reverse().find((rowElementModel: TimelineChart.TimeGraphState) => cursorPosition > rowElementModel.range.end ||
-                (cursorPosition > rowElementModel.range.start && cursorPosition <= rowElementModel.range.end));
+            const prevState = row.states.slice().reverse().find((stateModel: TimelineChart.TimeGraphState) => cursorPosition > stateModel.range.end ||
+                (cursorPosition > stateModel.range.start && cursorPosition <= stateModel.range.end));
 
             if (prevState) {
                 const newPos = cursorPosition > prevState.range.end ? prevState.range.end : prevState.range.start;
                 this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : newPos, end: newPos };
-                this.chartLayer.selectRowElement(prevState);
+                this.chartLayer.selectState(prevState);
             } else {
                 this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : row.prevPossibleState, end: row.prevPossibleState };
                 this.chartLayer.setNavigationFlag(true);
@@ -183,13 +183,13 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const nextState = row.states.find((rowElementModel: TimelineChart.TimeGraphState) => cursorPosition < rowElementModel.range.start ||
-                (cursorPosition >= rowElementModel.range.start && cursorPosition < rowElementModel.range.end));
+            const nextState = row.states.find((stateModel: TimelineChart.TimeGraphState) => cursorPosition < stateModel.range.start ||
+                (cursorPosition >= stateModel.range.start && cursorPosition < stateModel.range.end));
 
             if (nextState) {
                 const newPos = cursorPosition < nextState.range.start ? nextState.range.start : nextState.range.end;
                 this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : newPos, end: newPos };
-                this.chartLayer.selectRowElement(nextState);
+                this.chartLayer.selectState(nextState);
             } else {
                 this.unitController.selectionRange = { start: this.shiftKeyDown ? this.unitController.selectionRange.start : row.nextPossibleState, end: row.nextPossibleState };
                 this.chartLayer.setNavigationFlag(true);
@@ -212,7 +212,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
             return false;
         });
-        state && this.chartLayer.selectRowElement(state);
+        state && this.chartLayer.selectState(state);
     }
 
     protected navigateUp() {
@@ -229,7 +229,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
             return false;
         })
-        state && this.chartLayer.selectRowElement(state);
+        state && this.chartLayer.selectState(state);
     }
 
     centerCursor() {
