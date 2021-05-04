@@ -1,6 +1,6 @@
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphParentComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimelineChart } from "../time-graph-model";
-import { TimeGraphRowElement } from "./time-graph-row-element";
+import { TimeGraphStateComponent } from "./time-graph-state";
 
 export interface TimeGraphRowStyle {
     backgroundColor?: number
@@ -12,7 +12,7 @@ export interface TimeGraphRowStyle {
 
 export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentComponent {
 
-    protected rowElements: TimeGraphRowElement[] = [];
+    protected states: TimeGraphStateComponent[] = [];
 
     constructor(
         id: string,
@@ -56,9 +56,9 @@ export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentC
     }
 
     // Gets called by TimeGraphLayer. Don't call it unless you know what you are doing.
-    addChild(rowElement: TimeGraphRowElement) {
-        this.rowElements.push(rowElement);
-        this._displayObject.addChild(rowElement.displayObject);
+    addChild(state: TimeGraphStateComponent) {
+        this.states.push(state);
+        this._displayObject.addChild(state.displayObject);
     }
 
     get style() {

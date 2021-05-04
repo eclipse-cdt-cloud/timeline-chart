@@ -4,14 +4,14 @@ import { TimelineChart } from "../time-graph-model";
 import { FontController } from "../time-graph-font-controller";
 import * as PIXI from "pixi.js-legacy";
 
-export interface TimeGraphRowElementStyle {
+export interface TimeGraphStateStyle {
     color?: number
     height?: number
     borderWidth?: number
     borderColor?: number
 }
 
-export class TimeGraphRowElement extends TimeGraphComponent {
+export class TimeGraphStateComponent extends TimeGraphComponent {
 
     protected _height: number;
     protected _position: TimeGraphElementPosition;
@@ -24,7 +24,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         protected _model: TimelineChart.TimeGraphState,
         protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
-        protected _style: TimeGraphRowElementStyle = { color: 0xfffa66, height: 14 },
+        protected _style: TimeGraphStateStyle = { color: 0xfffa66, height: 14 },
         protected displayWidth: number,
         displayObject?: PIXI.Graphics
     ) {
@@ -53,8 +53,8 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         if (!this._model.label) {
             return;
         }
-        const fontName = TimeGraphRowElement.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
-            TimeGraphRowElement.fontController.getDefaultFontName();
+        const fontName = TimeGraphStateComponent.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
+            TimeGraphStateComponent.fontController.getDefaultFontName();
         const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName });
         const textWidth = textObj.getLocalBounds().width;
         const position = {
@@ -112,7 +112,7 @@ export class TimeGraphRowElement extends TimeGraphComponent {
         return this._style;
     }
 
-    set style(style: TimeGraphRowElementStyle) {
+    set style(style: TimeGraphStateStyle) {
         if (style.color !== undefined) {
             this._options.color = style.color;
         }
