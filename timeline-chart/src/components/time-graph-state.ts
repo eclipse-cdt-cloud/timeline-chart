@@ -55,8 +55,6 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
         }
         const fontName = TimeGraphStateComponent.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
             TimeGraphStateComponent.fontController.getDefaultFontName();
-        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName });
-        const textWidth = textObj.getLocalBounds().width;
         const position = {
             x: this._options.position.x + this._options.width < 0 ? this._options.position.x : Math.max(0, this._options.position.x),
             y: this._options.position.y
@@ -64,7 +62,12 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
         const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
         const labelText = this._model.label;
         const textPadding = 0.5;
-
+        if (displayWidth < 3){
+            this.clearLabel();
+            return;
+        }
+        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName });
+        const textWidth = textObj.getLocalBounds().width;
         let textObjX = position.x + textPadding;
         const textObjY = position.y + textPadding;
         let displayLabel = "";
@@ -81,14 +84,24 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
                 displayLabel = partialLabel.concat("...");
             }
         }
-
-        const newTextObj = new PIXI.BitmapText(displayLabel, { fontName: fontName });
-        newTextObj.x = textObjX;
-        newTextObj.y = textObjY;
-        this.displayObject.addChild(newTextObj);
+        if (displayLabel === ""){
+            this.clearLabel();
+            return;
+        }
+        if (displayLabel === this._model.label) {
+            textObj.x = textObjX;
+            textObj.y = textObjY;
+            this.displayObject.addChild(textObj);
+        } else {
+            const newTextObj = new PIXI.BitmapText(displayLabel, { fontName: fontName });
+            newTextObj.x = textObjX;
+            newTextObj.y = textObjY;
+            this.displayObject.addChild(newTextObj);
+        }
     }
 
     clearLabel() {
+        this.displayObject.children.forEach(element => element.destroy());
         this.displayObject.removeChildren();
     }
 
