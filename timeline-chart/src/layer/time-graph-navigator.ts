@@ -57,7 +57,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
     }
 }
 
-export class TimeGraphNavigatorHandle extends TimeGraphComponent {
+export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
 
     protected mouseIsDown: boolean;
     protected mouseStartX: number;

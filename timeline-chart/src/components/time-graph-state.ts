@@ -11,7 +11,7 @@ export interface TimeGraphStateStyle {
     borderColor?: number
 }
 
-export class TimeGraphStateComponent extends TimeGraphComponent {
+export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.TimeGraphState> {
 
     protected _height: number;
     protected _position: TimeGraphElementPosition;
@@ -21,14 +21,14 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
 
     constructor(
         id: string,
-        protected _model: TimelineChart.TimeGraphState,
+        model: TimelineChart.TimeGraphState,
         protected range: TimelineChart.TimeGraphRange,
         protected _row: TimeGraphRow,
         protected _style: TimeGraphStateStyle = { color: 0xfffa66, height: 14 },
         protected displayWidth: number,
         displayObject?: PIXI.Graphics
     ) {
-        super(id, displayObject);
+        super(id, displayObject, model);
         this._height = _style.height || 14;
         this._height = _row.height === 0 ? 0 : Math.min(this._height, _row.height - 1);
         this._position = {
@@ -50,7 +50,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
     }
 
     renderLabel() {
-        if (!this._model.label) {
+        if (!this.model.label) {
             return;
         }
         const fontName = TimeGraphStateComponent.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
@@ -60,13 +60,13 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
             y: this._options.position.y
         }
         const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
-        const labelText = this._model.label;
+        const labelText = this.model.label;
         const textPadding = 0.5;
         if (displayWidth < 3) {
             this.clearLabel();
             return;
         }
-        const textObj = new PIXI.BitmapText(this._model.label, { fontName: fontName });
+        const textObj = new PIXI.BitmapText(this.model.label, { fontName: fontName });
         const textWidth = textObj.getLocalBounds().width;
         let textObjX = position.x + textPadding;
         const textObjY = position.y + textPadding;
@@ -88,7 +88,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
             this.clearLabel();
             return;
         }
-        if (displayLabel === this._model.label) {
+        if (displayLabel === this.model.label) {
             textObj.x = textObjX;
             textObj.y = textObjY;
             this.displayObject.addChild(textObj);
@@ -111,10 +111,6 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
 
     get position(): TimeGraphElementPosition {
         return this._position;
-    }
-
-    get model(): TimelineChart.TimeGraphState {
-        return this._model;
     }
 
     get row(): TimeGraphRow {

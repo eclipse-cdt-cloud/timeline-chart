@@ -8,7 +8,7 @@ export abstract class TimeGraphLayer {
     private canvas: HTMLCanvasElement;
     protected stateController: TimeGraphStateController;
     protected unitController: TimeGraphUnitController;
-    protected children: TimeGraphComponent[];
+    protected children: TimeGraphComponent<any>[];
     protected stage: PIXI.Container;
     protected layer: PIXI.Container;
 
@@ -17,7 +17,7 @@ export abstract class TimeGraphLayer {
         this.layer = new PIXI.Container;
     }
 
-    protected addChild(child: TimeGraphComponent, parent?: TimeGraphParentComponent) {
+    protected addChild(child: TimeGraphComponent<any>, parent?: TimeGraphParentComponent) {
         if (!this.canvas) {
             throw ("Layers must be added to a container before components can be added.");
         }
@@ -55,7 +55,7 @@ export abstract class TimeGraphLayer {
         this.children = [];
     }
 
-    protected removeChild(child: TimeGraphComponent) {
+    protected removeChild(child: TimeGraphComponent<any>) {
         child.destroy();
         const idx = this.children.findIndex(c => c === child);
         idx && this.children.splice(idx, 1);

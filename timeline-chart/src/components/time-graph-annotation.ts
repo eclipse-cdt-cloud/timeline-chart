@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js-legacy"
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphComponentOptions } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row"
 
@@ -17,7 +18,7 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
 /*
  * This is only implementing a subset of the tick elements so far
  */
-export class TimeGraphAnnotationComponent extends TimeGraphComponent {
+export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineChart.TimeGraphAnnotation> {
 
     // TODO: make a map of the display objects
     // e.g. cross-14-black-middle etc...
@@ -27,11 +28,12 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
     protected _size: number;
 
     constructor(id: string,
+        model: TimelineChart.TimeGraphAnnotation,
         protected _options: TimeGraphAnnotationComponentOptions,
         protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross', verticalAlign: 'middle' },
         protected _row: TimeGraphRow,
         displayObject?: PIXI.Graphics) {
-        super(id, displayObject);
+        super(id, displayObject, model);
         this._size = _style.size || 7;
         // called to ensure consistency. Only the X component is used from options.
         this.update(_options);
@@ -43,6 +45,10 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
             this.updateYPosition();
         }
         super.update();
+    }
+
+    get row(): TimeGraphRow {
+        return this._row;
     }
 
     private updateYPosition() {

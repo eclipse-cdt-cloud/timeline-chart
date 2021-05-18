@@ -547,9 +547,16 @@ export const timeGraphStates = {
                 ],
                 "annotations": [
                     {
+                        "id": "symbol_1_0",
+                        "category": "symbol marker",
+                        "label": "symbol",
                         "range": {
                             "start": 1332170682486039800,
                             "end": 1332170682486039800
+                        },
+                        "data": {
+                            "symbol": "diamond",
+                            "color": 0xff00ff
                         }
                     }
                 ]
@@ -558,9 +565,16 @@ export const timeGraphStates = {
                 "entryID": 2,
                 "annotations": [
                     {
+                        "id": "symbol_2_0",
+                        "category": "symbol marker",
+                        "label": "symbol",
                         "range": {
                             "start": 1332170682497734100,
                             "end": 1332170682497734100
+                        },
+                        "data": {
+                            "symbol": "diamond",
+                            "color": 0xff00ff
                         }
                     }
                 ],
@@ -8873,10 +8887,17 @@ export const timeGraphStates = {
                 "entryId": -1,
                 "annotations": [
                     {
+                        "id": "range_0",
+                        "category": "range marker",
+                        "label": "range",
                         "range": {
                             "start": 1332170682486039800,
                             "end": 1332170682488039800
                         },
+                        "data": {
+                            "color": 0xff0000,
+                            "opacity": 0.2
+                        }
                     }
                 ],
                 "states": []

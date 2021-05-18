@@ -34,17 +34,21 @@ export type TimeGraphHorizontalLine = TimeGraphHorizontalElement & TimeGraphLine
 export type TimeGraphVerticalLine = TimeGraphVerticalElement & TimeGraphLineStyle;
 
 export interface TimeGraphParentComponent {
-    addChild(child: TimeGraphComponent): void;
+    addChild(child: TimeGraphComponent<any>): void;
 }
 
-export abstract class TimeGraphComponent {
+export abstract class TimeGraphComponent<T> {
     protected _displayObject: PIXI.Graphics;
+    protected _model: T;
     protected _options: TimeGraphComponentOptions;
 
     protected graphicsData: PIXI.GraphicsData;
 
-    constructor(protected _id: string, displayObject?: PIXI.Graphics) {
+    constructor(protected _id: string, displayObject?: PIXI.Graphics, model?: T) {
         this._displayObject = displayObject || new PIXI.Graphics();
+        if (model) {
+            this._model = model;
+        }
     }
 
     get id(): string {
@@ -53,6 +57,10 @@ export abstract class TimeGraphComponent {
 
     get displayObject(): PIXI.Graphics {
         return this._displayObject;
+    }
+
+    get model(): T {
+        return this._model;
     }
 
     clear() {
