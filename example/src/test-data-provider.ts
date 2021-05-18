@@ -193,12 +193,14 @@ export class TestDataProvider {
             const start = annotation.range.start - startTime;
             if (range.start < start && range.end > start) {
                 rangeEvents.push({
-                    id: 'mark_' + -1 + '_' + annotationIndex,
+                    id: annotation.id,
+                    category: annotation.category,
                     range: {
                         start: annotation.range.start - this.absoluteStart,
                         end: annotation.range.end - this.absoluteStart
                     },
-                    label: '',
+                    label: annotation.label,
+                    data: annotation.data
                 });
             }
         });
@@ -239,12 +241,14 @@ export class TestDataProvider {
                         const start = annotation.range.start - entry.startTime;
                         if (range.start < start && range.end > start) {
                             annotations.push({
-                                id: 'mark_' + rowIndex + '_' + annotationIndex,
+                                id: annotation.id,
+                                category: annotation.category,
                                 range: {
                                     start: annotation.range.start - this.absoluteStart,
                                     end: annotation.range.end - this.absoluteStart
                                 },
-                                label: '',
+                                label: annotation.label,
+                                data: annotation.data
                             });
                         }
                     });

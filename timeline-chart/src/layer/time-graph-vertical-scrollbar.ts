@@ -41,7 +41,7 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
     }
 }
 
-export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent {
+export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
 
     protected mouseIsDown: boolean;
     protected mouseStartY: number;

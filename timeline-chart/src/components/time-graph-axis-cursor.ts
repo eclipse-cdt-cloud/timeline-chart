@@ -5,7 +5,7 @@ export interface TimeGraphAxisCursorOptions extends TimeGraphComponentOptions {
     color: number
 }
 
-export class TimeGraphAxisCursor extends TimeGraphComponent {
+export class TimeGraphAxisCursor extends TimeGraphComponent<null> {
 
     constructor(protected _options: TimeGraphAxisCursorOptions) {
         super('cursor');

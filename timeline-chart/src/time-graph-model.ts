@@ -43,6 +43,7 @@ export namespace TimelineChart {
 
     export interface TimeGraphAnnotation {
         readonly id: string
+        readonly category: string
         readonly range: TimeGraphRange
         readonly label: string
         selected?: boolean

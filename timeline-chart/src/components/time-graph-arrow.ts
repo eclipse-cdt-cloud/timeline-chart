@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js-legacy"
 
+import { TimelineChart } from "../time-graph-model";
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphComponentOptions } from "./time-graph-component";
 
 export interface TimeGraphArrowCoordinates extends TimeGraphComponentOptions {
@@ -7,12 +8,14 @@ export interface TimeGraphArrowCoordinates extends TimeGraphComponentOptions {
     end: TimeGraphElementPosition
 }
 
-export class TimeGraphArrowComponent extends TimeGraphComponent {
+export class TimeGraphArrowComponent extends TimeGraphComponent<TimelineChart.TimeGraphArrow> {
 
     protected head: PIXI.Graphics;
 
-    constructor(id: string, protected _options: TimeGraphArrowCoordinates) {
-        super(id);
+    constructor(id: string,
+        model: TimelineChart.TimeGraphArrow,
+        protected _options: TimeGraphArrowCoordinates) {
+        super(id, undefined, model);
 
         this.head = new PIXI.Graphics();
     }

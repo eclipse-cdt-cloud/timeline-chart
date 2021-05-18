@@ -10,7 +10,7 @@ export interface TimeGraphAxisStyle extends TimeGraphStyledRect {
     lineColor?: number
 }
 
-export class TimeGraphAxisScale extends TimeGraphComponent {
+export class TimeGraphAxisScale extends TimeGraphComponent<null> {
 
     protected mouseStartY: number;
     protected mouseStartX: number;

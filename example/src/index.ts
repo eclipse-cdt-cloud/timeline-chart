@@ -97,7 +97,11 @@ const providers = {
     },
     rowAnnotationStyleProvider: (annotation: TimelineChart.TimeGraphAnnotation) => {
         return {
-            color: 0xFF0000, size: 7, symbol: 'none', verticalAlign: 'middle', opacity: 0.2
+            color: annotation.data?.color,
+            size: 7 * (annotation.data && annotation.data.height ? annotation.data.height : 1.0),
+            symbol: annotation.data?.symbol,
+            verticalAlign: annotation.data?.verticalAlign,
+            opacity: annotation.data?.opacity
         }
     }
 }
@@ -143,12 +147,21 @@ timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
 const timeGraphChart = new TimeGraphChart('timeGraphChart', providers, rowController);
 timeGraphChartContainer.addLayer(timeGraphChart);
 
-timeGraphChart.registerStateMouseInteractions({
+timeGraphChart.registerMouseInteractions({
     click: el => {
-        console.log(el.model.label);
-        if (el.model.data) {
-            console.log(el.model.data.timeRange);
-        }
+        console.log('click: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+    },
+    mouseover: el => {
+        console.log('mouseover: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+    },
+    mouseout: el => {
+        console.log('mouseout: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+    },
+    mousedown: el => {
+        console.log('mousedown: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+    },
+    mouseup: el => {
+        console.log('mouseup: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
     }
 });
 

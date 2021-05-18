@@ -1,6 +1,6 @@
 import { TimeGraphComponent, TimeGraphStyledRect } from "./time-graph-component";
 
-export class TimeGraphRectangle extends TimeGraphComponent {
+export class TimeGraphRectangle extends TimeGraphComponent<null> {
     protected _options: TimeGraphStyledRect;
 
     constructor(protected opts: TimeGraphStyledRect) {

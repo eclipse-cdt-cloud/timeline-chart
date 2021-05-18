@@ -10,7 +10,7 @@ export interface TimeGraphRowStyle {
     lineOpacity?: number
 }
 
-export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentComponent {
+export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowModel> implements TimeGraphParentComponent {
 
     protected states: TimeGraphStateComponent[] = [];
 
@@ -18,9 +18,9 @@ export class TimeGraphRow extends TimeGraphComponent implements TimeGraphParentC
         id: string,
         protected _options: TimeGraphStyledRect,
         protected _rowIndex: number,
-        public readonly model: TimelineChart.TimeGraphRowModel,
+        model: TimelineChart.TimeGraphRowModel,
         protected _style: TimeGraphRowStyle = { lineOpacity: 0.5, lineThickness: 1, backgroundOpacity: 0 }) {
-        super(id);
+        super(id, undefined, model);
     }
 
     get rowIndex(): number {

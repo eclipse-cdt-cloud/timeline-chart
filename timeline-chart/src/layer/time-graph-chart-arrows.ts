@@ -32,7 +32,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected addArrow(arrow: TimelineChart.TimeGraphArrow) {
         const coords = this.getCoordinates(arrow);
-        const arrowComponent = new TimeGraphArrowComponent('arrow', coords);
+        const arrowComponent = new TimeGraphArrowComponent('arrow', arrow, coords);
         this.arrows.set(arrow, arrowComponent);
         this.addChild(arrowComponent);
     }

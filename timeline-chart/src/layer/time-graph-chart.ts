@@ -8,12 +8,12 @@ import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
-export interface TimeGraphStateMouseInteractions {
-    click?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
-    mouseover?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
-    mouseout?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
-    mousedown?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
-    mouseup?: (el: TimeGraphStateComponent, ev: PIXI.InteractionEvent) => void
+export interface TimeGraphMouseInteractions {
+    click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    mouseout?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    mousedown?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    mouseup?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
 }
 
 export interface TimeGraphChartProviders {
@@ -38,7 +38,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
     protected rowStateComponents: Map<TimelineChart.TimeGraphState, TimeGraphStateComponent>;
     protected rowAnnotationComponents: Map<TimelineChart.TimeGraphAnnotation, TimeGraphAnnotationComponent>;
-    protected stateMouseInteractions: TimeGraphStateMouseInteractions;
+    protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
     protected providedRange: TimelineChart.TimeGraphRange;
@@ -498,6 +498,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
             const el = this.createNewAnnotation(annotation, rowComponent);
             if (el) {
+                this.addElementInteractions(el);
                 this.addChild(el);
             }
         });
@@ -507,7 +508,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const start = this.getPixels(annotation.range.start - this.unitController.viewRange.start);
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
-        el = new TimeGraphAnnotationComponent(annotation.id, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
+        el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
         this.rowAnnotationComponents.set(annotation, el);
         return el;
     }
@@ -529,34 +530,34 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return el;
     }
 
-    protected addElementInteractions(el: TimeGraphStateComponent) {
+    protected addElementInteractions(el: TimeGraphComponent<any>) {
         el.displayObject.interactive = true;
         el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
-            if (!this.mousePanning && !this.mouseZooming) {
+            if (el instanceof TimeGraphStateComponent && !this.mousePanning && !this.mouseZooming) {
                 this.selectState(el.model);
             }
-            if (this.stateMouseInteractions && this.stateMouseInteractions.click) {
-                this.stateMouseInteractions.click(el, e);
+            if (this.mouseInteractions && this.mouseInteractions.click) {
+                this.mouseInteractions.click(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
-            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseover) {
-                this.stateMouseInteractions.mouseover(el, e);
+            if (this.mouseInteractions && this.mouseInteractions.mouseover) {
+                this.mouseInteractions.mouseover(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseout', ((e: PIXI.InteractionEvent) => {
-            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseout) {
-                this.stateMouseInteractions.mouseout(el, e);
+            if (this.mouseInteractions && this.mouseInteractions.mouseout) {
+                this.mouseInteractions.mouseout(el, e);
             }
         }).bind(this));
         el.displayObject.on('mousedown', ((e: PIXI.InteractionEvent) => {
-            if (this.stateMouseInteractions && this.stateMouseInteractions.mousedown) {
-                this.stateMouseInteractions.mousedown(el, e);
+            if (this.mouseInteractions && this.mouseInteractions.mousedown) {
+                this.mouseInteractions.mousedown(el, e);
             }
         }).bind(this));
         el.displayObject.on('mouseup', ((e: PIXI.InteractionEvent) => {
-            if (this.stateMouseInteractions && this.stateMouseInteractions.mouseup) {
-                this.stateMouseInteractions.mouseup(el, e);
+            if (this.mouseInteractions && this.mouseInteractions.mouseup) {
+                this.mouseInteractions.mouseup(el, e);
             }
         }).bind(this));
     }
@@ -590,8 +591,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         component && style && (component.style = style);
     }
 
-    registerStateMouseInteractions(interactions: TimeGraphStateMouseInteractions) {
-        this.stateMouseInteractions = interactions;
+    registerMouseInteractions(interactions: TimeGraphMouseInteractions) {
+        this.mouseInteractions = interactions;
     }
 
     onSelectedStateChanged(handler: (el: TimelineChart.TimeGraphState | undefined) => void) {
@@ -603,7 +604,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     getElementById(id: string): TimeGraphStateComponent | undefined {
-        const element: TimeGraphComponent | undefined = this.children.find((child) => {
+        const element: TimeGraphComponent<any> | undefined = this.children.find((child) => {
             return child.id === id;
         });
         return element as TimeGraphStateComponent;

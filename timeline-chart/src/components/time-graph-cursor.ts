@@ -7,7 +7,7 @@ export interface TimeGraphCursorOptions {
     thickness?: number
 }
 
-export class TimeGraphCursor extends TimeGraphComponent{
+export class TimeGraphCursor extends TimeGraphComponent<null> {
     constructor(opts: TimeGraphCursorOptions){
         super('cursor');
         this._options = opts;
