@@ -39,8 +39,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected rowStateComponents: Map<TimelineChart.TimeGraphState, TimeGraphStateComponent>;
     protected rowAnnotationComponents: Map<TimelineChart.TimeGraphAnnotation, TimeGraphAnnotationComponent>;
     protected stateMouseInteractions: TimeGraphStateMouseInteractions;
-    protected selectedStateModel: TimelineChart.TimeGraphState;
-    protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState) => void)[] = [];
+    protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
+    protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
 
@@ -619,7 +619,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.updateRowStyle(row);
     }
 
-    getSelectedState(): TimelineChart.TimeGraphState {
+    getSelectedState(): TimelineChart.TimeGraphState | undefined {
         return this.selectedStateModel;
     }
 
@@ -639,6 +639,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.selectRow(row.model);
                 }
             }
+        } else {
+            this.selectedStateModel = undefined;
         }
         this.handleSelectedStateChange();
     }
