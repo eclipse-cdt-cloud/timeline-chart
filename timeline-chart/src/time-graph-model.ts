@@ -9,6 +9,7 @@ export namespace TimelineChart {
         totalLength: number
         rows: TimeGraphRowModel[]
         arrows: TimeGraphArrow[]
+        rangeEvents: TimeGraphAnnotation[]
         readonly data?: { [key: string]: any }
     }
 
