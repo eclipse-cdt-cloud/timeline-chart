@@ -4,6 +4,8 @@ import { TimeGraphRow } from "./time-graph-row"
 
 export interface TimeGraphAnnotationComponentOptions extends TimeGraphComponentOptions {
     position: TimeGraphElementPosition
+    width: number
+    height: number
 }
 
 export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
@@ -11,6 +13,7 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
     size?: number
     color?: number
     verticalAlign?: string
+    opacity?: number
 }
 
 /*
@@ -27,8 +30,8 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
 
     constructor(id: string,
         protected _options: TimeGraphAnnotationComponentOptions,
-        protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross', verticalAlign: 'middle' },
-        protected _row: TimeGraphRow,
+        protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: undefined, verticalAlign: 'middle'},
+        protected _row?: TimeGraphRow,
         displayObject?: PIXI.Graphics) {
         super(id, displayObject);
         this._size = _style.size || 7;
@@ -39,6 +42,8 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
     update(opts: TimeGraphAnnotationComponentOptions): void {
         if (opts) {
             this._options.position.x = opts.position.x;
+            this._options.width = opts.width;
+            this._options.height = opts.height;
             this.updateYPosition();
         }
         super.update();
@@ -47,7 +52,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
     private updateYPosition() {
         const align = this._style.verticalAlign;
         const size = this._style.size;
-        if (!!size) {
+        if (!!size && this._row) {
             const offset = align == 'top' ? size : align == 'bottom' ? this._row.height - size : this._row.height / 2;
             this._options.position.y = this._row.position.y + (offset);
         }
@@ -60,6 +65,15 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent {
         const y = this._options.position.y;
 
         if (symbol === undefined || symbol == 'none') {
+            this.rect(
+                {
+                    color: this._style.color,
+                    height: this._options.height,
+                    width: this._options.width,
+                    position: this._options.position,
+                    opacity: this._style.opacity
+                }
+            )
             return;
         }
         if (symbol == 'circle') {

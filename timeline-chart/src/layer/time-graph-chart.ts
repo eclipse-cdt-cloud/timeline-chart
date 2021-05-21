@@ -61,7 +61,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _stageMouseMoveHandler: Function;
     private _stageMouseUpHandler: Function;
 
-    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };    
+    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
     private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void; };
@@ -157,7 +157,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._keyUpHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
             if (triggerKeyEvent) {
-                if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control' ) {
+                if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control') {
                     this.stage.cursor = 'default';
                 }
             }
@@ -422,6 +422,24 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     }
                     comp.update(opts);
                 }
+
+                row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
+
+                    const el = this.rowAnnotationComponents.get(annotation);
+                    if (el) {
+                        // only handle ticks for now
+                        const start = annotation.range.start;
+                        const opts: TimeGraphAnnotationComponentOptions = {
+                            position: {
+                                x: this.getPixels(start - this.unitController.viewRange.start),
+                                y: el.displayObject.y
+                            },
+                            width: this.getPixels(annotation.range.end - annotation.range.start),
+                            height: this.layer.height
+                        }
+                        el.update(opts);
+                    }
+                });
                 row.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
                     const el = this.rowStateComponents.get(state);
                     if (el) {
@@ -440,20 +458,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         el.update(opts);
                     }
                 });
-                row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
-                    const el = this.rowAnnotationComponents.get(annotation);
-                    if (el) {
-                        // only handle ticks for now
-                        const start = annotation.range.start;
-                        const opts: TimeGraphAnnotationComponentOptions = {
-                            position: {
-                                x: this.getPixels(start - this.unitController.viewRange.start),
-                                y: el.displayObject.y
-                            }
-                        }
-                        el.update(opts);
-                    }
-                });
+
             });
         }
     }
@@ -482,6 +487,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (this.rowController.selectedRow && this.rowController.selectedRow.id === row.id) {
             this.selectRow(row);
         }
+
+        row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
+            const el = this.createNewAnnotation(annotation, rowComponent);
+            if (el) {
+                this.addChild(el);
+            }
+        });
         row.states.forEach((stateModel: TimelineChart.TimeGraphState) => {
             const el = this.createNewState(stateModel, rowComponent);
             if (el) {
@@ -495,19 +507,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             }
         });
-        row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
-            const el = this.createNewAnnotation(annotation, rowComponent);
-            if (el) {
-                this.addChild(el);
-            }
-        });
+
     }
 
     protected createNewAnnotation(annotation: TimelineChart.TimeGraphAnnotation, rowComponent: TimeGraphRow) {
         const start = this.getPixels(annotation.range.start - this.unitController.viewRange.start);
+        const width = this.getPixels(annotation.range.end - annotation.range.start);
+        const height = this.layer.height;
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
-        el = new TimeGraphAnnotationComponent(annotation.id, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
+        el = new TimeGraphAnnotationComponent(annotation.id, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) }, width, height }, elementStyle, rowComponent);
         this.rowAnnotationComponents.set(annotation, el);
         return el;
     }
