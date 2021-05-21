@@ -62,7 +62,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
         const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
         const labelText = this._model.label;
         const textPadding = 0.5;
-        if (displayWidth < 3){
+        if (displayWidth < 3) {
             this.clearLabel();
             return;
         }
@@ -84,7 +84,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent {
                 displayLabel = partialLabel.concat("...");
             }
         }
-        if (displayLabel === ""){
+        if (displayLabel === "") {
             this.clearLabel();
             return;
         }
