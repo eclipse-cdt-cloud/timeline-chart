@@ -17,9 +17,16 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     protected updateScaleAndPosition() {
         if (this.unitController.selectionRange && this.selectionRange) {
-            this.selectionRange.rectOptions.position.x = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            this.selectionRange.rectOptions.width = this.getPixels(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
-            this.selectionRange.update();
+            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const width = this.getPixels(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
+            this.selectionRange.update({
+                position: {
+                    x: firstCursorPosition,
+                    y: 0
+                },
+                height: this.stateController.canvasDisplayHeight,
+                width
+            });
         }
     }
 
@@ -58,8 +65,6 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
                     this.addChild(this.selectionRange);
                 } else {
                     this.selectionRange.update({
-                        color: this.color,
-                        opacity: 0.2,
                         position: {
                             x: firstCursorPosition,
                             y: 0

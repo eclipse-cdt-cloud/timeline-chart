@@ -21,7 +21,7 @@ export abstract class TimeGraphLayer {
         if (!this.canvas) {
             throw ("Layers must be added to a container before components can be added.");
         }
-        child.render();
+        child.update();
         if (parent) {
             parent.addChild(child);
         } else {

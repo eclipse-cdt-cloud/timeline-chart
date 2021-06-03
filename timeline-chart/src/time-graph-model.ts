@@ -8,6 +8,7 @@ export namespace TimelineChart {
         id: string
         totalLength: number
         rows: TimeGraphRowModel[]
+        rangeEvents: TimeGraphAnnotation[]
         arrows: TimeGraphArrow[]
         readonly data?: { [key: string]: any }
     }
