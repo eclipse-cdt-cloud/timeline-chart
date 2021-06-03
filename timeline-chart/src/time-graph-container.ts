@@ -91,9 +91,13 @@ export class TimeGraphContainer {
         this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
         this.stateController.updateDisplayHeight();
-        this.background.displayObject.width = newWidth;
-        this.background.displayObject.height = newHeight;
-        this.background.update();
+        this.background.update({
+            position: {
+                x: 0, y: 0
+            },
+            height: newHeight,
+            width: newWidth
+        });
         this.layers.forEach(l => l.update());
     }
 

@@ -185,6 +185,24 @@ export class TestDataProvider {
         const rows: TimelineChart.TimeGraphRowModel[] = [];
         const range = opts.range || { start: 0, end: this.totalLength };
         const resolution = opts.resolution || this.totalLength / this.canvasDisplayWidth;
+        const commonRow = timeGraphStates.model.rows.find(row => row.entryId === -1);
+        const _rangeEvents = commonRow?.annotations;
+        const rangeEvents: TimelineChart.TimeGraphAnnotation[] = [];
+        const startTime = 1332170682440133097;
+        _rangeEvents?.forEach((annotation: any, annotationIndex: number) => {
+            const start = annotation.range.start - startTime;
+            if (range.start < start && range.end > start) {
+                rangeEvents.push({
+                    id: 'mark_' + -1 + '_' + annotationIndex,
+                    range: {
+                        start: annotation.range.start - this.absoluteStart,
+                        end: annotation.range.end - this.absoluteStart
+                    },
+                    label: '',
+                });
+            }
+        });
+
         timeGraphEntries.model.entries.forEach((entry: any, rowIndex: number): void => {
             const states: TimelineChart.TimeGraphState[] = [];
             const annotations: TimelineChart.TimeGraphAnnotation[] = [];
@@ -266,6 +284,7 @@ export class TestDataProvider {
             id: "",
             arrows,
             rows,
+            rangeEvents,
             totalLength: this.totalLength
         };
     }

@@ -11,6 +11,7 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
     size?: number
     color?: number
     verticalAlign?: string
+    opacity?:number
 }
 
 /*
