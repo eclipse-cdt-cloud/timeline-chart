@@ -61,7 +61,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _stageMouseMoveHandler: Function;
     private _stageMouseUpHandler: Function;
 
-    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };    
+    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
     private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void; };
@@ -77,6 +77,28 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.providedResolution = 1;
         this.isNavigating = false;
     }
+
+    adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
+        if (zoomPosition === undefined) {
+            const start = this.getPixels(this.unitController.selectionRange ? this.unitController.selectionRange.start - this.unitController.viewRange.start : 0);
+            const end = this.getPixels(this.unitController.selectionRange ? this.unitController.selectionRange.end - this.unitController.viewRange.start : this.unitController.viewRangeLength);
+            zoomPosition = (start + end) / 2;
+        }
+        const zoomPixels = zoomPosition / this.stateController.zoomFactor;
+        const zoomMagnitude = hasZoomedIn ? 0.8 : 1.25;
+        const newViewRangeLength = Math.max(1, Math.min(this.unitController.absoluteRange,
+            this.unitController.viewRangeLength * zoomMagnitude));
+        const center = this.unitController.viewRange.start + zoomPixels;
+        const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
+            center - zoomPixels * newViewRangeLength / this.unitController.viewRangeLength));
+        const end = start + newViewRangeLength;
+        if (Math.trunc(start) !== Math.trunc(end)) {
+            this.unitController.viewRange = {
+                start,
+                end
+            }
+        }
+    };
 
     protected afterAddToContainer() {
         this.stage.cursor = 'default';
@@ -109,21 +131,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.rowController.verticalOffset = verticalOffset;
         }
 
-        const adjustZoom = (zoomPosition: number, zoomIn: boolean) => {
-            const newViewRangeLength = Math.max(1, Math.min(this.unitController.absoluteRange,
-                this.unitController.viewRangeLength * (zoomIn ? 0.8 : 1.25)));
-            const center = this.unitController.viewRange.start + zoomPosition;
-            const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
-                center - zoomPosition * newViewRangeLength / this.unitController.viewRangeLength));
-            const end = start + newViewRangeLength;
-            if (Math.trunc(start) !== Math.trunc(end)) {
-                this.unitController.viewRange = {
-                    start,
-                    end
-                }
-            }
-        };
-
         this._mouseMoveHandler = (event: MouseEvent) => {
             mousePositionX = event.offsetX;
         };
@@ -138,16 +145,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.stage.cursor = 'default';
                 }
                 if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
-                    const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
-                    adjustZoom(zoomPosition, true);
-
+                    this.adjustZoom(mousePositionX, true);
                 } else if (keyBoardNavs['zoomout'].indexOf(keyPressed) >= 0) {
-                    const zoomPosition = (mousePositionX / this.stateController.zoomFactor);
-                    adjustZoom(zoomPosition, false);
-
+                    this.adjustZoom(mousePositionX, false);
                 } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
                     moveHorizontally(-horizontalDelta);
-
                 } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
                     moveHorizontally(horizontalDelta);
                 }
@@ -157,7 +159,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._keyUpHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
             if (triggerKeyEvent) {
-                if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control' ) {
+                if (this.stage.cursor === 'grabbing' && !this.mousePanning && keyPressed === 'Control') {
                     this.stage.cursor = 'default';
                 }
             }
@@ -231,9 +233,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this._mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
-                const zoomPosition = (ev.offsetX / this.stateController.zoomFactor);
-                const zoomIn = ev.deltaY < 0;
-                adjustZoom(zoomPosition, zoomIn);
+                const hasZoomedIn = ev.deltaY < 0;
+                this.adjustZoom(ev.offsetX, hasZoomedIn);
 
             } else if (ev.shiftKey) {
                 moveHorizontally(ev.deltaY);
