@@ -272,10 +272,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.mouseEndX = e.offsetX;
                 const start = this.mouseZoomingStart;
                 const end = this.unitController.viewRange.start + (this.mouseEndX / this.stateController.zoomFactor);
-                if (start !== end) {
+                if (start !== end && this.unitController.viewRangeLength > 1) {
+                    let newViewStart = Math.max(Math.min(start, end), this.unitController.viewRange.start);
+                    let newViewEnd = Math.min(Math.max(start, end), this.unitController.viewRange.end);
+                    if (newViewEnd - newViewStart < 1) {
+                        const center = (newViewStart + newViewEnd) / 2;
+                        newViewStart = center - 0.5;
+                        newViewEnd = center + 0.5;
+                    }
                     this.unitController.viewRange = {
-                        start: Math.max(Math.min(start, end), this.unitController.viewRange.start),
-                        end: Math.min(Math.max(start, end), this.unitController.viewRange.end)
+                        start: newViewStart,
+                        end: newViewEnd
                     }
                 }
                 this.stage.cursor = 'default';
