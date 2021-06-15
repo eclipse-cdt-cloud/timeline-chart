@@ -26,8 +26,8 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
         const width = end - start;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(rangeEvent) : undefined;
         const rangeEventComponent = new TimeGraphRectangle({
-            color: (elementStyle && elementStyle.color) || 0xFF0000,
-            opacity: (elementStyle && elementStyle.opacity) || 0.2,
+            color: (elementStyle ? elementStyle.color : 0x000000),
+            opacity: (elementStyle ? elementStyle.opacity : 1.0),
             position: {
                 x: start,
                 y: 0

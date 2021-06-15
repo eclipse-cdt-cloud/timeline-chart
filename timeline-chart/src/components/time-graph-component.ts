@@ -135,7 +135,7 @@ export abstract class TimeGraphComponent<T> {
      * 
      * @param opacity a number meaning the desired opacity. If it is undefined, assume it is 100% opacity
      */
-    private getPIXIOpacity(opacity: number | undefined): number | undefined {
+    protected getPIXIOpacity(opacity: number | undefined): number | undefined {
         return (opacity !== undefined ? opacity == 0 ? 0.001 : opacity : 1);
     }
 
