@@ -6,6 +6,7 @@ import * as PIXI from "pixi.js-legacy";
 
 export interface TimeGraphStateStyle {
     color?: number
+    opacity?: number
     height?: number
     borderWidth?: number
     borderColor?: number
@@ -39,6 +40,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         const width = Math.max(1, this.range.end - this.range.start);
         this._options = {
             color: _style.color,
+            opacity: _style.opacity,
             height: this._height,
             position: this._position,
             width,
@@ -124,6 +126,9 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     set style(style: TimeGraphStateStyle) {
         if (style.color !== undefined) {
             this._options.color = style.color;
+        }
+        if (style.opacity !== undefined) {
+            this._options.opacity = style.opacity;
         }
         if (style.height !== undefined) {
             this._options.height = style.height;

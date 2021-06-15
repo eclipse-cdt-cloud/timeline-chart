@@ -11,8 +11,8 @@ export interface TimeGraphAnnotationStyle extends TimeGraphComponentOptions {
     symbol?: string
     size?: number
     color?: number
+    opacity?: number
     verticalAlign?: string
-    opacity?:number
 }
 
 /*
@@ -88,7 +88,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
 
     private drawCircle(x: number, y: number, radius: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         this._displayObject.drawCircle(x, y, radius);
         this._displayObject.endFill();
@@ -98,7 +98,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
     // thickness = 20
     private drawCross(x: number, y: number, size: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         // Root of two thickness
         const thickness = 0.14 * size;
@@ -125,7 +125,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
     // thickness = 20%
     private drawPlus(x: number, y: number, size: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         // half thickness
         const thickness = 0.1 * size;
@@ -150,7 +150,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
 
     private drawDiamond(x: number, y: number, size: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         this._displayObject.drawPolygon([
             x - size, y,
@@ -165,7 +165,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
 
     private drawTriangle(x: number, y: number, size: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         this._displayObject.drawPolygon([
             x - size, y + size,
@@ -178,7 +178,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
 
     private drawInvertedTriangle(x: number, y: number, size: number): void {
         this._displayObject.clear();
-        this._displayObject.beginFill(this._style.color);
+        this._displayObject.beginFill(this._style.color, this.getPIXIOpacity(this._style.opacity));
         this._displayObject.lineStyle(0);
         this._displayObject.drawPolygon([
             x + size, y - size,
