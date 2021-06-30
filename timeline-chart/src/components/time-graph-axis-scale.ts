@@ -130,12 +130,6 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
     }
 
     render() {
-        this.rect({
-            color: this._options.color || 0xededdd,
-            height: this._options.height,
-            width: this._options.width,
-            position: this._options.position
-        });
         this.renderVerticalLines(true, this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' || l === undefined ? 5 : 10 }));
     }
 

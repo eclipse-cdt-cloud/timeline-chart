@@ -4,6 +4,8 @@ import { TimeGraphComponent, TimeGraphParentComponent } from "../components/time
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
+export type TimeGraphLayerOptions = {}
+
 export abstract class TimeGraphLayer {
     private canvas: HTMLCanvasElement;
     protected stateController: TimeGraphStateController;
@@ -67,9 +69,9 @@ export abstract class TimeGraphLayer {
 
     protected afterAddToContainer() { }
 
-    destroy() { 
+    destroy() {
         this.removeChildren();
     }
 
-    abstract update(): void;
+    abstract update(opts?: TimeGraphLayerOptions): void;
 }

@@ -1,7 +1,11 @@
-import { TimeGraphAxisScale } from "../components/time-graph-axis-scale";
-import { TimeGraphLayer } from "./time-graph-layer";
+import { TimeGraphAxisScale, TimeGraphAxisStyle } from "../components/time-graph-axis-scale";
+import { TimeGraphLayer, TimeGraphLayerOptions } from "./time-graph-layer";
 import * as _ from "lodash";
 import { TimelineChart } from "../time-graph-model";
+
+export interface TimeGraphAxisLayerOptions extends TimeGraphLayerOptions {
+    lineColor?: number;
+}
 
 export class TimeGraphAxis extends TimeGraphLayer {
 
@@ -16,7 +20,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
         super(id);
     }
 
-    protected getOptions() {
+    protected getOptions(): TimeGraphAxisStyle {
         let color;
         let lineColor;
         if (this.style) {
@@ -55,7 +59,7 @@ export class TimeGraphAxis extends TimeGraphLayer {
                 const center = this.unitController.viewRange.start + zoomPosition;
                 const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
                     center - zoomPosition * newViewRangeLength / this.unitController.viewRangeLength));
-                const end = start + newViewRangeLength;    
+                const end = start + newViewRangeLength;
                 this.unitController.viewRange = {
                     start,
                     end
@@ -93,11 +97,14 @@ export class TimeGraphAxis extends TimeGraphLayer {
         this.unitController.onViewRangeChanged(this._updateHandler);
     }
 
-    update() {
+    update(opts?: TimeGraphAxisLayerOptions) {
+        if (opts && this.style) {
+            this.style.lineColor = opts.lineColor;
+        }
         this.scaleComponent.update(this.getOptions());
     }
 
-    destroy() : void {
+    destroy(): void {
         if (this.unitController) {
             this.unitController.removeViewRangeChangedHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);

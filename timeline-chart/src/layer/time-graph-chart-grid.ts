@@ -1,6 +1,7 @@
 import { TimeGraphLayer } from "./time-graph-layer";
 import { TimeGraphGrid } from "../components/time-graph-grid";
 import { TimelineChart } from "../time-graph-model";
+import { TimeGraphAxisLayerOptions } from "./time-graph-axis";
 
 export class TimeGraphChartGrid extends TimeGraphLayer {
 
@@ -23,8 +24,8 @@ export class TimeGraphChartGrid extends TimeGraphLayer {
         this.unitController.onViewRangeChanged(this._updateHandler);
     }
 
-    update() {
-        this.gridComponent.update();
+    update(opts?: TimeGraphAxisLayerOptions) {
+        this.gridComponent.update(opts);
     }
 
     destroy() : void {
