@@ -14,6 +14,10 @@ export class TimeGraphRectangle extends TimeGraphComponent<null> {
             this._options.width = opts.width;
             this._options.height = opts.height;
             this._options.position = opts.position;
+            if (opts.color) {
+                this._options.color = opts.color;
+            }
+
         }
         super.update();
     }

@@ -1,18 +1,18 @@
 import * as PIXI from "pixi.js-legacy"
-
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
-import { TimeGraphLayer } from "./layer/time-graph-layer";
+import { TimeGraphLayer, TimeGraphLayerOptions } from "./layer/time-graph-layer";
 import { TimeGraphRectangle } from "./components/time-graph-rectangle";
 
 export interface TimeGraphContainerOptions {
-    id: string
-    width: number
-    height: number
-    backgroundColor?: number
-    transparent?: boolean
-    classNames?: string
-} //
+    id: string;
+    width: number;
+    height: number;
+    backgroundColor?: number;
+    lineColor?: number;
+    transparent?: boolean;
+    classNames?: string;
+}
 
 export class TimeGraphContainer {
 
@@ -80,13 +80,14 @@ export class TimeGraphContainer {
     }
 
     // if canvas size has changed displayWidth need to be updated for zoomfactor
-    reInitCanvasSize(newWidth: number, newHeight?: number) {
-        if (newHeight === undefined) {
-            newHeight = this.config.height;
-        } else {
-            this.config.height = newHeight;
-        }
+    updateCanvas(newWidth: number, newHeight: number, newColor?: number, lineColor?: number) {
         this.config.width = newWidth;
+        this.config.height = newHeight;
+        if (newColor) {
+            this.config.backgroundColor = newColor;
+        }
+
+        const opts: TimeGraphLayerOptions = { lineColor };
 
         this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
@@ -96,12 +97,18 @@ export class TimeGraphContainer {
                 x: 0, y: 0
             },
             height: newHeight,
-            width: newWidth
+            width: newWidth,
+            color: newColor
         });
-        this.layers.forEach(l => l.update());
+
+        this.layers.forEach(l => l.update(opts));
     }
 
-    addLayer(layer: TimeGraphLayer) {
+    addLayers(layers: TimeGraphLayer[]) {
+        layers.forEach(layer => this.addLayer(layer));
+    }
+
+    protected addLayer(layer: TimeGraphLayer) {
         this.layers.push(layer);
         layer.initializeLayer(this._canvas, this.stage, this.stateController, this.unitController);
     }

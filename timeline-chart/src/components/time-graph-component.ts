@@ -85,7 +85,7 @@ export abstract class TimeGraphComponent<T> {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
         this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
-        this.displayObject.drawRect(position.x + 0.5, position.y + 0.5, width, height);
+        this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
     }
 

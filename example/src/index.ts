@@ -124,7 +124,7 @@ const timeGraphAxisContainer = new TimeGraphContainer({
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
-timeGraphAxisContainer.addLayer(timeAxisLayer);
+timeGraphAxisContainer.addLayers([timeAxisLayer]);
 
 const chartHTMLContainer = document.createElement('div');
 chartHTMLContainer.id = 'main_chart';
@@ -142,10 +142,16 @@ const timeGraphChartContainer = new TimeGraphContainer({
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
-timeGraphChartContainer.addLayer(timeGraphChartGridLayer);
-
 const timeGraphChart = new TimeGraphChart('timeGraphChart', providers, rowController);
-timeGraphChartContainer.addLayer(timeGraphChart);
+const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
+const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
+const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor });
+const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChart, rowController, { color: styleConfig.cursorColor });
+const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer('timeGraphChartRangeEvents', providers);
+
+timeGraphChartContainer.addLayers([timeGraphChartGridLayer, timeGraphChart,
+    timeGraphChartArrows, timeAxisCursors, timeGraphSelectionRange,
+    timeGraphChartCursors, timeGraphChartRangeEvents]);
 
 timeGraphChart.registerMouseInteractions({
     click: el => {
@@ -165,18 +171,7 @@ timeGraphChart.registerMouseInteractions({
     }
 });
 
-const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
-timeGraphChartContainer.addLayer(timeGraphChartArrows);
 timeGraphChartArrows.addArrows(timeGraph.arrows);
-
-const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
-timeGraphAxisContainer.addLayer(timeAxisCursors);
-const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor });
-timeGraphChartContainer.addLayer(timeGraphSelectionRange);
-const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChart, rowController, { color: styleConfig.cursorColor });
-timeGraphChartContainer.addLayer(timeGraphChartCursors);
-const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer('timeGraphChartRangeEvents', providers);
-timeGraphChartContainer.addLayer(timeGraphChartRangeEvents);
 timeGraphChartRangeEvents.addRangeEvents(timeGraph.rangeEvents);
 
 const cursorReset = document.getElementById('cursor-reset');
@@ -196,7 +191,7 @@ const naviContainer = new TimeGraphContainer({
     backgroundColor: styleConfig.naviBackgroundColor
 }, unitController);
 const navi = new TimeGraphNavigator('timeGraphNavigator');
-naviContainer.addLayer(navi);
+naviContainer.addLayers([navi]);
 naviEl.appendChild(naviContainer.canvas);
 
 const vscrollElement = document.getElementById('main-vscroll');
@@ -208,6 +203,6 @@ if (vscrollElement) {
         backgroundColor: styleConfig.naviBackgroundColor
     }, unitController);
     const vscroll = new TimeGraphVerticalScrollbar('timeGraphVerticalScrollbar', rowController);
-    verticalScrollContainer.addLayer(vscroll);
+    verticalScrollContainer.addLayers([vscroll]);
     vscrollElement.appendChild(verticalScrollContainer.canvas);
 }
