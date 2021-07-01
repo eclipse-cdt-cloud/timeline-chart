@@ -155,6 +155,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
                 event.preventDefault();
             }
+            if (keyPressed === 'Escape' && this.mouseZooming) {
+                this.mouseZooming = false;
+                this.stage.cursor = 'default';
+                this.updateZoomingSelection();
+            }
         };
         this._keyUpHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
