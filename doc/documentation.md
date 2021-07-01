@@ -40,6 +40,7 @@ A reusable time axis component, that can be used independently of the other comp
 * Horizontal zooming can be performed using Ctrl+mouse wheel. The zooming is centered on the mouse cursor position.
 * Horizontal panning can be performed using the middle mouse button or Ctrl+left mouse button.
 * Horizontal zooming selection can be performed using the right mouse button.
+* Horizontal zooming can be cancelled by pressing the `esc` button while zooming using the right click + drag.
 * The view is connected to a time controller instance and synchronizes its viewport, zoom level cursors bi-directionally.
 
 ## Data Model
