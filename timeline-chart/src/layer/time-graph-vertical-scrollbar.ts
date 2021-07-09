@@ -59,11 +59,9 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
         }, this._displayObject);
         this.addEvent('mousemove', event => {
             if (this.mouseIsDown) {
-                const delta = event.data.global.y - this.mouseStartY;
-                let ypos = this.oldVerticalOffset + delta;
-                if (ypos >= 0 && (ypos + this.height) <= this.stateController.canvasDisplayHeight) {
-                    this.rowController.verticalOffset = ypos / this.factor;
-                }
+                const delta = (event.data.global.y - this.mouseStartY) / this.factor;
+                const verticalOffset = this.oldVerticalOffset + delta;
+                this.rowController.verticalOffset = Math.max(0, Math.min(this.rowController.totalHeight - this.stateController.canvasDisplayHeight, verticalOffset));
             }
         }, this._displayObject);
         const moveEnd: TimeGraphInteractionHandler = event => {
@@ -73,7 +71,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
         this.addEvent('mouseupoutside', moveEnd, this._displayObject);
     }
 
-    updateFactor(factor: number){
+    updateFactor(factor: number) {
         this.factor = factor;
     }
 
