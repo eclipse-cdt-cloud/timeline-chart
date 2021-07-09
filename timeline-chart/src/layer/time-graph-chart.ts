@@ -348,7 +348,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     x: mouseStartX,
                     y: 0
                 },
-                height: this.stateController.canvasDisplayHeight,
+                height: Math.max(this.stateController.canvasDisplayHeight, this.rowController.totalHeight),
                 width: this.mouseEndX - mouseStartX
             });
             this.addChild(this.zoomingSelection);
