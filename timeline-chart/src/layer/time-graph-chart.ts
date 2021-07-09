@@ -275,7 +275,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.mouseButtons = e.buttons;
             if (e.button === this.mouseDownButton && this.mouseZooming) {
                 this.mouseZooming = false;
-                this.mouseEndX = e.offsetX;
                 const start = this.mouseZoomingStart;
                 const end = this.unitController.viewRange.start + (this.mouseEndX / this.stateController.zoomFactor);
                 if (start !== end && this.unitController.viewRangeLength > 1) {
