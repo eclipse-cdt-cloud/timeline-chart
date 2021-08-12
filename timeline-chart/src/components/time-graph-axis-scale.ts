@@ -107,7 +107,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                                 fontSize: 10,
                                 fill: lineColor
                             });
-                            text.x = position.x + 5;
+                            text.x = position.x - (text.width / 2);
                             text.y = position.y + lineStyle(label).lineHeight;
                             this.labels.push(text);
                             this._displayObject.addChild(text);
