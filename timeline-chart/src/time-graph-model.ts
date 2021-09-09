@@ -1,12 +1,12 @@
 export namespace TimelineChart {
     export interface TimeGraphRange {
-        start: number
-        end: number
+        start: bigint
+        end: bigint
     }
 
     export interface TimeGraphModel {
         id: string
-        totalLength: number
+        totalLength: bigint
         rows: TimeGraphRowModel[]
         rangeEvents: TimeGraphAnnotation[]
         arrows: TimeGraphArrow[]
@@ -21,8 +21,8 @@ export namespace TimelineChart {
         annotations: TimeGraphAnnotation[]
         selected?: boolean
         readonly data?: { [key: string]: any }
-        prevPossibleState: number
-        nextPossibleState: number
+        prevPossibleState: bigint
+        nextPossibleState: bigint
     }
 
     export interface TimeGraphState {

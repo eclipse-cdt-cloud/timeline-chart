@@ -6,6 +6,7 @@ import { TimelineChart } from "../time-graph-model";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChart } from "./time-graph-chart";
+import { BIMath } from "../bigint-utils";
 
 export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected mouseSelecting: boolean = false;
@@ -79,18 +80,18 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             this.mouseSelecting = true;
             this.stage.cursor = 'crosshair';
             const mouseX = event.data.global.x;
-            const xpos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
+            const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
             this.chartLayer.selectState(undefined);
             if (extendSelection) {
-                const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : 0;
+                const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : BigInt(0);
                 this.unitController.selectionRange = {
                     start,
-                    end: xpos
+                    end
                 }
             } else {
                 this.unitController.selectionRange = {
-                    start: xpos,
-                    end: xpos
+                    start: end,
+                    end: end
                 }
             }
         };
@@ -108,11 +109,11 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     return;
                 }
                 const mouseX = event.data.global.x;
-                const xStartPos = this.unitController.selectionRange.start;
-                const xEndPos = this.unitController.viewRange.start + (mouseX / this.stateController.zoomFactor);
+                const start = this.unitController.selectionRange.start;
+                const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
                 this.unitController.selectionRange = {
-                    start: xStartPos,
-                    end: xEndPos
+                    start,
+                    end
                 }
             }
         }
@@ -235,21 +236,21 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     centerCursor() {
         if (this.unitController.selectionRange) {
             const cursorPosition = this.unitController.selectionRange.end;
-            const halfViewRangeLength = this.unitController.viewRangeLength / 2;
-            let startViewRange = cursorPosition - halfViewRangeLength;
-            let endViewRange = cursorPosition + halfViewRangeLength;
+            const halfViewRangeLength = this.unitController.viewRangeLength / BigInt(2);
+            let start = cursorPosition - halfViewRangeLength;
+            let end = cursorPosition + halfViewRangeLength;
 
-            if (startViewRange < 0) {
-                endViewRange -= startViewRange;
-                startViewRange = 0;
-            } else if (endViewRange > this.unitController.absoluteRange) {
-                startViewRange -= (endViewRange - this.unitController.absoluteRange);
-                endViewRange = this.unitController.absoluteRange;
+            if (start < 0) {
+                end -= start;
+                start = BigInt(0);
+            } else if (end > this.unitController.absoluteRange) {
+                start -= (end - this.unitController.absoluteRange);
+                end = this.unitController.absoluteRange;
             }
 
             this.unitController.viewRange = {
-                start: startViewRange,
-                end: endViewRange
+                start,
+                end
             }
         }
     }
@@ -260,8 +261,8 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     update() {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const secondCursorPosition = this.getPixels(this.unitController.selectionRange.end - this.unitController.viewRange.start);
+            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const secondCursorPosition = this.getPixel(this.unitController.selectionRange.end - this.unitController.viewRange.start);
             const firstCursorOptions = {
                 color: this.color,
                 height: this.stateController.canvasDisplayHeight,

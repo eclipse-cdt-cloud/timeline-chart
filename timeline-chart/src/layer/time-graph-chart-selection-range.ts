@@ -17,8 +17,8 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     protected updateScaleAndPosition() {
         if (this.unitController.selectionRange && this.selectionRange) {
-            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const width = this.getPixels(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
+            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const width = this.getPixel(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
             this.selectionRange.update({
                 position: {
                     x: firstCursorPosition,
@@ -48,8 +48,8 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     update() {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.getPixels(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const secondCursorPosition = this.getPixels(this.unitController.selectionRange.end - this.unitController.viewRange.start);
+            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
+            const secondCursorPosition = this.getPixel(this.unitController.selectionRange.end - this.unitController.viewRange.start);
             if (secondCursorPosition !== firstCursorPosition) {
                 if (!this.selectionRange) {
                     this.selectionRange = new TimeGraphRectangle({

@@ -11,12 +11,12 @@ export class TimeGraphUnitController {
      *  Create a string from the given number, which is shown in TimeAxis.
      *  Or return undefined to not show any text for that number.
      */
-    numberTranslator?: (theNumber: number) => string | undefined;
+    numberTranslator?: (theNumber: bigint) => string | undefined;
     scaleSteps?: number[]
 
-    constructor(public absoluteRange: number, viewRange?: TimelineChart.TimeGraphRange) {
+    constructor(public absoluteRange: bigint, viewRange?: TimelineChart.TimeGraphRange) {
         this.viewRangeChangedHandlers = [];
-        this._viewRange = viewRange || { start: 0, end: absoluteRange };
+        this._viewRange = viewRange || { start: BigInt(0), end: absoluteRange };
 
         this.selectionRangeChangedHandlers = [];
     }
@@ -59,7 +59,7 @@ export class TimeGraphUnitController {
             this._viewRange = { start: newRange.start, end: newRange.end };
         }
         if (newRange.start < 0) {
-            this._viewRange.start = 0;
+            this._viewRange.start = BigInt(0);
         }
         if (this._viewRange.end > this.absoluteRange) {
             this._viewRange.end = this.absoluteRange;
@@ -75,7 +75,7 @@ export class TimeGraphUnitController {
         this.handleSelectionRangeChange();
     }
 
-    get viewRangeLength(): number {
+    get viewRangeLength(): bigint {
         return this._viewRange.end - this._viewRange.start;
     }
 }

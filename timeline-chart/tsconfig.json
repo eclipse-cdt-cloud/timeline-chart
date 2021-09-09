@@ -15,7 +15,8 @@
         "jsx": "react",
         "lib": [
             "es6",
-            "dom"
+            "dom",
+            "esnext.bigint"
         ],
         "declaration": true,
         "sourceMap": true,

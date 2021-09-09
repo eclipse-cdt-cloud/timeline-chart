@@ -16,7 +16,8 @@
         "allowJs": true,
         "lib": [
             "es6",
-            "dom"
+            "dom",
+            "esnext.bigint"
         ],
         "sourceMap": true,
         "outDir": "./lib"
