@@ -4,6 +4,7 @@ import { TimeGraphStateController } from "../time-graph-state-controller";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphLayer } from "./time-graph-layer";
 import { TimelineChart } from "../time-graph-model";
+import { BIMath } from "../bigint-utils";
 
 export class TimeGraphNavigator extends TimeGraphLayer {
 
@@ -30,10 +31,10 @@ export class TimeGraphNavigator extends TimeGraphLayer {
                 height: this.stateController.canvasDisplayHeight,
                 opacity: 0.5,
                 position: {
-                    x: this.unitController.selectionRange.start * this.stateController.absoluteResolution,
+                    x: Number(this.unitController.selectionRange.start) * this.stateController.absoluteResolution,
                     y: 0
                 },
-                width: (this.unitController.selectionRange.end - this.unitController.selectionRange.start) * this.stateController.absoluteResolution
+                width: Number(this.unitController.selectionRange.end - this.unitController.selectionRange.start) * this.stateController.absoluteResolution
             };
             if (!this.selectionRange) {
                 this.selectionRange = new TimeGraphRectangle(selectionOpts);
@@ -61,7 +62,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
 
     protected mouseIsDown: boolean;
     protected mouseStartX: number;
-    protected oldViewStart: number;
+    protected oldViewStart: bigint;
 
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
@@ -73,9 +74,9 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
         this.addEvent('mousemove', event => {
             if (this.mouseIsDown) {
                 const delta = event.data.global.x - this.mouseStartX;
-                var start = Math.max(this.oldViewStart + (delta / this.stateController.absoluteResolution), 0);
-                start = Math.min(start, this.unitController.absoluteRange - this.unitController.viewRangeLength);
-                const end = Math.min(start + this.unitController.viewRangeLength, this.unitController.absoluteRange)
+                const start = BIMath.clamp(Number(this.oldViewStart) + (delta / this.stateController.absoluteResolution),
+                    BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
+                const end = start + this.unitController.viewRangeLength;
                 this.unitController.viewRange = {
                     start,
                     end
@@ -91,11 +92,11 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
 
     render(): void {
         const MIN_NAVIGATOR_WIDTH = 20;
-        const xPos = this.unitController.viewRange.start * this.stateController.absoluteResolution;
-        const effectiveAbsoluteRange = this.unitController.absoluteRange * this.stateController.absoluteResolution;
+        const xPos = Number(this.unitController.viewRange.start) * this.stateController.absoluteResolution;
+        const effectiveAbsoluteRange = Number(this.unitController.absoluteRange) * this.stateController.absoluteResolution;
         // Avoid the navigator rendered outside of the range at high zoom levels when its width is capped to MIN_NAVIGATOR_WIDTH
         const position = { x: Math.min(effectiveAbsoluteRange - MIN_NAVIGATOR_WIDTH, xPos), y: 0 };
-        const width = Math.max(MIN_NAVIGATOR_WIDTH, this.unitController.viewRangeLength * this.stateController.absoluteResolution);
+        const width = Math.max(MIN_NAVIGATOR_WIDTH, Number(this.unitController.viewRangeLength) * this.stateController.absoluteResolution);
         this.rect({
             height: 20,
             position,

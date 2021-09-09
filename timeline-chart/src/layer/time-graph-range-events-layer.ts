@@ -21,8 +21,8 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
     }
 
     protected addRangeEvent(rangeEvent: TimelineChart.TimeGraphAnnotation) {
-        const start = this.getPixels(rangeEvent.range.start - this.unitController.viewRange.start);
-        const end = this.getPixels(rangeEvent.range.end - this.unitController.viewRange.start);
+        const start = this.getPixel(rangeEvent.range.start - this.unitController.viewRange.start);
+        const end = this.getPixel(rangeEvent.range.end - this.unitController.viewRange.start);
         const width = end - start;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(rangeEvent) : undefined;
         const rangeEventComponent = new TimeGraphRectangle({
@@ -62,8 +62,8 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
 
     protected updateRangeEvent(rangeEvent: TimelineChart.TimeGraphAnnotation) {
         const rangeEventComponent = this.rangeEvents.get(rangeEvent);
-        const start = this.getPixels(rangeEvent.range.start - this.unitController.viewRange.start);
-        const end = this.getPixels(rangeEvent.range.end - this.unitController.viewRange.start);
+        const start = this.getPixel(rangeEvent.range.start - this.unitController.viewRange.start);
+        const end = this.getPixel(rangeEvent.range.end - this.unitController.viewRange.start);
         const width = end - start;
         if (rangeEventComponent) {
             rangeEventComponent.update({

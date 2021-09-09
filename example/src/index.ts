@@ -36,18 +36,22 @@ container.style.width = styleConfig.mainWidth + "px";
 const testDataProvider = new TestDataProvider(styleConfig.mainWidth);
 let timeGraph = testDataProvider.getData({});
 const unitController = new TimeGraphUnitController(timeGraph.totalLength);
-unitController.numberTranslator = (theNumber: number) => {
-    const milli = Math.floor(theNumber / 1000000);
-    const micro = Math.floor((theNumber % 1000000) / 1000);
-    const nano = Math.floor((theNumber % 1000000) % 1000);
-    return milli + ':' + micro + ':' + nano;
+unitController.numberTranslator = (theNumber: bigint) => {
+    let num = theNumber.toString();
+    if (num.length > 6) {
+        num = num.slice(0, -6) + ':' + num.slice(-6);
+    }
+    if (num.length > 3) {
+        num = num.slice(0, -3) + ':' + num.slice(-3);
+    }
+    return num;
 };
 
 const providers = {
     dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
         const length = range.end - range.start;
-        const overlap = ((length * 20) - length) / 2;
-        const start = range.start - overlap > 0 ? range.start - overlap : 0;
+        const overlap = length * BigInt(10);
+        const start = range.start - overlap > BigInt(0) ? range.start - overlap : BigInt(0);
         const end = range.end + overlap < unitController.absoluteRange ? range.end + overlap : unitController.absoluteRange;
         const newRange: TimelineChart.TimeGraphRange = { start, end };
         const newResolution: number = resolution * 0.1;
@@ -155,19 +159,19 @@ timeGraphChartContainer.addLayers([timeGraphChartGridLayer, timeGraphChart,
 
 timeGraphChart.registerMouseInteractions({
     click: el => {
-        console.log('click: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+        console.log('click: ' + el.constructor.name, el.model);
     },
     mouseover: el => {
-        console.log('mouseover: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+        console.log('mouseover: ' + el.constructor.name, el.model);
     },
     mouseout: el => {
-        console.log('mouseout: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+        console.log('mouseout: ' + el.constructor.name, el.model);
     },
     mousedown: el => {
-        console.log('mousedown: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+        console.log('mousedown: ' + el.constructor.name, el.model);
     },
     mouseup: el => {
-        console.log('mouseup: ' + el.constructor.name + ' : ' + JSON.stringify(el.model));
+        console.log('mouseup: ' + el.constructor.name, el.model);
     }
 });
 

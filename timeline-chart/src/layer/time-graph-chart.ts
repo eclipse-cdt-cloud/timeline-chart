@@ -7,6 +7,7 @@ import { TimeGraphStateComponent, TimeGraphStateStyle } from "../components/time
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
+import { BIMath } from "../bigint-utils";
 
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
@@ -54,7 +55,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseDownButton: number;
     protected mouseStartX: number;
     protected mouseEndX: number;
-    protected mouseZoomingStart: number;
+    protected mousePanningStart: bigint;
+    protected mouseZoomingStart: bigint;
     protected zoomingSelection?: TimeGraphRectangle;
 
     private _stageMouseDownHandler: Function;
@@ -73,26 +75,26 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         protected providers: TimeGraphChartProviders,
         protected rowController: TimeGraphRowController) {
         super(id, rowController);
-        this.providedRange = { start: 0, end: 0 };
+        this.providedRange = { start: BigInt(0), end: BigInt(0) };
         this.providedResolution = 1;
         this.isNavigating = false;
     }
 
     adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
         if (zoomPosition === undefined) {
-            const start = this.getPixels(this.unitController.selectionRange ? this.unitController.selectionRange.start - this.unitController.viewRange.start : 0);
-            const end = this.getPixels(this.unitController.selectionRange ? this.unitController.selectionRange.end - this.unitController.viewRange.start : this.unitController.viewRangeLength);
+            const start = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.start - this.unitController.viewRange.start : BigInt(0));
+            const end = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end - this.unitController.viewRange.start : this.unitController.viewRangeLength);
             zoomPosition = (start + end) / 2;
         }
-        const zoomPixels = zoomPosition / this.stateController.zoomFactor;
+        const zoomTime = zoomPosition / this.stateController.zoomFactor;
         const zoomMagnitude = hasZoomedIn ? 0.8 : 1.25;
-        const newViewRangeLength = Math.max(1, Math.min(this.unitController.absoluteRange,
-            this.unitController.viewRangeLength * zoomMagnitude));
-        const center = this.unitController.viewRange.start + zoomPixels;
-        const start = Math.max(0, Math.min(this.unitController.absoluteRange - newViewRangeLength,
-            center - zoomPixels * newViewRangeLength / this.unitController.viewRangeLength));
+        const newViewRangeLength = BIMath.clamp(Number(this.unitController.viewRangeLength) * zoomMagnitude,
+            BigInt(2), this.unitController.absoluteRange);
+        const center = this.unitController.viewRange.start + BIMath.round(zoomTime);
+        const start = BIMath.clamp(Number(center) - zoomTime * Number(newViewRangeLength) / Number(this.unitController.viewRangeLength),
+            BigInt(0), this.unitController.absoluteRange - newViewRangeLength);
         const end = start + newViewRangeLength;
-        if (Math.trunc(start) !== Math.trunc(end)) {
+        if (start !== end) {
             this.unitController.viewRange = {
                 start,
                 end
@@ -107,13 +109,26 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         let triggerKeyEvent = false;
 
         const moveHorizontally = (magnitude: number) => {
-            const xOffset = -(magnitude / this.stateController.zoomFactor);
-            let start = Math.max(0, this.unitController.viewRange.start - xOffset);
-            let end = start + this.unitController.viewRangeLength;
-            if (end > this.unitController.absoluteRange) {
-                end = this.unitController.absoluteRange;
-                start = end - this.unitController.viewRangeLength;
+            if (magnitude === 0) {
+                return;
             }
+            // move by at least one nanosecond
+            const absOffset = BIMath.max(1, Math.abs(magnitude / this.stateController.zoomFactor));
+            const timeOffset = magnitude > 0 ? absOffset : -absOffset;
+            const start = BIMath.clamp(this.unitController.viewRange.start + timeOffset,
+                BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
+            const end = start + this.unitController.viewRangeLength;
+            this.unitController.viewRange = {
+                start,
+                end
+            }
+        }
+
+        const panHorizontally = (magnitude: number) => {
+            const timeOffset = BIMath.round(magnitude / this.stateController.zoomFactor);
+            const start = BIMath.clamp(this.mousePanningStart - timeOffset,
+                BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
+            const end = start + this.unitController.viewRangeLength;
             this.unitController.viewRange = {
                 start,
                 end
@@ -195,6 +210,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.mousePanning = true;
             this.mouseDownButton = event.data.button;
             this.mouseStartX = event.data.global.x;
+            this.mousePanningStart = this.unitController.viewRange.start;
             this.stage.cursor = 'grabbing';
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
@@ -212,9 +228,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     }
                     return;
                 }
-                const horizontalDelta = this.mouseStartX - event.data.global.x;
-                moveHorizontally(horizontalDelta);
-                this.mouseStartX = event.data.global.x;
+                const horizontalDelta = event.data.global.x - this.mouseStartX;
+                panHorizontally(horizontalDelta);
             }
             if (this.mouseZooming) {
                 this.mouseEndX = event.data.global.x;
@@ -264,7 +279,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.mouseDownButton = e.button;
                 this.mouseStartX = e.offsetX;
                 this.mouseEndX = e.offsetX;
-                this.mouseZoomingStart = this.unitController.viewRange.start + (this.mouseStartX / this.stateController.zoomFactor);
+                this.mouseZoomingStart = this.unitController.viewRange.start + BIMath.round(this.mouseStartX / this.stateController.zoomFactor);
                 this.stage.cursor = 'col-resize';
                 // this is the only way to detect mouseup outside of right button
                 document.addEventListener('mouseup', mouseUpListener);
@@ -276,15 +291,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (e.button === this.mouseDownButton && this.mouseZooming) {
                 this.mouseZooming = false;
                 const start = this.mouseZoomingStart;
-                const end = this.unitController.viewRange.start + (this.mouseEndX / this.stateController.zoomFactor);
-                if (start !== end && this.unitController.viewRangeLength > 1) {
-                    let newViewStart = Math.max(Math.min(start, end), this.unitController.viewRange.start);
-                    let newViewEnd = Math.min(Math.max(start, end), this.unitController.viewRange.end);
-                    if (newViewEnd - newViewStart < 1) {
-                        const center = (newViewStart + newViewEnd) / 2;
-                        newViewStart = center - 0.5;
-                        newViewEnd = center + 0.5;
-                    }
+                const end = this.unitController.viewRange.start + BIMath.round(this.mouseEndX / this.stateController.zoomFactor);
+                if (BIMath.abs(end - start) > 1 && this.unitController.viewRangeLength > 1) {
+                    let newViewStart = BIMath.clamp(start, this.unitController.viewRange.start, end);
+                    let newViewEnd = BIMath.clamp(end, start, this.unitController.viewRange.end);
                     this.unitController.viewRange = {
                         start: newViewStart,
                         end: newViewEnd
@@ -309,7 +319,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this._viewRangeChangedHandler = () => {
             this.updateScaleAndPosition();
-            if (!this.fetching && this.unitController.viewRangeLength !== 0) {
+            if (!this.fetching && this.unitController.viewRangeLength !== BigInt(0)) {
                 this.maybeFetchNewData();
             }
             if (this.mouseZooming) {
@@ -339,7 +349,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             delete this.zoomingSelection;
         }
         if (this.mouseZooming) {
-            const mouseStartX = (this.mouseZoomingStart - this.unitController.viewRange.start) * this.stateController.zoomFactor;
+            const mouseStartX = Number(this.mouseZoomingStart - this.unitController.viewRange.start) * this.stateController.zoomFactor;
             this.zoomingSelection = new TimeGraphRectangle({
                 color: 0xbbbbbb,
                 opacity: 0.2,
@@ -387,7 +397,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected async maybeFetchNewData(update?: boolean) {
-        const resolution = this.unitController.viewRangeLength / this.stateController.canvasDisplayWidth;
+        const resolution = Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
         const viewRange = this.unitController.viewRange;
         if (viewRange && (
             viewRange.start < this.providedRange.start ||
@@ -442,12 +452,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const opts: TimeGraphStyledRect = {
                             height: el.height,
                             position: {
-                                x: this.getPixels(start - this.unitController.viewRange.start),
+                                x: this.getPixel(start - this.unitController.viewRange.start),
                                 y: el.position.y
                             },
                             // min width of a state should never be less than 1 (for visibility)
-                            width: Math.max(1, this.getPixels(end) - this.getPixels(start)),
-                            displayWidth: this.getPixels(Math.min(this.unitController.viewRange.end, end)) - this.getPixels(Math.max(this.unitController.viewRange.start, start))
+                            width: Math.max(1, this.getPixel(end) - this.getPixel(start)),
+                            displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
                         }
                         el.update(opts);
                     }
@@ -459,7 +469,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const start = annotation.range.start;
                         const opts: TimeGraphAnnotationComponentOptions = {
                             position: {
-                                x: this.getPixels(start - this.unitController.viewRange.start),
+                                x: this.getPixel(start - this.unitController.viewRange.start),
                                 y: el.displayObject.y
                             }
                         }
@@ -517,7 +527,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewAnnotation(annotation: TimelineChart.TimeGraphAnnotation, rowComponent: TimeGraphRow) {
-        const start = this.getPixels(annotation.range.start - this.unitController.viewRange.start);
+        const start = this.getPixel(annotation.range.start - this.unitController.viewRange.start);
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
         el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
@@ -526,18 +536,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
-        const start = this.getPixels(stateModel.range.start - this.unitController.viewRange.start);
-        const end = this.getPixels(stateModel.range.end - this.unitController.viewRange.start);
+        const xStart = this.getPixel(stateModel.range.start - this.unitController.viewRange.start);
+        const xEnd = this.getPixel(stateModel.range.end - this.unitController.viewRange.start);
         let el: TimeGraphStateComponent | undefined;
-        const range: TimelineChart.TimeGraphRange = {
-            start,
-            end
-        };
-        const displayStart = this.getPixels(Math.max(stateModel.range.start, this.unitController.viewRange.start));
-        const displayEnd = this.getPixels(Math.min(stateModel.range.end, this.unitController.viewRange.end));
+        const displayStart = this.getPixel(BIMath.max(stateModel.range.start, this.unitController.viewRange.start));
+        const displayEnd = this.getPixel(BIMath.min(stateModel.range.end, this.unitController.viewRange.end));
         const displayWidth = displayEnd - displayStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
-        el = new TimeGraphStateComponent(stateModel.id, stateModel, range, rowComponent, elementStyle, displayWidth);
+        el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
         this.rowStateComponents.set(stateModel, el);
         return el;
     }

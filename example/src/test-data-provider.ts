@@ -150,8 +150,8 @@ export namespace TestData {
 }
 
 export class TestDataProvider {
-    protected absoluteStart: number;
-    protected totalLength: number;
+    protected absoluteStart: bigint;
+    protected totalLength: bigint;
     protected timeGraphEntries: object[];
     protected timeGraphRows: object[];
     protected canvasDisplayWidth: number;
@@ -159,21 +159,21 @@ export class TestDataProvider {
     constructor(canvasDisplayWidth: number) {
         this.timeGraphEntries = timeGraphEntries.model.entries;
         this.timeGraphRows = timeGraphStates.model.rows;
-        this.totalLength = 0;
+        this.totalLength = BigInt(0);
 
         this.canvasDisplayWidth = canvasDisplayWidth;
 
         this.timeGraphEntries.forEach((entry: TestData.TimeGraphEntry, rowIndex: number) => {
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
             if (!this.absoluteStart) {
-                this.absoluteStart = entry.startTime;
-            } else if (entry.startTime < this.absoluteStart) {
-                this.absoluteStart = entry.startTime;
+                this.absoluteStart = BigInt(entry.startTime);
+            } else if (BigInt(entry.startTime) < this.absoluteStart) {
+                this.absoluteStart = BigInt(entry.startTime);
             }
             if (row) {
                 row.states.forEach((state: TestData.TimeGraphState, stateIndex: number) => {
                     if (state.value > 0) {
-                        const end = state.startTime + state.duration - entry.startTime;
+                        const end = BigInt(state.startTime + state.duration - entry.startTime);
                         this.totalLength = end > this.totalLength ? end : this.totalLength;
                     }
                 });
@@ -183,21 +183,21 @@ export class TestDataProvider {
 
     getData(opts: { range?: TimelineChart.TimeGraphRange, resolution?: number }): TimelineChart.TimeGraphModel {
         const rows: TimelineChart.TimeGraphRowModel[] = [];
-        const range = opts.range || { start: 0, end: this.totalLength };
-        const resolution = opts.resolution || this.totalLength / this.canvasDisplayWidth;
+        const range = opts.range || { start: BigInt(0), end: this.totalLength };
+        const resolution = opts.resolution || Number(this.totalLength) / this.canvasDisplayWidth;
         const commonRow = timeGraphStates.model.rows.find(row => row.entryId === -1);
         const _rangeEvents = commonRow?.annotations;
         const rangeEvents: TimelineChart.TimeGraphAnnotation[] = [];
-        const startTime = 1332170682440133097;
+        const startTime = BigInt(1332170682440133097);
         _rangeEvents?.forEach((annotation: any, annotationIndex: number) => {
-            const start = annotation.range.start - startTime;
+            const start = BigInt(annotation.range.start) - startTime;
             if (range.start < start && range.end > start) {
                 rangeEvents.push({
                     id: annotation.id,
                     category: annotation.category,
                     range: {
-                        start: annotation.range.start - this.absoluteStart,
-                        end: annotation.range.end - this.absoluteStart
+                        start: BigInt(annotation.range.start) - this.absoluteStart,
+                        end: BigInt(annotation.range.end) - this.absoluteStart
                     },
                     label: annotation.label,
                     data: annotation.data
@@ -210,14 +210,14 @@ export class TestDataProvider {
             const annotations: TimelineChart.TimeGraphAnnotation[] = [];
             const row = timeGraphStates.model.rows.find(row => row.entryID === entry.id);
             let hasStates = false;
-            let prevPossibleState = 0;
+            let prevPossibleState = BigInt(0);
             let nextPossibleState = this.totalLength;
             if (row) {
                 hasStates = !!row.states.length;
                 row.states.forEach((state: any, stateIndex: number) => {
                     if (state.value > 0 && state.duration * (1 / resolution) > 1) {
-                        const start = state.startTime - entry.startTime;
-                        const end = state.startTime + state.duration - entry.startTime;
+                        const start = BigInt(state.startTime - entry.startTime);
+                        const end = BigInt(state.startTime + state.duration - entry.startTime);
                         if (end > range.start && start < range.end) {
                             states.push({
                                 id: 'el_' + rowIndex + '_' + stateIndex,
@@ -228,24 +228,24 @@ export class TestDataProvider {
                         }
                     }
                     if (stateIndex === 0) {
-                        prevPossibleState = state.startTime - entry.startTime;
+                        prevPossibleState = BigInt(state.startTime - entry.startTime);
                     }
                     if (stateIndex === row.states.length - 1) {
-                        nextPossibleState = state.startTime + state.duration - entry.startTime;
+                        nextPossibleState = BigInt(state.startTime + state.duration - entry.startTime);
                     }
                 });
 
                 const _annotations = row.annotations;
                 if (!!_annotations) {
                     _annotations.forEach((annotation: any, annotationIndex: number) => {
-                        const start = annotation.range.start - entry.startTime;
+                        const start = BigInt(annotation.range.start - entry.startTime);
                         if (range.start < start && range.end > start) {
                             annotations.push({
                                 id: annotation.id,
                                 category: annotation.category,
                                 range: {
-                                    start: annotation.range.start - this.absoluteStart,
-                                    end: annotation.range.end - this.absoluteStart
+                                    start: BigInt(annotation.range.start) - this.absoluteStart,
+                                    end: BigInt(annotation.range.end) - this.absoluteStart
                                 },
                                 label: annotation.label,
                                 data: annotation.data
@@ -259,8 +259,8 @@ export class TestDataProvider {
                 id: entry.id,
                 name: entry.name[0],
                 range: {
-                    start: 0,
-                    end: entry.endTime - entry.startTime
+                    start: BigInt(0),
+                    end: BigInt(entry.endTime - entry.startTime)
                 },
                 states,
                 annotations,

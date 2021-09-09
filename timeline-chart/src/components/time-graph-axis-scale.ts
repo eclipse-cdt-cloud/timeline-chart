@@ -9,6 +9,7 @@ import { TimelineChart } from "../time-graph-model";
 export interface TimeGraphAxisStyle extends TimeGraphStyledRect {
     lineColor?: number
 }
+import { BIMath } from "../bigint-utils";
 
 export class TimeGraphAxisScale extends TimeGraphComponent<null> {
 
@@ -30,18 +31,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
     protected addEvents() {
         const mouseMove = _.throttle(event => {
             if (this.mouseIsDown) {
-                /**
-                    Zoom around MousePosition on drag up/down
-                    left here as an additional option
-                    to be added later
-                */
-                // const delta = event.data.global.y - this.mouseStartY;
-                // const zoomStep = (delta / 100);
-                // this.zoomAroundMousePointerOnDrag(zoomStep);
-
-                const delta = event.data.global.x - this.mouseStartX;
-                const zoomStep = (delta / 100);
-                this.zoomAroundLeftViewBorder(zoomStep);
+                this.zoomAroundLeftViewBorder(event.data.global.x);
             }
         }, 40);
         this.addEvent('mousedown', event => {
@@ -63,14 +53,14 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
         const minCanvasStepWidth = Math.max(labelWidth, 80);
         const viewRangeLength = this.unitController.viewRangeLength;
         const maxSteps = canvasDisplayWidth / minCanvasStepWidth;
-        const realStepLength = viewRangeLength / maxSteps;
+        const realStepLength = Number(viewRangeLength) / maxSteps;
         const log = Math.log10(realStepLength);
         let logRounded = Math.round(log);
         const normalizedStepLength = Math.pow(10, logRounded);
         const residual = realStepLength / normalizedStepLength;
-        const steps = this.unitController.scaleSteps || [1, 1.5, 2, 2.5, 5, 10];
+        const steps = this.unitController.scaleSteps || [1, 2, 5, 10];
         const normStepLength = steps.find(s => s > residual);
-        const stepLength = normalizedStepLength * (normStepLength || 1);
+        const stepLength = Math.max(normalizedStepLength * (normStepLength || 1), 1);
         return stepLength;
     }
 
@@ -89,11 +79,11 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
             const zoomFactor = this.stateController.zoomFactor;
             const viewRangeStart = this.unitController.viewRange.start;
-            const iLo: number = Math.floor(viewRangeStart / stepLength);
-            const iHi: number = Math.ceil((canvasDisplayWidth / zoomFactor + viewRangeStart) / stepLength);
+            const iLo: number = Math.floor(Number(viewRangeStart) / stepLength);
+            const iHi: number = Math.ceil((canvasDisplayWidth / zoomFactor + Number(viewRangeStart)) / stepLength);
             for (let i = iLo; i < iHi; i++) {
-                const absolutePosition = stepLength * i;
-                const xpos = (absolutePosition - viewRangeStart) * zoomFactor;
+                const time = BIMath.round(stepLength * i);
+                const xpos = Number(time - viewRangeStart) * zoomFactor;
                 if (xpos >= 0 && xpos < canvasDisplayWidth) {
                     const position = {
                         x: xpos,
@@ -101,7 +91,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                     };
                     let label;
                     if (drawLabels && this.unitController.numberTranslator) {
-                        label = this.unitController.numberTranslator(absolutePosition);
+                        label = this.unitController.numberTranslator(time);
                         if (label) {
                             const text = new PIXI.Text(label, {
                                 fontSize: 10,
@@ -133,40 +123,18 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
         this.renderVerticalLines(true, this._options.lineColor || 0x000000, (l) => ({ lineHeight: l === '' || l === undefined ? 5 : 10 }));
     }
 
-    zoomAroundLeftViewBorder(zoomStep: number) {
-        const oldViewRangeLength = this.oldViewRange.end - this.oldViewRange.start;
-        const newViewRangeLength = oldViewRangeLength / (1 + (zoomStep));
-        let start = this.oldViewRange.start;
-        let end = start + newViewRangeLength;
-        if (end > this.unitController.absoluteRange) {
-            end = this.unitController.absoluteRange;
+    zoomAroundLeftViewBorder(mouseX: number) {
+        if (mouseX <= 0) {
+            return;
         }
-        if (Math.trunc(start) !== Math.trunc(end)) {
+        const start = this.oldViewRange.start;
+        const end = BIMath.min(this.oldViewRange.start + BIMath.round(Number(this.oldViewRange.end - this.oldViewRange.start) * (this.mouseStartX / mouseX)),
+            this.unitController.absoluteRange);
+        if (BIMath.abs(end - start) > 1) {
             this.unitController.viewRange = {
                 start,
                 end
             }
-        }
-    }
-
-    zoomAroundMousePointerOnDrag(zoomStep: number) {
-        const oldViewRangeLength = this.oldViewRange.end - this.oldViewRange.start;
-        const newViewRangeLength = oldViewRangeLength / (1 + (zoomStep));
-        const normZoomFactor = newViewRangeLength / oldViewRangeLength;
-        const shiftedMouseX = normZoomFactor * this.mouseStartX;
-        const xOffset = this.mouseStartX - shiftedMouseX;
-        const viewRangeOffset = xOffset / (this.stateController.canvasDisplayWidth / oldViewRangeLength);
-        let start = this.oldViewRange.start + viewRangeOffset;
-        if (start < 0) {
-            start = 0;
-        }
-        let end = start + newViewRangeLength;
-        if (end > this.unitController.absoluteRange) {
-            end = this.unitController.absoluteRange;
-        }
-        this.unitController.viewRange = {
-            start,
-            end
         }
     }
 }

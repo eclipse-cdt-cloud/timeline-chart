@@ -81,12 +81,12 @@ export class TimeGraphStateController {
     }
 
     get zoomFactor(): number {
-        this._zoomFactor = this.canvasDisplayWidth / this.unitController.viewRangeLength;
+        this._zoomFactor = this.canvasDisplayWidth / Number(this.unitController.viewRangeLength);
         return this._zoomFactor;
     }
 
     get absoluteResolution(): number {
-        return this.canvasDisplayWidth / this.unitController.absoluteRange;
+        return this.canvasDisplayWidth / Number(this.unitController.absoluteRange);
     }
 
     get positionOffset(): {

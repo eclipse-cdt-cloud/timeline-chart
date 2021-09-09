@@ -23,7 +23,8 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     constructor(
         id: string,
         model: TimelineChart.TimeGraphState,
-        protected range: TimelineChart.TimeGraphRange,
+        xStart:  number,
+        xEnd: number,
         protected _row: TimeGraphRow,
         protected _style: TimeGraphStateStyle = { color: 0xfffa66, height: 14 },
         protected displayWidth: number,
@@ -33,11 +34,11 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         this._height = _style.height || 14;
         this._height = _row.height === 0 ? 0 : Math.min(this._height, _row.height - 1);
         this._position = {
-            x: this.range.start,
+            x: xStart,
             y: this._row.position.y + ((this.row.height - this._height) / 2)
         };
         // min width of a state should never be less than 1 (for visibility)
-        const width = Math.max(1, this.range.end - this.range.start);
+        const width = Math.max(1, xEnd - xStart);
         this._options = {
             color: _style.color,
             opacity: _style.opacity,

@@ -63,8 +63,11 @@ export abstract class TimeGraphLayer {
         idx && this.children.splice(idx, 1);
     }
 
-    protected getPixels(ticks: number) {
-        return ticks * this.stateController.zoomFactor;
+    protected getPixel(time: bigint) {
+        const div = 0x100000000;
+        const hi = Number(time / BigInt(div));
+        const lo = Number(time % BigInt(div));
+        return Math.floor(hi * this.stateController.zoomFactor * div + lo * this.stateController.zoomFactor);
     }
 
     protected afterAddToContainer() { }
