@@ -1,8 +1,8 @@
 {
   "name": "timeline-chart-example",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "license": "MIT",  
+  "license": "MIT",
   "scripts": {
     "build": "webpack --mode=development",
     "watch": "webpack --watch --mode=development",
@@ -20,6 +20,6 @@
   },
   "dependencies": {
     "lodash.throttle": "^4.1.1",
-    "timeline-chart": "^0.1.0"
+    "timeline-chart": "^0.2.0"
   }
 }
