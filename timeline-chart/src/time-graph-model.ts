@@ -28,7 +28,7 @@ export namespace TimelineChart {
     export interface TimeGraphState {
         readonly id: string
         readonly range: TimeGraphRange
-        readonly label: string
+        readonly label?: string
         selected?: boolean
         readonly data?: { [key: string]: any }
     }
