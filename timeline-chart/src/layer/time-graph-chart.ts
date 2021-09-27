@@ -8,6 +8,7 @@ import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
+import { debounce } from 'lodash';
 
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
@@ -44,8 +45,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
-
-    protected fetching: boolean;
 
     protected isNavigating: boolean;
 
@@ -319,14 +318,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this._viewRangeChangedHandler = () => {
             this.updateScaleAndPosition();
-            if (!this.fetching && this.unitController.viewRangeLength !== BigInt(0)) {
-                this.maybeFetchNewData();
-            }
             if (this.mouseZooming) {
                 this.updateZoomingSelection();
             }
         };
         this.unitController.onViewRangeChanged(this._viewRangeChangedHandler);
+        this.unitController.onViewRangeChanged(debounce(() => this.maybeFetchNewData(), 400));
+
         if (this.unitController.viewRangeLength && this.stateController.canvasDisplayWidth) {
             this.maybeFetchNewData();
         }
@@ -405,7 +403,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             resolution < this.providedResolution ||
             update
         )) {
-            this.fetching = true;
             try {
                 const rowData = await this.providers.dataProvider(viewRange, resolution);
                 if (rowData) {
@@ -423,7 +420,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     }
                 }
             } finally {
-                this.fetching = false;
                 this.isNavigating = false;
             }
         }
