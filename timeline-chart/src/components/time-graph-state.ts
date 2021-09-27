@@ -14,8 +14,6 @@ export interface TimeGraphStateStyle {
 
 export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.TimeGraphState> {
 
-    protected _height: number;
-    protected _position: TimeGraphElementPosition;
     static fontController: FontController = new FontController();
 
     protected _options: TimeGraphStyledRect;
@@ -31,19 +29,18 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         displayObject?: PIXI.Graphics
     ) {
         super(id, displayObject, model);
-        this._height = _style.height || 14;
-        this._height = _row.height === 0 ? 0 : Math.min(this._height, _row.height - 1);
-        this._position = {
+        const height = _row.height === 0 ? 0 : Math.min(_style.height || 14, _row.height - 1);
+        const position = {
             x: xStart,
-            y: this._row.position.y + ((this.row.height - this._height) / 2)
+            y: this._row.position.y + ((this.row.height - height) / 2)
         };
         // min width of a state should never be less than 1 (for visibility)
         const width = Math.max(1, xEnd - xStart);
         this._options = {
             color: _style.color,
             opacity: _style.opacity,
-            height: this._height,
-            position: this._position,
+            height,
+            position,
             width,
             displayWidth,
             borderRadius: 2,
@@ -109,11 +106,15 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     }
 
     get height(): number {
-        return this._height;
+        return this._options.height;
+    }
+
+    get width(): number {
+        return this._options.width;
     }
 
     get position(): TimeGraphElementPosition {
-        return this._position;
+        return this._options.position;
     }
 
     get row(): TimeGraphRow {
