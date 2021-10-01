@@ -110,7 +110,8 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 }
                 const mouseX = event.data.global.x;
                 const start = this.unitController.selectionRange.start;
-                const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
+                const end = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
+                            BigInt(0), this.unitController.absoluteRange);
                 this.unitController.selectionRange = {
                     start,
                     end
