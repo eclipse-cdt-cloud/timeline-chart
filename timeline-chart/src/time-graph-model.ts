@@ -23,6 +23,13 @@ export namespace TimelineChart {
         readonly data?: { [key: string]: any }
         prevPossibleState: bigint
         nextPossibleState: bigint
+        /**
+         * When the gap style is set, gap states will be drawn using this style
+         * in between the model's states when the gap between these states is visible.
+         * These gap states represent the unknown state between known states.
+         * Known blank states (with no style) must then be included in the model.
+         */
+        gapStyle?: any;
     }
 
     export interface TimeGraphState {
