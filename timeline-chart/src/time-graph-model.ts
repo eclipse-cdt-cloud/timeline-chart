@@ -23,6 +23,7 @@ export namespace TimelineChart {
         readonly data?: { [key: string]: any }
         prevPossibleState: bigint
         nextPossibleState: bigint
+        gapStyle?: any;
     }
 
     export interface TimeGraphState {
