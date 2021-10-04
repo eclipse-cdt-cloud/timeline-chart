@@ -431,35 +431,43 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected updateScaleAndPosition() {
         if (this.rows) {
             this.rows.forEach((row: TimelineChart.TimeGraphRowModel) => {
-                const comp = this.rowComponents.get(row);
-                if (comp) {
+                const rowComponent = this.rowComponents.get(row);
+                if (rowComponent) {
                     const opts: TimeGraphRect = {
                         height: this.rowController.rowHeight,
                         position: {
                             x: 0,
-                            y: comp.position.y
+                            y: rowComponent.position.y
                         },
                         width: this.stateController.canvasDisplayWidth
                     }
-                    comp.update(opts);
+                    rowComponent.update(opts);
                 }
+                let lastX: number | undefined;
+                let lastTime: bigint | undefined;
                 row.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
                     const el = this.rowStateComponents.get(state);
+                    const start = state.range.start;
+                    const xStart = this.getPixel(start - this.unitController.viewRange.start);
                     if (el) {
-                        const start = state.range.start;
                         const end = state.range.end;
+                        const xEnd = this.getPixel(end - this.unitController.viewRange.start);
                         const opts: TimeGraphStyledRect = {
                             height: el.height,
                             position: {
-                                x: this.getPixel(start - this.unitController.viewRange.start),
+                                x: xStart,
                                 y: el.position.y
                             },
-                            // min width of a state should never be less than 1 (for visibility)
-                            width: Math.max(1, this.getPixel(end) - this.getPixel(start)),
+                            width: Math.max(1, xEnd - xStart),
                             displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
                         }
                         el.update(opts);
                     }
+                    if (rowComponent && row.gapStyle) {
+                        this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime);
+                    }
+                    lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
+                    lastTime = state.range.end;
                 });
                 row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
                     const el = this.rowAnnotationComponents.get(annotation);
@@ -503,18 +511,28 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (this.rowController.selectedRow && this.rowController.selectedRow.id === row.id) {
             this.selectRow(row);
         }
+        let lastX: number | undefined;
+        let lastTime: bigint | undefined;
         row.states.forEach((stateModel: TimelineChart.TimeGraphState) => {
-            const el = this.createNewState(stateModel, rowComponent);
-            if (el) {
-                this.addElementInteractions(el);
-                this.addChild(el);
-                if (this.selectedStateModel && this.rowController.selectedRow
-                    && this.rowController.selectedRow.id === row.id
-                    && this.selectedStateModel.range.start === el.model.range.start
-                    && this.selectedStateModel.range.end === el.model.range.end) {
-                    this.selectState(el.model);
+            const x = this.getPixel(stateModel.range.start - this.unitController.viewRange.start);
+            if (stateModel.data?.style) {
+                const el = this.createNewState(stateModel, rowComponent);
+                if (el) {
+                    this.addElementInteractions(el);
+                    this.addChild(el);
+                    if (this.selectedStateModel && this.rowController.selectedRow
+                        && this.rowController.selectedRow.id === row.id
+                        && this.selectedStateModel.range.start === el.model.range.start
+                        && this.selectedStateModel.range.end === el.model.range.end) {
+                        this.selectState(el.model);
+                    }
                 }
             }
+            if (row.gapStyle) {
+                this.updateGap(stateModel, rowComponent, row.gapStyle, x, lastX, lastTime);
+            }
+            lastX = Math.max(x + 1, this.getPixel(stateModel.range.end - this.unitController.viewRange.start));
+            lastTime = stateModel.range.end;
         });
         row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
             const el = this.createNewAnnotation(annotation, rowComponent);
@@ -523,6 +541,48 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.addChild(el);
             }
         });
+    }
+
+    protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint) {
+        if (lastX && lastTime && (x > lastX || !state.data?.style)) {
+            const gap = state.data?.gap;
+            if (gap) {
+                const width = Math.max(1, x - lastX);
+                const opts: TimeGraphStyledRect = {
+                    height: gap.height,
+                    position: {
+                        x: lastX,
+                        y: gap.position.y
+                    },
+                    width: width,
+                    displayWidth: width
+                }
+                gap.update(opts);
+            } else {
+                const stateModel = {
+                    id: rowComponent.id + '-gap',
+                    range: {
+                        start: lastTime,
+                        end: state.range.start
+                    },
+                    data: {
+                        style: gapStyle
+                    }
+                };
+                const gap = this.createNewState(stateModel, rowComponent);
+                if (gap) {
+                    this.addChild(gap);
+                    if (state.data) {
+                        state.data['gap'] = gap;
+                    }
+                }
+            }
+        } else {
+            if (state.data && state.data?.gap) {
+                this.removeChild(state.data?.gap);
+                state.data.gap = undefined;
+            }
+        }
     }
 
     protected createNewAnnotation(annotation: TimelineChart.TimeGraphAnnotation, rowComponent: TimeGraphRow) {
