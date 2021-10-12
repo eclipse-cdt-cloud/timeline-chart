@@ -81,6 +81,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
+        if (this.unitController.viewRangeLength <= 0) {
+            return;
+        }
         if (zoomPosition === undefined) {
             const start = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.start - this.unitController.viewRange.start : BigInt(0));
             const end = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end - this.unitController.viewRange.start : this.unitController.viewRangeLength);
