@@ -445,6 +445,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
                 let lastX: number | undefined;
                 let lastTime: bigint | undefined;
+                let lastBlank = false;
                 row.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
                     const el = this.rowStateComponents.get(state);
                     const start = state.range.start;
@@ -464,10 +465,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         el.update(opts);
                     }
                     if (rowComponent && row.gapStyle) {
-                        this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime);
+                        this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime, lastBlank);
                     }
                     lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
                     lastTime = state.range.end;
+                    lastBlank = (state.data?.style === undefined);
                 });
                 row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
                     const el = this.rowAnnotationComponents.get(annotation);
@@ -513,6 +515,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         let lastX: number | undefined;
         let lastTime: bigint | undefined;
+        let lastBlank = false;
         row.states.forEach((stateModel: TimelineChart.TimeGraphState) => {
             const x = this.getPixel(stateModel.range.start - this.unitController.viewRange.start);
             if (stateModel.data?.style) {
@@ -529,10 +532,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             }
             if (row.gapStyle) {
-                this.updateGap(stateModel, rowComponent, row.gapStyle, x, lastX, lastTime);
+                this.updateGap(stateModel, rowComponent, row.gapStyle, x, lastX, lastTime, lastBlank);
             }
             lastX = Math.max(x + 1, this.getPixel(stateModel.range.end - this.unitController.viewRange.start));
             lastTime = stateModel.range.end;
+            lastBlank = (stateModel.data?.style === undefined);
         });
         row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
             const el = this.createNewAnnotation(annotation, rowComponent);
@@ -543,8 +547,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
     }
 
-    protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint) {
-        if (lastX && lastTime && (x > lastX || !state.data?.style)) {
+    protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint, lastBlank?: boolean) {
+        /* add gap if there is visible space between states or if there is a time gap between two blank states */
+        if (lastX && lastTime && (x > lastX || (lastBlank && !state.data?.style && state.range.start > lastTime))) {
             const gap = state.data?.gap;
             if (gap) {
                 const width = Math.max(1, x - lastX);
