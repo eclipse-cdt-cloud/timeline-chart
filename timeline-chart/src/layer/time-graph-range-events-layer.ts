@@ -8,7 +8,6 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
     protected providers: TimeGraphChartProviders;
 
     private _viewRangeUpdateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; };
-    private _updateHandler: { (): void; (selectionRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
 
     constructor(id: string, providers: TimeGraphChartProviders) {
         super(id);
@@ -16,8 +15,8 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
     }
 
     protected afterAddToContainer() {
-        this._updateHandler = (): void => this.update();
-        this.unitController.onViewRangeChanged(this._updateHandler);
+        this._viewRangeUpdateHandler = (): void => this.update();
+        this.unitController.onViewRangeChanged(this._viewRangeUpdateHandler);
     }
 
     protected addRangeEvent(rangeEvent: TimelineChart.TimeGraphAnnotation) {
@@ -80,7 +79,6 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
     destroy(): void {
         if (this.unitController) {
             this.unitController.removeViewRangeChangedHandler(this._viewRangeUpdateHandler);
-            this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
         }
         super.destroy();
     }
