@@ -223,7 +223,7 @@ export class TestDataProvider {
                                 id: 'el_' + rowIndex + '_' + stateIndex,
                                 label: state.label,
                                 range: { start, end },
-                                data: { value: state.value, timeRange: { startTime: state.startTime, endTime: (state.startTime + state.duration) } }
+                                data: { value: state.value, style: {}}
                             });
                         }
                     }
