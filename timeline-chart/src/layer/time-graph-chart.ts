@@ -8,10 +8,10 @@ import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
-import { debounce } from 'lodash';
+import { debounce, cloneDeep, DebouncedFunc } from 'lodash';
 
 export interface TimeGraphMouseInteractions {
-    click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent, clickCount: number) => void
     mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
     mouseout?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
     mousedown?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
@@ -69,6 +69,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void; };
     private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
     private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
+
+    // Keep track of the most recently clicked point.
+    // If clicked again during _multiClickTime duration (milliseconds) record multi-click
+    private _recentlyClickedGlobal: PIXI.Point | null = null;
+    private _multiClickTime: number = 500;
+    private _mouseClicks = 0;
+    private _multiClickTimer: DebouncedFunc<() => void>;
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
@@ -614,12 +621,37 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected addElementInteractions(el: TimeGraphComponent<any>) {
         el.displayObject.interactive = true;
+
+        var self = this;
+        this._multiClickTimer = debounce(function(){
+            self._mouseClicks = 0;
+            self._recentlyClickedGlobal = null;
+        }, this._multiClickTime);
+
         el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
             if (el instanceof TimeGraphStateComponent && !this.mousePanning && !this.mouseZooming) {
                 this.selectState(el.model);
             }
+
+            // Mouse clicks count keeps increasing without limit as long as we keep clicking on the same coordinate.
+            if (this._recentlyClickedGlobal && (this._recentlyClickedGlobal.equals(e.data.global))){
+                this._mouseClicks++;
+            } else {
+                // Only clear the timer and reset the click count if the global position is NOT 
+                // the same one as click 1.
+                this._multiClickTimer.cancel();
+                this._mouseClicks = 1;
+
+                // Store the global position on first click
+                this._recentlyClickedGlobal = cloneDeep(e.data.global);
+            }
+
+            // We can use a debouncer to reset the count when no click occurs for a certain period.
+            this._multiClickTimer();
+
+            // Click callback includes count parameter to record subsequent clicks on the same point
             if (this.mouseInteractions && this.mouseInteractions.click) {
-                this.mouseInteractions.click(el, e);
+                this.mouseInteractions.click(el, e, this._mouseClicks);
             }
         }).bind(this));
         el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
