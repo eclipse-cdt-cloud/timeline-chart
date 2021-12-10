@@ -10,6 +10,7 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
 import { debounce } from 'lodash';
 
+
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
     mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
@@ -29,12 +30,17 @@ export const keyBoardNavs: Record<string, Array<string>> = {
     "zoomin": ['w', 'i'],
     "zoomout": ['s', 'k'],
     "panleft": ['a', 'j'],
-    "panright": ['d', 'l']
+    "panright": ['d', 'l'],
+    "undo": ['z'],
+    "redo": ['y'],
 }
 
 export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 export class TimeGraphChart extends TimeGraphChartLayer {
+
+    protected undoStack: bigint[][];
+    protected redoStack: bigint[][];
 
     protected rows: TimelineChart.TimeGraphRowModel[];
     protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
@@ -77,6 +83,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.providedRange = { start: BigInt(0), end: BigInt(0) };
         this.providedResolution = 1;
         this.isNavigating = false;
+        this.undoStack = [];
+        this.redoStack = [];
     }
 
     adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
@@ -101,6 +109,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 start,
                 end
             }
+            return [start, end];
         }
     };
 
@@ -124,6 +133,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 start,
                 end
             }
+            return [start, end];
         }
 
         const panHorizontally = (magnitude: number) => {
@@ -135,6 +145,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 start,
                 end
             }
+            return [start, end];
         }
 
         const moveVertically = (magnitude: number) => {
@@ -162,13 +173,62 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.stage.cursor = 'default';
                 }
                 if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
-                    this.adjustZoom(mousePositionX, true);
+                    let timeRange = this.adjustZoom(mousePositionX, true);
+                    if (timeRange !== undefined) {
+                        this.undoStack.push(timeRange);
+                    }
                 } else if (keyBoardNavs['zoomout'].indexOf(keyPressed) >= 0) {
-                    this.adjustZoom(mousePositionX, false);
+                    let timeRange = this.adjustZoom(mousePositionX, false);
+                    if (timeRange !== undefined) {
+                        this.undoStack.push(timeRange);
+                    }
                 } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
-                    moveHorizontally(-horizontalDelta);
+                    let timeRange = moveHorizontally(-horizontalDelta);
+                    if (timeRange !== undefined) {
+                        this.undoStack.push(timeRange);
+                    }
                 } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
-                    moveHorizontally(horizontalDelta);
+                    let timeRange = moveHorizontally(horizontalDelta);
+                    if (timeRange !== undefined) {
+                        this.undoStack.push(timeRange);
+                    }
+                } else if (keyBoardNavs['undo'].indexOf(keyPressed) >= 0) {
+                    if (this.undoStack.length > 0) {
+                        let lastUndo = this.undoStack.pop();
+                        if (lastUndo !== undefined) {
+                            console.log('undo');
+                            this.redoStack.push(lastUndo);
+                            let start = lastUndo[0];
+                            let end = lastUndo[1];
+                            this.unitController.viewRange = {
+                                start,
+                                end
+                            }
+                        }
+
+
+                    }
+                    else {
+                        console.log('can\'t undo anymore')
+                    }
+                } else if (keyBoardNavs['redo'].indexOf(keyPressed) >= 0) {
+                    if (this.redoStack.length > 0) {
+                        let lastRedo = this.redoStack.pop();
+                        if (lastRedo !== undefined) {
+                            console.log('redo');
+                            this.undoStack.push(lastRedo);
+                            let start = lastRedo[0];
+                            let end = lastRedo[1];
+                            this.unitController.viewRange = {
+                                start,
+                                end
+                            }
+                        }
+                    }
+                    else {
+                        console.log('can\'t redo anymore')
+                    }
+
                 }
                 event.preventDefault();
             }
@@ -256,15 +316,24 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
                 const hasZoomedIn = ev.deltaY < 0;
-                this.adjustZoom(ev.offsetX, hasZoomedIn);
+                let timeRange = this.adjustZoom(ev.offsetX, hasZoomedIn);
+                if (timeRange !== undefined) {
+                    this.undoStack.push(timeRange);
+                }
 
             } else if (ev.shiftKey) {
-                moveHorizontally(ev.deltaY);
+                let timeRange = moveHorizontally(ev.deltaY);
+                if (timeRange !== undefined) {
+                    this.undoStack.push(timeRange);
+                }
             } else {
                 if (Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) {
                     moveVertically(ev.deltaY);
                 } else {
-                    moveHorizontally(ev.deltaX);
+                    let timeRange = moveHorizontally(ev.deltaX);
+                    if (timeRange !== undefined) {
+                        this.undoStack.push(timeRange);
+                    }
                 }
             }
             ev.preventDefault();
@@ -301,6 +370,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         start: newViewStart,
                         end: newViewEnd
                     }
+                    return [newViewStart, newViewEnd];
                 }
                 this.stage.cursor = 'default';
                 document.removeEventListener('mouseup', mouseUpListener);
