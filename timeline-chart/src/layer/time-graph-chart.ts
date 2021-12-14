@@ -26,21 +26,25 @@ export interface TimeGraphChartProviders {
     rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
 
+class UndoRedoFunctionality {
+    undoStack: Array<any>;
+    redoStack: Array<any>;
+    undo: () => void;
+    redo: () => void;
+}
+
 export const keyBoardNavs: Record<string, Array<string>> = {
     "zoomin": ['w', 'i'],
     "zoomout": ['s', 'k'],
     "panleft": ['a', 'j'],
-    "panright": ['d', 'l'],
-    "undo": ['z'],
-    "redo": ['y'],
+    "panright": ['d', 'l']
 }
+
 
 export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 export class TimeGraphChart extends TimeGraphChartLayer {
-
-    protected undoStack: bigint[][];
-    protected redoStack: bigint[][];
+    protected undoRedo: UndoRedoFunctionality;
 
     protected rows: TimelineChart.TimeGraphRowModel[];
     protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
@@ -83,8 +87,54 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.providedRange = { start: BigInt(0), end: BigInt(0) };
         this.providedResolution = 1;
         this.isNavigating = false;
-        this.undoStack = [];
-        this.redoStack = [];
+        let thisClass = this;
+        this.undoRedo = {
+            undoStack: [],
+            redoStack: [],
+            undo: function () {
+                if (this.undoStack.length > 0) {
+                    let lastUndo = this.undoStack.pop();
+                    if (lastUndo !== undefined) {
+                        console.log('undo');
+                        this.redoStack.push(lastUndo);
+                        let start = lastUndo[0];
+                        let end = lastUndo[1];
+                        thisClass.unitController.viewRange = {
+                            start,
+                            end
+                        }
+                    }
+                    else {
+                        console.log('undefined', lastUndo);
+                    }
+                }
+                else {
+                    console.log('can\'t undo anymore')
+                }
+            },
+            redo: function () {
+                if (this.redoStack.length > 0) {
+                    let lastRedo = this.redoStack.pop();
+                    if (lastRedo !== undefined) {
+                        console.log('redo');
+                        this.undoStack.push(lastRedo);
+                        let start = lastRedo[0];
+                        let end = lastRedo[1];
+                        thisClass.unitController.viewRange = {
+                            start,
+                            end
+                        }
+                    }
+                    else {
+                        console.log('undefined', lastRedo);
+                    }
+
+                }
+                else {
+                    console.log('can\'t redo anymore')
+                }
+            }
+        }
     }
 
     adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
@@ -163,6 +213,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             mousePositionX = event.offsetX;
         };
 
+        document.onkeydown = this._keyDownHandler;
         this._keyDownHandler = (event: KeyboardEvent) => {
             const keyPressed = event.key;
             if (triggerKeyEvent) {
@@ -172,63 +223,22 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     (keyPressed === 'Shift' || keyPressed === 'Alt')) {
                     this.stage.cursor = 'default';
                 }
-                if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
+                if (event.ctrlKey && event.key === 'z') {
+                    this.undoRedo.undo();
+                } else if (event.ctrlKey && event.key === 'y') {
+                    this.undoRedo.redo();
+                } else if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
                     let timeRange = this.adjustZoom(mousePositionX, true);
-                    if (timeRange !== undefined) {
-                        this.undoStack.push(timeRange);
-                    }
+                    this.undoRedo.undoStack.push(timeRange!);
                 } else if (keyBoardNavs['zoomout'].indexOf(keyPressed) >= 0) {
                     let timeRange = this.adjustZoom(mousePositionX, false);
-                    if (timeRange !== undefined) {
-                        this.undoStack.push(timeRange);
-                    }
+                    this.undoRedo.undoStack.push(timeRange!);
                 } else if (keyBoardNavs['panleft'].indexOf(keyPressed) >= 0) {
                     let timeRange = moveHorizontally(-horizontalDelta);
-                    if (timeRange !== undefined) {
-                        this.undoStack.push(timeRange);
-                    }
+                    this.undoRedo.undoStack.push(timeRange);
                 } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
                     let timeRange = moveHorizontally(horizontalDelta);
-                    if (timeRange !== undefined) {
-                        this.undoStack.push(timeRange);
-                    }
-                } else if (keyBoardNavs['undo'].indexOf(keyPressed) >= 0) {
-                    if (this.undoStack.length > 0) {
-                        let lastUndo = this.undoStack.pop();
-                        if (lastUndo !== undefined) {
-                            console.log('undo');
-                            this.redoStack.push(lastUndo);
-                            let start = lastUndo[0];
-                            let end = lastUndo[1];
-                            this.unitController.viewRange = {
-                                start,
-                                end
-                            }
-                        }
-
-
-                    }
-                    else {
-                        console.log('can\'t undo anymore')
-                    }
-                } else if (keyBoardNavs['redo'].indexOf(keyPressed) >= 0) {
-                    if (this.redoStack.length > 0) {
-                        let lastRedo = this.redoStack.pop();
-                        if (lastRedo !== undefined) {
-                            console.log('redo');
-                            this.undoStack.push(lastRedo);
-                            let start = lastRedo[0];
-                            let end = lastRedo[1];
-                            this.unitController.viewRange = {
-                                start,
-                                end
-                            }
-                        }
-                    }
-                    else {
-                        console.log('can\'t redo anymore')
-                    }
-
+                    this.undoRedo.undoStack.push(timeRange);
                 }
                 event.preventDefault();
             }
@@ -316,24 +326,15 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._mouseWheelHandler = (ev: WheelEvent) => {
             if (ev.ctrlKey) {
                 const hasZoomedIn = ev.deltaY < 0;
-                let timeRange = this.adjustZoom(ev.offsetX, hasZoomedIn);
-                if (timeRange !== undefined) {
-                    this.undoStack.push(timeRange);
-                }
+                this.adjustZoom(ev.offsetX, hasZoomedIn);
 
             } else if (ev.shiftKey) {
-                let timeRange = moveHorizontally(ev.deltaY);
-                if (timeRange !== undefined) {
-                    this.undoStack.push(timeRange);
-                }
+                moveHorizontally(ev.deltaY);
             } else {
                 if (Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) {
                     moveVertically(ev.deltaY);
                 } else {
-                    let timeRange = moveHorizontally(ev.deltaX);
-                    if (timeRange !== undefined) {
-                        this.undoStack.push(timeRange);
-                    }
+                    moveHorizontally(ev.deltaX);
                 }
             }
             ev.preventDefault();
@@ -811,4 +812,5 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         this.setNavigationFlag(false);
     }
+
 }
