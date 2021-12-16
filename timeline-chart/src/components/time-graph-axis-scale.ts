@@ -68,21 +68,20 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
         if (this.unitController.viewRangeLength > 0) {
             let labelWidth = 0;
             if (this.unitController.numberTranslator) {
-                const label = this.unitController.numberTranslator(this.unitController.viewRangeLength);
+                const label = this.unitController.numberTranslator(this.unitController.viewRange.end);
                 if (label) {
                     const style = new PIXI.TextStyle({ fontSize: 10 });
                     const textMetrics = PIXI.TextMetrics.measureText(label, style);
                     labelWidth = textMetrics.width;
                 }
             }
-            const stepLength = this.getStepLength(labelWidth);
+            const stepLength = BigInt(this.getStepLength(labelWidth));
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
             const zoomFactor = this.stateController.zoomFactor;
-            const viewRangeStart = this.unitController.viewRange.start;
-            const iLo: number = Math.floor(Number(viewRangeStart) / stepLength);
-            const iHi: number = Math.ceil((canvasDisplayWidth / zoomFactor + Number(viewRangeStart)) / stepLength);
-            for (let i = iLo; i < iHi; i++) {
-                const time = BIMath.round(stepLength * i);
+            const viewRangeStart = this.unitController.viewRange.start + this.unitController.offset;
+            const viewRangeEnd = this.unitController.viewRange.end + this.unitController.offset;
+            const startTime = (viewRangeStart / stepLength) * stepLength;
+            for (let time = startTime; time <= viewRangeEnd; time += stepLength) {
                 const xpos = Number(time - viewRangeStart) * zoomFactor;
                 if (xpos >= 0 && xpos < canvasDisplayWidth) {
                     const position = {
@@ -91,7 +90,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                     };
                     let label;
                     if (drawLabels && this.unitController.numberTranslator) {
-                        label = this.unitController.numberTranslator(time);
+                        label = this.unitController.numberTranslator(time - this.unitController.offset);
                         if (label) {
                             const text = new PIXI.Text(label, {
                                 fontSize: 10,
