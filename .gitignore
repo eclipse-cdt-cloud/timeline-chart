@@ -1,3 +1,5 @@
+# LC_COLLATE=C sort
+bundle.js
+coverage
 lib
 node_modules
-bundle.js

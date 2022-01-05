@@ -6,7 +6,8 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "prepare": "yarn run clean && yarn run build",
-    "clean": "rimraf lib"
+    "clean": "rimraf lib",
+    "test": "jest --config jest.config.json"
   },
   "dependencies": {
     "@types/lodash.throttle": "^4.1.4",
@@ -15,5 +16,15 @@
     "lodash.throttle": "^4.1.1",
     "pixi.js-legacy": "^5.3.3",
     "rimraf": "latest"
+  },
+  "devDependencies": {
+    "@types/enzyme": "^3.10.10",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/jest": "^27.0.3",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.6",
+    "jest": "^27.4.3",
+    "jest-canvas-mock": "^2.3.1",
+    "ts-jest": "^27.0.7"
   }
 }
