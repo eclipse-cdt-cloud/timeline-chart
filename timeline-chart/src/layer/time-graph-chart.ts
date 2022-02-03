@@ -70,6 +70,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
     private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
 
+    private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(), 400);
+
     // Keep track of the most recently clicked point.
     // If clicked again during _multiClickTime duration (milliseconds) record multi-click
     private _recentlyClickedGlobal: PIXI.Point | null = null;
@@ -333,7 +335,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         };
         this.unitController.onViewRangeChanged(this._viewRangeChangedHandler);
-        this.unitController.onViewRangeChanged(debounce(() => this.maybeFetchNewData(), 400));
+        this.unitController.onViewRangeChanged(this._debouncedMaybeFetchNewData);
 
         if (this.unitController.viewRangeLength && this.stateController.canvasDisplayWidth) {
             this.maybeFetchNewData();
@@ -349,6 +351,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     update() {
         this.updateScaleAndPosition();
+        this._debouncedMaybeFetchNewData();
     }
 
     updateZoomingSelection() {
@@ -410,7 +413,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (viewRange && (
             viewRange.start < this.providedRange.start ||
             viewRange.end > this.providedRange.end ||
-            resolution < this.providedResolution ||
+            resolution != this.providedResolution ||
             update
         )) {
             try {
