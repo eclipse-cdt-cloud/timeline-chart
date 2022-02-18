@@ -8,7 +8,7 @@ import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
-import { debounce, cloneDeep, DebouncedFunc } from 'lodash';
+import { debounce, cloneDeep, DebouncedFunc, isEqual } from 'lodash';
 
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent, clickCount: number) => void
@@ -43,6 +43,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
     protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
+    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange, resolution: number } | undefined;
     protected providedRange: TimelineChart.TimeGraphRange;
     protected providedResolution: number;
 
@@ -416,8 +417,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             resolution != this.providedResolution ||
             update
         )) {
+            const request = { viewRange, resolution };
+            if (isEqual(request, this.ongoingRequest)) {
+                // request ignored because equal to ongoing request
+                return;
+            }
             try {
+                this.ongoingRequest = request;
                 const rowData = await this.providers.dataProvider(viewRange, resolution);
+                if (!isEqual(request, this.ongoingRequest)) {
+                    // response discarded because not equal to ongoing request
+                    return;
+                }
                 if (rowData) {
                     this.providedResolution = rowData.resolution;
                     this.providedRange = rowData.range;
@@ -433,6 +444,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     }
                 }
             } finally {
+                if (isEqual(request, this.ongoingRequest)) {
+                    this.ongoingRequest = undefined;
+                }
                 this.isNavigating = false;
             }
         }
