@@ -9,12 +9,15 @@ import { BIMath } from "../bigint-utils";
 export class TimeGraphNavigator extends TimeGraphLayer {
 
     protected navigatorHandle: TimeGraphNavigatorHandle;
+    protected navigatorBackground: TimeGraphNavigatorBackground;
     protected selectionRange?: TimeGraphRectangle;
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
 
     afterAddToContainer() {
         this._updateHandler = (): void => this.update();
         this.unitController.onViewRangeChanged(this._updateHandler);
+        this.navigatorBackground = new TimeGraphNavigatorBackground(this.unitController, this.stateController);
+        this.addChild(this.navigatorBackground);
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
         this.unitController.onSelectionRangeChange(this._updateHandler);
@@ -66,11 +69,21 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
 
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
-        this.addEvent('mousedown', event => {
+        const moveStart: TimeGraphInteractionHandler = event => {
             this.mouseStartX = event.data.global.x;
             this.oldViewStart = this.unitController.viewRange.start;
             this.mouseIsDown = true;
+            this.stateController.snapped = false;
+        }
+        const moveEnd = () => {
+            this.mouseIsDown = false;
+        }
+        this.addEvent('mouseover', event => {
+            if (this.stateController.snapped) {
+                moveStart(event);
+            }
         }, this._displayObject);
+        this.addEvent('mousedown', moveStart, this._displayObject);
         this.addEvent('mousemove', event => {
             if (this.mouseIsDown) {
                 const delta = event.data.global.x - this.mouseStartX;
@@ -83,11 +96,9 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
                 }
             }
         }, this._displayObject);
-        const moveEnd: TimeGraphInteractionHandler = event => {
-            this.mouseIsDown = false;
-        }
         this.addEvent('mouseup', moveEnd, this._displayObject);
         this.addEvent('mouseupoutside', moveEnd, this._displayObject);
+        document.addEventListener('snap-x-end', moveEnd);
     }
 
     render(): void {
@@ -103,5 +114,56 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             width,
             color: 0x777769
         })
+    }
+}
+
+export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
+
+    protected snapEvent: CustomEvent;
+    protected snapEventString: string;
+
+    constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
+        super("navigator_background");
+        this.addEvent("mousedown", event => {
+            let x = event.data.getLocalPosition(this._displayObject).x;
+            let middle = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
+            // We have horizontal offset at point of click, now we need coord for start of handler.
+            let hVL = this.unitController.viewRangeLength / BigInt(2);
+            let start0 = middle - hVL;
+            let max = this.unitController.absoluteRange - this.unitController.viewRangeLength;
+            let min = BigInt(0);
+            // Clamp it.
+            const start = BIMath.clamp(start0, min, max);
+            this.unitController.viewRange = {
+                start,
+                end: start + this.unitController.viewRangeLength
+            }
+            // Set snapped state
+            this.toggleSnappedState(true);
+        }, this._displayObject);
+        // Custom event lets handler know 'mouseup' triggers.
+        this.snapEvent = new CustomEvent(this.snapEventString = 'snap-x-end');
+        const endSnap = () => {
+            this.toggleSnappedState(false);
+            document.dispatchEvent(this.snapEvent);
+        }
+        this.addEvent('mouseup', endSnap, this._displayObject);
+        this.addEvent('mouseupoutside', endSnap, this._displayObject);
+    }
+
+    protected toggleSnappedState = (bool: boolean) => {
+        this.stateController.snapped = bool;
+    }
+
+    render(): void {
+        this.rect({
+            height: 20,
+            position: {
+                x: 0,
+                y: 0
+            },
+            width: this.stateController.canvasDisplayWidth,
+            opacity: 0
+        });
     }
 }

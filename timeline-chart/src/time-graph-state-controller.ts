@@ -5,6 +5,8 @@ export class TimeGraphStateController {
         x: number;
         y: number;
     };
+    
+    snapped: boolean;
 
     protected ratio: number;
 
@@ -32,6 +34,7 @@ export class TimeGraphStateController {
         this.zoomChangedHandlers = [];
         this.positionChangedHandlers = [];
         this.canvasDisplayWidthChangedHandlers = [];
+        this.snapped = false;
     }
 
     protected handleZoomChange() {
@@ -102,4 +105,5 @@ export class TimeGraphStateController {
         this._positionOffset = value;
         this.handlePositionChange();
     }
+
 }
