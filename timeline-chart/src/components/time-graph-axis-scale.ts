@@ -65,7 +65,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
     }
 
     protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
-        if (this.unitController.viewRangeLength > 0) {
+        if (this.unitController.viewRangeLength > 0 && this.stateController.canvasDisplayWidth > 0) {
             let labelWidth = 0;
             if (this.unitController.numberTranslator) {
                 const label = this.unitController.numberTranslator(this.unitController.viewRange.end);
