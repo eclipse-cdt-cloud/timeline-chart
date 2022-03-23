@@ -18,11 +18,7 @@ export class TimeGraphArrowComponent extends TimeGraphComponent<TimelineChart.Ti
         super(id, undefined, model);
 
         this.head = new PIXI.Graphics();
-    }
-
-    destroy() {
-        this.head.destroy();
-        super.destroy();
+        this._displayObject.addChild(this.head);
     }
 
     render(): void {
@@ -61,6 +57,5 @@ export class TimeGraphArrowComponent extends TimeGraphComponent<TimelineChart.Ti
         this.head.position.y = end.y;
         this.head.pivot = new PIXI.Point(end.x, end.y);
         this.head.rotation = Math.atan2(end.y - start.y, end.x - start.x);
-        this._displayObject.addChild(this.head);
     }
 }

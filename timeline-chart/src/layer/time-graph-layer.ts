@@ -13,10 +13,11 @@ export abstract class TimeGraphLayer {
     protected children: TimeGraphComponent<any>[];
     protected stage: PIXI.Container;
     protected layer: PIXI.Container;
+    private childContainer: PIXI.Container | undefined;
 
     constructor(protected id: string) {
         this.children = [];
-        this.layer = new PIXI.Container;
+        this.layer = new PIXI.Container();
     }
 
     protected addChild(child: TimeGraphComponent<any>, parent?: TimeGraphParentComponent) {
@@ -27,7 +28,11 @@ export abstract class TimeGraphLayer {
         if (parent) {
             parent.addChild(child);
         } else {
-            this.layer.addChild(child.displayObject);
+            if (!this.childContainer) {
+                this.childContainer = new PIXI.Container();
+                this.layer.addChild(this.childContainer);
+            }
+            this.childContainer.addChild(child.displayObject);
             this.children.push(child);
         }
     }
@@ -53,11 +58,13 @@ export abstract class TimeGraphLayer {
     }
 
     protected removeChildren() {
-        this.children.forEach(child => child.destroy());
+        this.childContainer?.destroy({ children: true });
+        this.childContainer = undefined;
         this.children = [];
     }
 
     protected removeChild(child: TimeGraphComponent<any>) {
+        this.childContainer?.removeChild(child.displayObject);
         child.destroy();
         const idx = this.children.findIndex(c => c === child);
         idx && this.children.splice(idx, 1);
@@ -73,7 +80,9 @@ export abstract class TimeGraphLayer {
     protected afterAddToContainer() { }
 
     destroy() {
-        this.removeChildren();
+        this.layer.destroy({ children: true });
+        this.childContainer = undefined;
+        this.children = [];
     }
 
     abstract update(opts?: TimeGraphLayerOptions): void;
