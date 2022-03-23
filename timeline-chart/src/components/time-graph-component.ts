@@ -68,7 +68,7 @@ export abstract class TimeGraphComponent<T> {
     }
 
     destroy() {
-        this._displayObject.destroy();
+        this._displayObject.destroy({ children: true });
     }
 
     update(opts?: TimeGraphComponentOptions) {

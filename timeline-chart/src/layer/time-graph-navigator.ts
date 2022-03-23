@@ -75,9 +75,11 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             this.oldViewStart = this.unitController.viewRange.start;
             this.mouseIsDown = true;
             this.stateController.snapped = false;
+            document.addEventListener('snap-x-end', this._moveEndHandler);
         }
         this._moveEndHandler = () => {
             this.mouseIsDown = false;
+            document.removeEventListener('snap-x-end', this._moveEndHandler);
         }
         this.addEvent('mouseover', event => {
             if (this.stateController.snapped) {
@@ -99,7 +101,6 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
         }, this._displayObject);
         this.addEvent('mouseup', this._moveEndHandler, this._displayObject);
         this.addEvent('mouseupoutside', this._moveEndHandler, this._displayObject);
-        document.addEventListener('snap-x-end', this._moveEndHandler);
     }
 
     render(): void {
@@ -115,10 +116,6 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             width,
             color: 0x777769
         })
-    }
-
-    destroy(): void {
-        document.removeEventListener('snap-x-end', this._moveEndHandler);
     }
 }
 
