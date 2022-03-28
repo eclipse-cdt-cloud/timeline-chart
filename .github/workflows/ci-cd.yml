@@ -41,7 +41,7 @@ jobs:
 
   publish:
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && github.repository == 'theia-ide/timeline-chart'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && github.repository == 'eclipse-cdt-cloud/timeline-chart'
 
     runs-on: ubuntu-latest
 
