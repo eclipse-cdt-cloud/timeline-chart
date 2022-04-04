@@ -377,6 +377,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     destroy() {
+        this.unitController.removeViewRangeChangedHandler(this._debouncedMaybeFetchNewData);
         if (this._viewRangeChangedHandler) {
             this.unitController.removeViewRangeChangedHandler(this._viewRangeChangedHandler);
         }
