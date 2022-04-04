@@ -66,6 +66,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
     protected mouseIsDown: boolean;
     protected mouseStartX: number;
     protected oldViewStart: bigint;
+    private _moveEndHandler;
 
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
@@ -75,7 +76,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             this.mouseIsDown = true;
             this.stateController.snapped = false;
         }
-        const moveEnd = () => {
+        this._moveEndHandler = () => {
             this.mouseIsDown = false;
         }
         this.addEvent('mouseover', event => {
@@ -96,9 +97,9 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
                 }
             }
         }, this._displayObject);
-        this.addEvent('mouseup', moveEnd, this._displayObject);
-        this.addEvent('mouseupoutside', moveEnd, this._displayObject);
-        document.addEventListener('snap-x-end', moveEnd);
+        this.addEvent('mouseup', this._moveEndHandler, this._displayObject);
+        this.addEvent('mouseupoutside', this._moveEndHandler, this._displayObject);
+        document.addEventListener('snap-x-end', this._moveEndHandler);
     }
 
     render(): void {
@@ -114,6 +115,10 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             width,
             color: 0x777769
         })
+    }
+
+    destroy(): void {
+        document.removeEventListener('snap-x-end', this._moveEndHandler);
     }
 }
 
