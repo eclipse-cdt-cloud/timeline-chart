@@ -52,14 +52,14 @@ The following command prints a coverage report to the terminal. As of now it cov
 yarn test --coverage --collectCoverageFrom='src/**/*.ts'
 ```
 
-[build-status-icon]: https://github.com/theia-ide/timeline-chart/workflows/CI-CD/badge.svg?branch=master
-[build-status-link]: https://github.com/theia-ide/timeline-chart/actions?query=branch%3Amaster
+[build-status-icon]: https://github.com/eclipse-cdt-cloud/timeline-chart/workflows/CI-CD/badge.svg?branch=master
+[build-status-link]: https://github.com/eclipse-cdt-cloud/timeline-chart/actions?query=branch%3Amaster
 [contributing]: CONTRIBUTING.md
-[documentation]: https://github.com/theia-ide/timeline-chart/blob/master/doc/documentation.md
+[documentation]: https://github.com/eclipse-cdt-cloud/timeline-chart/blob/master/doc/documentation.md
 [gitpod-icon-large]: https://gitpod.io/button/open-in-gitpod.svg
 [gitpod-icon-small]: https://img.shields.io/badge/Gitpod-code%20now-blue.svg?longCache=true
-[gitpod-link]: https://gitpod.io#https://github.com/theia-ide/timeline-chart
+[gitpod-link]: https://gitpod.io#https://github.com/eclipse-cdt-cloud/timeline-chart
 [sample-app]: https://github.com/theia-ide/theia-timeline-extension
-[screenshot-1]: https://raw.githubusercontent.com/theia-ide/timeline-chart/master/doc/images/screenshot1-0.0.1.png
-[screenshot-2]: https://raw.githubusercontent.com/theia-ide/timeline-chart/master/doc/images/screenshot2-0.0.1.png
+[screenshot-1]: https://raw.githubusercontent.com/eclipse-cdt-cloud/timeline-chart/master/doc/images/screenshot1-0.0.1.png
+[screenshot-2]: https://raw.githubusercontent.com/eclipse-cdt-cloud/timeline-chart/master/doc/images/screenshot2-0.0.1.png
 [trace-extension]: https://github.com/eclipse-cdt-cloud/theia-trace-extension
