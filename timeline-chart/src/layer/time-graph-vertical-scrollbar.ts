@@ -55,6 +55,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
 
     protected height: number;
     protected position: TimeGraphElementPosition;
+    private _moveEndHandler;
 
     constructor(protected rowController: TimeGraphRowController, protected stateController: TimeGraphStateController, protected factor: number) {
         super('vscroll_handle');
@@ -63,9 +64,11 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
             this.oldVerticalOffset = this.rowController.verticalOffset;
             this.mouseIsDown = true;
             this.stateController.snapped = false;
+            document.addEventListener('snap-y-end', this._moveEndHandler);
         };
-        const moveEnd = () => {
+        this._moveEndHandler = () => {
             this.mouseIsDown = false;
+            document.removeEventListener('snap-y-end', this._moveEndHandler);
         }
         this.addEvent('mouseover', (event) => {
             if (this.stateController.snapped) {
@@ -80,9 +83,8 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
                 this.rowController.verticalOffset = Math.max(0, Math.min(this.rowController.totalHeight - this.stateController.canvasDisplayHeight, verticalOffset));
             }
         }, this._displayObject);
-        this.addEvent('mouseup', moveEnd, this._displayObject);
-        this.addEvent('mouseupoutside', moveEnd, this._displayObject);
-        document.addEventListener('snap-y-end', moveEnd);
+        this.addEvent('mouseup', this._moveEndHandler, this._displayObject);
+        this.addEvent('mouseupoutside', this._moveEndHandler, this._displayObject);
     }
 
     updateFactor(factor: number) {
