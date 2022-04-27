@@ -48,6 +48,11 @@ unitController.numberTranslator = (theNumber: bigint) => {
 };
 
 const providers = {
+    rowProvider: () => {
+        return {
+            rowIds : testDataProvider.getRowIds()
+        };
+    },
     dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
         const length = range.end - range.start;
         const overlap = length * BigInt(10);

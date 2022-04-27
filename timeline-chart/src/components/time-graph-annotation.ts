@@ -39,7 +39,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
         this.update(_options);
     }
 
-    update(opts: TimeGraphAnnotationComponentOptions): void {
+    update(opts?: TimeGraphAnnotationComponentOptions): void {
         if (opts) {
             this._options.position.x = opts.position.x;
             this.updateYPosition();

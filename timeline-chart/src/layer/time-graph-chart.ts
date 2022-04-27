@@ -19,10 +19,11 @@ export interface TimeGraphMouseInteractions {
 }
 
 export interface TimeGraphChartProviders {
-    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
+    rowProvider: () => { rowIds: number[] }
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number, rowIds?: number[]) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
     stateStyleProvider?: (el: TimelineChart.TimeGraphState) => TimeGraphStateStyle | undefined
     rowAnnotationStyleProvider?: (el: TimelineChart.TimeGraphAnnotation) => TimeGraphAnnotationStyle | undefined
-    rowStyleProvider?: (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
+    rowStyleProvider?: (row?: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
 }
 
 export const keyBoardNavs: Record<string, Array<string>> = {
@@ -34,18 +35,16 @@ export const keyBoardNavs: Record<string, Array<string>> = {
 
 export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
+const VISIBLE_ROW_BUFFER = 3; // number of buffer rows above and below visible range
+
 export class TimeGraphChart extends TimeGraphChartLayer {
 
-    protected rows: TimelineChart.TimeGraphRowModel[];
-    protected rowComponents: Map<TimelineChart.TimeGraphRowModel, TimeGraphRow>;
-    protected rowStateComponents: Map<TimelineChart.TimeGraphState, TimeGraphStateComponent>;
-    protected rowAnnotationComponents: Map<TimelineChart.TimeGraphAnnotation, TimeGraphAnnotationComponent>;
+    protected rowIds: number[]; // complete ordered list of rowIds
+    protected rowComponents: Map<number, TimeGraphRow> = new Map(); // map of rowId to row component
     protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
-    protected selectedElementChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
-    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange, resolution: number } | undefined;
-    protected providedRange: TimelineChart.TimeGraphRange;
-    protected providedResolution: number;
+    protected selectedStateChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
+    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange, resolution: number, rowIds: number[] } | undefined;
 
     protected isNavigating: boolean;
 
@@ -84,8 +83,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         protected providers: TimeGraphChartProviders,
         protected rowController: TimeGraphRowController) {
         super(id, rowController);
-        this.providedRange = { start: BigInt(0), end: BigInt(0) };
-        this.providedResolution = 1;
         this.isNavigating = false;
     }
 
@@ -179,6 +176,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     moveHorizontally(-horizontalDelta);
                 } else if (keyBoardNavs['panright'].indexOf(keyPressed) >= 0) {
                     moveHorizontally(horizontalDelta);
+                } else if (keyPressed === 'ArrowUp') {
+                    this.navigateUp();
+                } else if (keyPressed === 'ArrowDown') {
+                    this.navigateDown();
                 }
                 event.preventDefault();
             }
@@ -327,6 +328,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
+            this._debouncedMaybeFetchNewData();
         });
 
         this._viewRangeChangedHandler = () => {
@@ -376,6 +378,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
+    protected removeChildren(): void {
+        this.rowComponents.clear();
+        super.removeChildren();
+    }
+
     destroy() {
         this.unitController.removeViewRangeChangedHandler(this._debouncedMaybeFetchNewData);
         if (this._viewRangeChangedHandler) {
@@ -406,36 +413,66 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.stage.off('mouseup', this._stageMouseUpHandler);
             this.stage.off('mouseupoutside', this._stageMouseUpHandler);
         }
+        this.rowComponents.clear();
         super.destroy();
     }
 
     protected async maybeFetchNewData(update?: boolean) {
-        const resolution = Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
+        this.rowIds = this.providers.rowProvider().rowIds;
+        if (update) {
+            // update position of existing rows and remove deleted rows
+            this.rowComponents.forEach((rowComponent, rowId) => {
+                const index = this.rowIds.indexOf(rowId);
+                if (index == -1) {
+                    this.rowComponents.delete(rowId);
+                    this.removeChild(rowComponent);
+                } else {
+                    rowComponent.position.y = this.rowController.rowHeight * index;
+                }
+            });
+            // update selected row
+            if (this.rowController.selectedRow) {
+                this.rowController.selectedRowIndex = this.rowIds.indexOf(this.rowController.selectedRow.id);
+                if (this.rowController.selectedRowIndex === -1) {
+                    this.rowController.selectedRow = undefined;
+                }
+            }
+            // create placeholder rows
+            this.rowIds.forEach(rowId => {
+                if (!this.rowComponents.get(rowId)) {
+                    this.addRow(rowId);
+                }
+            });
+        }
+        const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         const viewRange = this.unitController.viewRange;
-        if (viewRange && (
-            viewRange.start < this.providedRange.start ||
-            viewRange.end > this.providedRange.end ||
-            resolution != this.providedResolution ||
-            update
-        )) {
-            const request = { viewRange, resolution };
+        const resolution = Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
+        // Compute the visible rowIds to fetch. Fetch all visible rows if update flag is set,
+        // otherwise fetch visible rows with no component, no model or obsolete model.
+        const rowIds = visibleRowIds.filter(rowId => {
+            const rowComponent = this.rowComponents.get(rowId);
+            return update ||
+                !rowComponent ||
+                !rowComponent.providedModel ||
+                viewRange.start < rowComponent.providedModel.range.start ||
+                viewRange.end > rowComponent.providedModel.range.end ||
+                resolution != rowComponent.providedModel.resolution;
+        });
+        if (rowIds.length > 0) {
+            const request = { viewRange, resolution, rowIds };
             if (isEqual(request, this.ongoingRequest)) {
                 // request ignored because equal to ongoing request
                 return;
             }
             try {
                 this.ongoingRequest = request;
-                const rowData = await this.providers.dataProvider(viewRange, resolution);
+                const rowData = await this.providers.dataProvider(viewRange, resolution, rowIds);
                 if (!isEqual(request, this.ongoingRequest)) {
                     // response discarded because not equal to ongoing request
                     return;
                 }
                 if (rowData) {
-                    this.providedResolution = rowData.resolution;
-                    this.providedRange = rowData.range;
-                    this.setRowModel(rowData.rows);
-                    this.removeChildren();
-                    this.addRows(this.rows, this.rowController.rowHeight);
+                    this.addOrUpdateRows(rowData);
                     if (this.isNavigating) {
                         this.selectStateInNavigation();
                     }
@@ -454,90 +491,109 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected updateScaleAndPosition() {
-        if (this.rows) {
-            this.rows.forEach((row: TimelineChart.TimeGraphRowModel) => {
-                const rowComponent = this.rowComponents.get(row);
-                if (rowComponent) {
-                    const opts: TimeGraphRect = {
-                        height: this.rowController.rowHeight,
-                        position: {
-                            x: 0,
-                            y: rowComponent.position.y
-                        },
-                        width: this.stateController.canvasDisplayWidth
-                    }
-                    rowComponent.update(opts);
+        this.rowComponents.forEach((rowComponent) => {
+            const row = rowComponent.model;
+            if (rowComponent) {
+                const opts: TimeGraphRect = {
+                    height: this.rowController.rowHeight,
+                    position: {
+                        x: 0,
+                        y: rowComponent.position.y
+                    },
+                    width: this.stateController.canvasDisplayWidth
                 }
-                let lastX: number | undefined;
-                let lastTime: bigint | undefined;
-                let lastBlank = false;
-                row.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
-                    const el = this.rowStateComponents.get(state);
-                    const start = state.range.start;
-                    const xStart = this.getPixel(start - this.unitController.viewRange.start);
-                    if (el) {
-                        const end = state.range.end;
-                        const xEnd = this.getPixel(end - this.unitController.viewRange.start);
-                        const opts: TimeGraphStyledRect = {
-                            height: el.height,
-                            position: {
-                                x: xStart,
-                                y: el.position.y
-                            },
-                            width: Math.max(1, xEnd - xStart),
-                            displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
-                        }
-                        el.update(opts);
+                rowComponent.update(opts);
+            }
+            let lastX: number | undefined;
+            let lastTime: bigint | undefined;
+            let lastBlank = false;
+            row?.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
+                const el = rowComponent.getStateById(state.id);
+                const start = state.range.start;
+                const xStart = this.getPixel(start - this.unitController.viewRange.start);
+                if (el) {
+                    const end = state.range.end;
+                    const xEnd = this.getPixel(end - this.unitController.viewRange.start);
+                    const opts: TimeGraphStyledRect = {
+                        height: el.height,
+                        position: {
+                            x: xStart,
+                            y: el.position.y
+                        },
+                        width: Math.max(1, xEnd - xStart),
+                        displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
                     }
-                    if (rowComponent && row.gapStyle) {
-                        this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime, lastBlank);
-                    }
-                    lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
-                    lastTime = state.range.end;
-                    lastBlank = (state.data?.style === undefined);
-                });
-                row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
-                    const el = this.rowAnnotationComponents.get(annotation);
-                    if (el) {
-                        // only handle ticks for now
-                        const start = annotation.range.start;
-                        const opts: TimeGraphAnnotationComponentOptions = {
-                            position: {
-                                x: this.getPixel(start - this.unitController.viewRange.start),
-                                y: el.displayObject.y
-                            }
-                        }
-                        el.update(opts);
-                    }
-                });
+                    el.update(opts);
+                }
+                if (rowComponent && row.gapStyle) {
+                    this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime, lastBlank);
+                }
+                lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
+                lastTime = state.range.end;
+                lastBlank = (state.data?.style === undefined);
             });
-        }
+            row?.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
+                const el = rowComponent.getAnnotationById(annotation.id);
+                if (el) {
+                    // only handle ticks for now
+                    const start = annotation.range.start;
+                    const opts: TimeGraphAnnotationComponentOptions = {
+                        position: {
+                            x: this.getPixel(start - this.unitController.viewRange.start),
+                            y: el.displayObject.y
+                        }
+                    }
+                    el.update(opts);
+                }
+            });
+        });
     }
 
     protected handleSelectedStateChange() {
-        this.selectedElementChangedHandler.forEach(handler => handler(this.selectedStateModel));
+        this.selectedStateChangedHandler.forEach(handler => handler(this.selectedStateModel));
     }
 
-    protected addRow(row: TimelineChart.TimeGraphRowModel, height: number, rowIndex: number) {
-        const rowId = 'row_' + rowIndex;
+    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
+        if (!this.stateController) {
+            throw ('Add this TimeGraphChart to a container before adding rows.');
+        }
+        const providedModel = { range: rowData.range, resolution: rowData.resolution };
+        rowData.rows.forEach(row => {
+            const rowComponent = this.rowComponents.get(row.id);
+            if (rowComponent) {
+                this.removeChild(rowComponent);
+            }
+            this.addRow(row.id, row, providedModel);
+        })
+    }
+
+    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+        const id = 'row_' + rowId;
+        const rowIndex = this.rowIds.indexOf(rowId);
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
-        const rowComponent = new TimeGraphRow(rowId, {
+        const rowComponent = new TimeGraphRow(id, {
             position: {
                 x: 0,
-                y: (height * rowIndex)
+                y: (this.rowController.rowHeight * rowIndex)
             },
             width: this.stateController.canvasDisplayWidth,
-            height
+            height: this.rowController.rowHeight
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
         rowComponent.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
             this.selectRow(row);
         }).bind(this));
         this.addChild(rowComponent);
-        this.rowComponents.set(row, rowComponent);
-        if (this.rowController.selectedRow && this.rowController.selectedRow.id === row.id) {
+        this.rowComponents.set(rowId, rowComponent);
+        if (this.rowController.selectedRowIndex == rowIndex) {
             this.selectRow(row);
         }
+        if (row && providedModel) {
+            this.updateRow(rowComponent, row, providedModel);
+        }
+    }
+
+    protected updateRow(rowComponent: TimeGraphRow, row: TimelineChart.TimeGraphRowModel, providedModel: { range: TimelineChart.TimeGraphRange, resolution: number }) {
         let lastX: number | undefined;
         let lastTime: bigint | undefined;
         let lastBlank = false;
@@ -547,13 +603,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 const el = this.createNewState(stateModel, rowComponent);
                 if (el) {
                     this.addElementInteractions(el);
-                    this.addChild(el);
-                    if (this.selectedStateModel && this.rowController.selectedRow
-                        && this.rowController.selectedRow.id === row.id
-                        && this.selectedStateModel.range.start === el.model.range.start
-                        && this.selectedStateModel.range.end === el.model.range.end) {
-                        this.selectState(el.model);
-                    }
+                    rowComponent.addState(el);
                 }
             }
             if (row.gapStyle) {
@@ -563,13 +613,20 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             lastTime = stateModel.range.end;
             lastBlank = (stateModel.data?.style === undefined);
         });
+        if (this.rowController.selectedRow && this.unitController.selectionRange && this.rowController.selectedRow.id === row.id) {
+            const state = row.states.find(state => {
+                return this.unitController.selectionRange && state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
+            });
+            this.selectState(state);
+        }
         row.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
             const el = this.createNewAnnotation(annotation, rowComponent);
             if (el) {
                 this.addElementInteractions(el);
-                this.addChild(el);
+                rowComponent.addAnnotation(el);
             }
         });
+        rowComponent.providedModel = providedModel;
     }
 
     protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint, lastBlank?: boolean) {
@@ -601,7 +658,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 };
                 const gap = this.createNewState(stateModel, rowComponent);
                 if (gap) {
-                    this.addChild(gap);
+                    rowComponent.addChild(gap);
                     if (state.data) {
                         state.data['gap'] = gap;
                     }
@@ -609,7 +666,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         } else {
             if (state.data && state.data?.gap) {
-                this.removeChild(state.data?.gap);
+                rowComponent.removeChild(state.data?.gap);
                 state.data.gap = undefined;
             }
         }
@@ -620,7 +677,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
         el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
-        this.rowAnnotationComponents.set(annotation, el);
         return el;
     }
 
@@ -633,7 +689,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const displayWidth = displayEnd - displayStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
         el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
-        this.rowStateComponents.set(stateModel, el);
         return el;
     }
 
@@ -694,32 +749,15 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }).bind(this));
     }
 
-    protected addRows(rows: TimelineChart.TimeGraphRowModel[], height: number) {
-        if (!this.stateController) {
-            throw ('Add this TimeGraphChart to a container before adding rows.');
-        }
-        this.rowComponents = new Map();
-        this.rowStateComponents = new Map();
-        this.rowAnnotationComponents = new Map();
-        this.rowController.rowHeight = height;
-        rows.forEach((row: TimelineChart.TimeGraphRowModel, index: number) => {
-            this.addRow(row, height, index);
-        });
-    }
-
-    protected setRowModel(rows: TimelineChart.TimeGraphRowModel[]) {
-        this.rows = rows;
-    }
-
-    protected updateElementStyle(model: TimelineChart.TimeGraphState) {
+    protected updateStateStyle(model: TimelineChart.TimeGraphState) {
         const style = this.providers.stateStyleProvider && this.providers.stateStyleProvider(model);
-        const component = this.rowStateComponents.get(model);
+        const component = this.getStateById(model.id);
         component && style && (component.style = style);
     }
 
     protected updateRowStyle(model: TimelineChart.TimeGraphRowModel) {
         const style = this.providers.rowStyleProvider && this.providers.rowStyleProvider(model);
-        const component = this.rowComponents.get(model);
+        const component = this.rowComponents.get(model.id);
         component && style && (component.style = style);
     }
 
@@ -728,28 +766,38 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     onSelectedStateChanged(handler: (el: TimelineChart.TimeGraphState | undefined) => void) {
-        this.selectedElementChangedHandler.push(handler);
+        this.selectedStateChangedHandler.push(handler);
     }
 
-    getRowModels(): TimelineChart.TimeGraphRowModel[] {
-        return this.rows;
+    getRowModel(index: number): TimelineChart.TimeGraphRowModel | undefined {
+        if (index >= this.rowIds.length) {
+            return undefined;
+        }
+        return this.rowComponents.get(this.rowIds[index])?.model;
     }
 
-    getElementById(id: string): TimeGraphStateComponent | undefined {
-        const element: TimeGraphComponent<any> | undefined = this.children.find((child) => {
-            return child.id === id;
-        });
-        return element as TimeGraphStateComponent;
+    getStateById(id: string): TimeGraphStateComponent | undefined {
+        let state = undefined;
+        for (const rowComponent of this.rowComponents.values()) {
+            state = rowComponent.getStateById(id);
+            if (state) {
+                break;
+            }
+        }
+        return state;
     }
 
-    selectRow(row: TimelineChart.TimeGraphRowModel) {
+    selectRow(row: TimelineChart.TimeGraphRowModel | undefined) {
         if (this.rowController.selectedRow) {
             delete this.rowController.selectedRow.selected;
             this.updateRowStyle(this.rowController.selectedRow);
         }
         this.rowController.selectedRow = row;
-        row.selected = true;
-        this.updateRowStyle(row);
+        if (row) {
+            this.rowController.selectedRowIndex = this.rowIds.indexOf(row.id);
+            row.selected = true;
+            this.updateRowStyle(row);
+        }
     }
 
     getSelectedState(): TimelineChart.TimeGraphState | undefined {
@@ -757,24 +805,25 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     selectState(model: TimelineChart.TimeGraphState | undefined) {
+        if (this.selectedStateModel === model) {
+            return;
+        }
         if (this.selectedStateModel) {
             delete this.selectedStateModel.selected;
-            this.updateElementStyle(this.selectedStateModel);
+            this.updateStateStyle(this.selectedStateModel);
         }
         if (model) {
-            const el = this.getElementById(model.id);
-            if (el) {
-                const row = el.row;
+            const state = this.getStateById(model.id);
+            if (state) {
+                const row = state.row;
                 if (row) {
-                    this.selectedStateModel = el.model;
-                    el.model.selected = true;
-                    this.updateElementStyle(this.selectedStateModel);
+                    state.model.selected = true;
+                    this.updateStateStyle(state.model);
                     this.selectRow(row.model);
                 }
             }
-        } else {
-            this.selectedStateModel = undefined;
         }
+        this.selectedStateModel = model;
         this.handleSelectedStateChange();
     }
 
@@ -790,5 +839,62 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.selectState(state);
         }
         this.setNavigationFlag(false);
+    }
+
+    protected navigateDown() {
+        if (this.rowIds.length > 0) {
+            this.rowController.selectedRowIndex = Math.min(this.rowController.selectedRowIndex + 1, this.rowIds.length - 1);
+            this.navigate(this.rowController.selectedRowIndex);
+        }
+    }
+
+    protected navigateUp() {
+        if (this.rowIds.length > 0) {
+            this.rowController.selectedRowIndex = Math.max(this.rowController.selectedRowIndex - 1, 0);
+            this.navigate(this.rowController.selectedRowIndex);
+        }
+    }
+
+    protected navigate(rowIndex: number) {
+        this.ensureVisible(rowIndex);
+        const selectedRowId = this.rowIds[rowIndex];
+        const selectedRowComponent = this.rowComponents.get(selectedRowId);
+        if (!selectedRowComponent) {
+            this.selectRow(undefined);
+            this.selectState(undefined);
+            return;
+        }
+        const selectedRow = selectedRowComponent.model;
+        this.selectRow(selectedRow);
+        const state = selectedRow?.states.find(state => {
+            return this.unitController.selectionRange && state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
+        });
+        this.selectState(state);
+    }
+
+    private getVisibleRowIds(buffer: number): number[] {
+        const visibleRowIds: number[] = [];
+        const rowHeight = this.rowController.rowHeight;
+        // return all rows that intersect the visible height range with a number of buffer rows
+        const minY = this.rowController.verticalOffset - buffer * rowHeight;
+        const maxY = this.rowController.verticalOffset + this.stateController.canvasDisplayHeight + buffer * rowHeight;
+        this.rowIds.forEach((rowId, index) => {
+            const y = rowHeight * index;
+            if (y + rowHeight >= minY && y <= maxY) {
+                visibleRowIds.push(rowId);
+            }
+        });
+        return visibleRowIds;
+    }
+
+    protected ensureVisible(rowIndex: number) {
+        if (rowIndex === -1) {
+            return;
+        }
+        if (rowIndex * this.rowController.rowHeight < this.rowController.verticalOffset) {
+            this.rowController.verticalOffset = rowIndex * this.rowController.rowHeight;
+        } else if ((rowIndex + 1) * this.rowController.rowHeight > this.rowController.verticalOffset + this.stateController.canvasDisplayHeight) {
+            this.rowController.verticalOffset = (rowIndex + 1) * this.rowController.rowHeight - this.stateController.canvasDisplayHeight
+        }
     }
 }

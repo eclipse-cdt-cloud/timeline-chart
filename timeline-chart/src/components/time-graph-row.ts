@@ -1,6 +1,7 @@
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphParentComponent, TimeGraphStyledRect } from "./time-graph-component";
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphStateComponent } from "./time-graph-state";
+import { TimeGraphAnnotationComponent } from "./time-graph-annotation";
 
 export interface TimeGraphRowStyle {
     backgroundColor?: number
@@ -12,13 +13,15 @@ export interface TimeGraphRowStyle {
 
 export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowModel> implements TimeGraphParentComponent {
 
-    protected states: TimeGraphStateComponent[] = [];
+    protected _providedModel: { range: TimelineChart.TimeGraphRange, resolution: number };
+    protected _rowStateComponents: Map<string, TimeGraphStateComponent> = new Map();
+    protected _rowAnnotationComponents: Map<string, TimeGraphAnnotationComponent> = new Map();
 
     constructor(
         id: string,
         protected _options: TimeGraphStyledRect,
         protected _rowIndex: number,
-        model: TimelineChart.TimeGraphRowModel,
+        model?: TimelineChart.TimeGraphRowModel,
         protected _style: TimeGraphRowStyle = { lineOpacity: 0.5, lineThickness: 1, backgroundOpacity: 0 }) {
         super(id, undefined, model);
     }
@@ -55,10 +58,42 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
         return this._options.height;
     }
 
-    // Gets called by TimeGraphLayer. Don't call it unless you know what you are doing.
-    addChild(state: TimeGraphStateComponent) {
-        this.states.push(state);
-        this._displayObject.addChild(state.displayObject);
+    addChild(child: TimeGraphComponent<any>): void {
+        this._displayObject.addChild(child.displayObject);
+        child.update();
+    }
+
+    removeChild(child: TimeGraphComponent<any>): void {
+        this._displayObject.removeChild(child.displayObject);
+        child.destroy();
+    }
+
+    addState(stateComponent: TimeGraphStateComponent) {
+        this._rowStateComponents.set(stateComponent.id, stateComponent);
+        this.addChild(stateComponent);
+    }
+
+    removeState(stateComponent: TimeGraphStateComponent) {
+        this._rowStateComponents.delete(stateComponent.id);
+        this.removeChild(stateComponent);
+    }
+
+    getStateById(id: string) {
+        return this._rowStateComponents.get(id);
+    }
+
+    addAnnotation(annotationComponent: TimeGraphAnnotationComponent) {
+        this._rowAnnotationComponents.set(annotationComponent.id, annotationComponent);
+        this.addChild(annotationComponent);
+    }
+
+    removeAnnotation(annotationComponent: TimeGraphAnnotationComponent) {
+        this._rowAnnotationComponents.delete(annotationComponent.id);
+        this.removeChild(annotationComponent);
+    }
+
+    getAnnotationById(id: string) {
+        return this._rowAnnotationComponents.get(id);
     }
 
     get style() {
@@ -82,5 +117,13 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
             this._style.lineThickness = style.lineThickness;
         }
         this.update();
+    }
+
+    get providedModel() {
+        return this._providedModel;
+    }
+
+    set providedModel(providedModel: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+        this._providedModel = providedModel;
     }
 }
