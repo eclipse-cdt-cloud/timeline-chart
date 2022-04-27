@@ -175,7 +175,7 @@ timeGraphChart.registerMouseInteractions({
     }
 });
 
-timeGraphChartArrows.addArrows(timeGraph.arrows);
+timeGraphChartArrows.addArrows(timeGraph.arrows, testDataProvider.getRowIds());
 timeGraphChartRangeEvents.addRangeEvents(timeGraph.rangeEvents);
 
 const cursorReset = document.getElementById('cursor-reset');

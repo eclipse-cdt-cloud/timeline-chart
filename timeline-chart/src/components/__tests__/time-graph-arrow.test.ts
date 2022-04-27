@@ -10,11 +10,11 @@ describe('TimeGraphArrow', () => {
         destinationId: 1,
         range
     }
-    const element = {
+    const coords = {
         start: { x: 0, y: 1 },
         end: { x: 2, y: 3 }
     }
-    const component = new TimeGraphArrowComponent('Test', arrow, element);
+    const component = new TimeGraphArrowComponent('Test', arrow, coords);
 
     it ('Renders', () => {
         expect(component).toBeTruthy();

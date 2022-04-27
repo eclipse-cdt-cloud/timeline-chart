@@ -39,6 +39,11 @@ jobs:
           NODE_OPTIONS: "--max_old_space_size=4096"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # https://github.com/microsoft/vscode-ripgrep/issues/9
 
+      - name: Test
+        shell: bash
+        run: |
+          yarn test
+
   publish:
     needs: build
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' && github.repository == 'eclipse-cdt-cloud/timeline-chart'

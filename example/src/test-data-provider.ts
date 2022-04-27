@@ -181,6 +181,14 @@ export class TestDataProvider {
         })
     }
 
+    getRowIds(): number[] {
+        const rowIds: number[] = [];
+        timeGraphEntries.model.entries.forEach(entry => {
+            rowIds.push(entry.id);
+        });
+        return rowIds;
+    }
+
     getData(opts: { range?: TimelineChart.TimeGraphRange, resolution?: number }): TimelineChart.TimeGraphModel {
         const rows: TimelineChart.TimeGraphRowModel[] = [];
         const range = opts.range || { start: BigInt(0), end: this.totalLength };

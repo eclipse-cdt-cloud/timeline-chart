@@ -6,6 +6,7 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected arrows: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>;
+    protected rowIds: number[] = [];
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; };
 
     protected afterAddToContainer() {
@@ -17,27 +18,36 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         });
     }
 
-    protected getCoordinates(arrow: TimelineChart.TimeGraphArrow): TimeGraphArrowCoordinates {
+    protected getCoordinates(arrow: TimelineChart.TimeGraphArrow): TimeGraphArrowCoordinates | undefined {
+        const sourceIndex = this.rowIds.indexOf(arrow.sourceId);
+        const destinationIndex = this.rowIds.indexOf(arrow.destinationId);
+        if (sourceIndex === -1 || destinationIndex === -1) {
+            return undefined;
+        }
         const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
             x: this.getPixel(relativeStartPosition),
-            y: (arrow.sourceId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
+            y: (sourceIndex * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         const end: TimeGraphElementPosition = {
             x: this.getPixel(relativeStartPosition + arrow.range.end - arrow.range.start),
-            y: (arrow.destinationId * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
+            y: (destinationIndex * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         return { start, end };
     }
 
     protected addArrow(arrow: TimelineChart.TimeGraphArrow) {
         const coords = this.getCoordinates(arrow);
+        if (!coords) {
+            return;
+        }
         const arrowComponent = new TimeGraphArrowComponent('arrow', arrow, coords);
         this.arrows.set(arrow, arrowComponent);
         this.addChild(arrowComponent);
     }
 
-    addArrows(arrows: TimelineChart.TimeGraphArrow[]): void {
+    addArrows(arrows: TimelineChart.TimeGraphArrow[], rowIds: number[]): void {
+        this.rowIds = rowIds;
         if (!this.stateController) {
             throw ('Add this TimeGraphChartArrows to a container before adding arrows.');
         }
@@ -59,10 +69,15 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
     }
 
     protected updateArrow(arrow: TimelineChart.TimeGraphArrow) {
-        const { start, end } = this.getCoordinates(arrow);
         const arrowComponent = this.arrows.get(arrow);
         if (arrowComponent) {
-            arrowComponent.update({ start, end });
+            const coords = this.getCoordinates(arrow);
+            if (!coords) {
+                this.removeChild(arrowComponent);
+                this.arrows.delete(arrow);
+            } else {
+                arrowComponent.update(coords);
+            }
         }
     }
 
