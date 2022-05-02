@@ -66,7 +66,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
     protected mouseIsDown: boolean;
     protected mouseStartX: number;
     protected oldViewStart: bigint;
-    private _moveEndHandler;
+    private _moveEndHandler: () => void;
 
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
@@ -127,19 +127,25 @@ export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super("navigator_background");
         this.addEvent("mousedown", event => {
+            // Get x position of click (in pixels).
             let x = event.data.getLocalPosition(this._displayObject).x;
-            let middle = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
-            // We have horizontal offset at point of click, now we need coord for start of handler.
-            let hVL = this.unitController.viewRangeLength / BigInt(2);
-            let start0 = middle - hVL;
+            // Convert x to units of BigInt Time.
+            let center = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
+            // We have the center of the new scrollbar position, but need the start of new position.
+            // Start = middle - (scrollbarWidth / 2)
+            let halfViewWidth = this.unitController.viewRangeLength / BigInt(2);
+            let start = center - halfViewWidth;
+            // Get the maximum and minimum values that start can be.
+            // Min = 0 (Handle is farthest left)
+            // Max = [The Last Number] - [Length of handle] (Handle is farthest right)
             let max = this.unitController.absoluteRange - this.unitController.viewRangeLength;
             let min = BigInt(0);
-            // Clamp it.
-            const start = BIMath.clamp(start0, min, max);
+            // Clamp
+            start = BIMath.clamp(start, min, max);
             this.unitController.viewRange = {
                 start,
                 end: start + this.unitController.viewRangeLength
-            }
+            };
             // Set snapped state
             this.toggleSnappedState(true);
         }, this._displayObject);
@@ -151,6 +157,32 @@ export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
         }
         this.addEvent('mouseup', endSnap, this._displayObject);
         this.addEvent('mouseupoutside', endSnap, this._displayObject);
+        this.addEvent('rightdown', event => {
+            // Get x position of click (in pixels).
+            let x = event.data.getLocalPosition(this._displayObject).x;
+            // Convert x to units of BigInt time.
+            let clickPoint = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
+            // Are we clicking to the left or the right of the current scrollbar position?
+            const { start, end } = this.unitController.viewRange;
+            let newStart = BigInt(0);
+            if (clickPoint < start) {
+                // If left, move left one page.
+                newStart = start - this.unitController.viewRangeLength;
+            } else if (clickPoint > end) {
+                // If right, move right one page.
+                newStart = start + this.unitController.viewRangeLength;
+            }
+            // Clamp our new value
+            let startMin = BigInt(0);
+            let startMax = this.unitController.absoluteRange - this.unitController.viewRangeLength;
+            newStart = BIMath.clamp(newStart, startMin, startMax);
+            // Set new value
+            this.unitController.viewRange = {
+                start: newStart,
+                end: newStart + this.unitController.viewRangeLength
+            };
+        }, this._displayObject);
+        
     }
 
     protected toggleSnappedState = (bool: boolean) => {
