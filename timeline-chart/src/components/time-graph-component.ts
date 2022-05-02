@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js-legacy"
 
-export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'click';
+export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'rightdown' | 'click';
 export type TimeGraphInteractionHandler = (event: PIXI.InteractionEvent) => void;
 
 export type TimeGraphComponentOptions = {}

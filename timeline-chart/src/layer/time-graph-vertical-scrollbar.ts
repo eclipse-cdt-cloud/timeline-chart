@@ -111,14 +111,19 @@ export class TimeGraphVerticalScrollbarBackground extends TimeGraphComponent<nul
     constructor(protected rowController: TimeGraphRowController, protected stateController: TimeGraphStateController, protected factor: number) {
         super("vscroll_background");
         this.addEvent("mousedown", event => {
-            let yPosition = event.data.getLocalPosition(this._displayObject).y;
-            let vOffset = (yPosition/this.stateController.canvasDisplayHeight) * this.rowController.totalHeight;
-            // We have vertical offset at point of click, but need to make it the center of scrollbar.
+            // Get y position of click (in pixels).
+            let y = event.data.getLocalPosition(this._displayObject).y;
+            // Convert to units used by rowController.
+            let center = (y/this.stateController.canvasDisplayHeight) * this.rowController.totalHeight;
+            // We have the center of the new scrollbar position, but need the starting pixel.
+            // start = middle - (scrollbarHeight / 2)
             let scrollBarHeight = (this.rowController.totalHeight * this.factor);
-            vOffset = vOffset - (scrollBarHeight / 2);
-            // Clamp it
-            let vOffsetClamped = Math.max(0, Math.min(this.rowController.totalHeight - this.stateController.canvasDisplayHeight, vOffset));
-            this.rowController.verticalOffset = vOffsetClamped;
+            let newOffset = center - (scrollBarHeight / 2);
+            // Clamp our new verticalOffset value
+            let vOffsetMin = 0;
+            let vOffsetMax = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
+            newOffset = Math.max(vOffsetMin, Math.min(vOffsetMax, newOffset));
+            this.rowController.verticalOffset = newOffset;
             // Set snapped state
             this.toggleSnappedState(true);
         }, this._displayObject);
@@ -130,6 +135,31 @@ export class TimeGraphVerticalScrollbarBackground extends TimeGraphComponent<nul
         }
         this.addEvent('mouseup', endSnap, this._displayObject);
         this.addEvent('mouseupoutside', endSnap, this._displayObject);
+        this.addEvent('rightdown', event => {
+            // Get y position of click (in raw pixels).
+            let y = event.data.getLocalPosition(this._displayObject).y;
+            // Convert y to correct units used by rowController.
+            let clickPoint = (y / this.stateController.canvasDisplayHeight) * this.rowController.totalHeight;
+            // Are we clicking above or below the current scrollbar position?
+            const { verticalOffset, totalHeight } = this.rowController;
+            const scrollBarHeight = totalHeight * this.factor;
+            let newOffset = verticalOffset;
+            const start = verticalOffset;
+            const end = verticalOffset + scrollBarHeight;
+            if (clickPoint < start) {
+                // If above, move up one page.
+                newOffset = newOffset - scrollBarHeight;
+            } else if (clickPoint > end) {
+                // If below, move down one page.
+                newOffset = newOffset + scrollBarHeight;
+            }
+            // Clamp our new values
+            const vOffsetMin = 0;
+            const vOffsetMax = totalHeight - scrollBarHeight;
+            newOffset = Math.max(vOffsetMin, Math.min(vOffsetMax, newOffset));
+            //  Assign new value
+            this.rowController.verticalOffset = newOffset;
+        }, this._displayObject);
     }
 
     updateFactor(factor: number) {
