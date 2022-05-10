@@ -12,6 +12,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
     protected navigatorBackground: TimeGraphNavigatorBackground;
     protected selectionRange?: TimeGraphRectangle;
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
+    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
 
     afterAddToContainer() {
         this._updateHandler = (): void => this.update();
@@ -21,6 +22,10 @@ export class TimeGraphNavigator extends TimeGraphLayer {
         this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController);
         this.addChild(this.navigatorHandle);
         this.unitController.onSelectionRangeChange(this._updateHandler);
+        this._contextMenuHandler = (e: MouseEvent): void => {
+            e.preventDefault();
+        }
+        this.onCanvasEvent('contextmenu', this._contextMenuHandler);
         this.update();
     }
 
@@ -56,6 +61,9 @@ export class TimeGraphNavigator extends TimeGraphLayer {
         if (this.unitController) {
             this.unitController.removeViewRangeChangedHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+        }
+        if (this._contextMenuHandler) {
+            this.removeOnCanvasEvent('contextmenu', this._contextMenuHandler);
         }
         super.destroy();
     }
@@ -183,6 +191,7 @@ export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
             };
         }, this._displayObject);
         
+        this.update()
     }
 
     protected toggleSnappedState = (bool: boolean) => {
