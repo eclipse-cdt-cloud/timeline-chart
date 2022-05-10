@@ -9,6 +9,9 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
     protected navigatorHandle: TimeGraphVerticalScrollbarHandle;
     protected navigatorBackground: TimeGraphVerticalScrollbarBackground;
     protected selectionRange?: TimeGraphRectangle;
+    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
+    private _verticalOffsetChangedHandler: () => void;
+    private _totalHeightChangedHandler: () => void;
 
     protected factor: number;
 
@@ -22,13 +25,21 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
         this.navigatorBackground = new TimeGraphVerticalScrollbarBackground(this.rowController, this.stateController, this.factor);
         this.addChild(this.navigatorBackground);
         this.addChild(this.navigatorHandle);
-        this.rowController.onVerticalOffsetChangedHandler(() => this.update());
-        this.rowController.onTotalHeightChangedHandler(() => {
+        this._contextMenuHandler = (e: MouseEvent): void => {
+            e.preventDefault();
+        }
+        this.onCanvasEvent('contextmenu', this._contextMenuHandler);
+        this._verticalOffsetChangedHandler = () => {
+            this.update();
+        }
+        this._totalHeightChangedHandler = () => {
             this.updateFactor();
             this.navigatorHandle.updateFactor(this.factor);
             this.navigatorBackground.updateFactor(this.factor);
             this.update()
-        });
+        }
+        this.rowController.onVerticalOffsetChangedHandler(this._verticalOffsetChangedHandler);
+        this.rowController.onTotalHeightChangedHandler(this._totalHeightChangedHandler);
     }
 
     protected updateFactor() {
@@ -44,6 +55,17 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
         this.navigatorHandle.render();
         this.navigatorBackground.clear();
         this.navigatorBackground.render();
+    }
+
+    destroy() {
+        if (this.rowController) {
+            this.rowController.removeTotalHeightChangedHandler(this._totalHeightChangedHandler);
+            this.rowController.removeVerticalOffsetChangedHandler(this._verticalOffsetChangedHandler);
+        }
+        if (this._contextMenuHandler) {
+            this.removeOnCanvasEvent('contextmenu', this._contextMenuHandler);
+        };
+        super.destroy();
     }
 }
 

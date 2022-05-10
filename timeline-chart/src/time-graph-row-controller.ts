@@ -27,12 +27,33 @@ export class TimeGraphRowController {
         this.selectedRowChangedHandlers.push(handler);
     }
 
+    removeSelectedRowChangedHandler(handler: (row: TimelineChart.TimeGraphRowModel) => void) {
+        const index = this.selectedRowChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.selectedRowChangedHandlers.splice(index, 1);
+        }
+    }
+
     onVerticalOffsetChangedHandler(handler: (verticalOffset: number) => void) {
         this.verticalOffsetChangedHandlers.push(handler);
     }
 
+    removeVerticalOffsetChangedHandler(handler: (verticalOffset: number) => void) {
+        const index = this.verticalOffsetChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.verticalOffsetChangedHandlers.splice(index, 1);
+        }
+    }
+
     onTotalHeightChangedHandler(handler: (totalHeight: number) =>  void) {
         this.totalHeightChangedHandlers.push(handler);
+    }
+
+    removeTotalHeightChangedHandler(handler: (totalHeight: number) =>  void) {
+        const index = this.totalHeightChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.totalHeightChangedHandlers.splice(index, 1);
+        }
     }
 
     get totalHeight(): number {
