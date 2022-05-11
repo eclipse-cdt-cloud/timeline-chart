@@ -428,6 +428,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.removeChild(rowComponent);
                 } else {
                     rowComponent.position.y = this.rowController.rowHeight * index;
+                    rowComponent.providedModel = undefined;
                 }
             });
             // update selected row
