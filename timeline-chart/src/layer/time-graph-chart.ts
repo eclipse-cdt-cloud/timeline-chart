@@ -663,6 +663,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     if (state.data) {
                         state.data['gap'] = gap;
                     }
+                    this.addElementInteractions(gap);
                 }
             }
         } else {
