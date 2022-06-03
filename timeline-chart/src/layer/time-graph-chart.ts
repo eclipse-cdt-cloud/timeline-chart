@@ -833,6 +833,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.isNavigating = flag;
     }
 
+    selectAndReveal(rowIndex: number) {
+        if (rowIndex >= 0 && rowIndex < this.rowIds.length) {
+            this.rowController.selectedRowIndex = rowIndex;
+            this.navigate(rowIndex);
+        }
+    }
+
     protected selectStateInNavigation() {
         const row = this.rowController.selectedRow;
         if (row && this.unitController.selectionRange) {
