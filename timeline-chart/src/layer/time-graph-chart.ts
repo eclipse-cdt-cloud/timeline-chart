@@ -36,6 +36,7 @@ export const keyBoardNavs: Record<string, Array<string>> = {
 export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined;
 
 const VISIBLE_ROW_BUFFER = 3; // number of buffer rows above and below visible range
+const FINE_RESOLUTION_FACTOR = 1; // fine resolution factor or default to disable coarse update
 
 export class TimeGraphChart extends TimeGraphChartLayer {
 
@@ -70,7 +71,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
     private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
 
-    private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(), 400);
+    private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400);
+    private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
 
     // Keep track of the most recently clicked point.
     // If clicked again during _multiClickTime duration (milliseconds) record multi-click
@@ -81,7 +83,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
-        protected rowController: TimeGraphRowController) {
+        protected rowController: TimeGraphRowController,
+        private _coarseResolutionFactor = FINE_RESOLUTION_FACTOR) {
         super(id, rowController);
         this.isNavigating = false;
     }
@@ -417,7 +420,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         super.destroy();
     }
 
-    protected async maybeFetchNewData(update?: boolean) {
+    protected async maybeFetchNewData(update?: boolean, fine?: boolean) {
         this.rowIds = this.providers.rowProvider().rowIds;
         if (update) {
             // update position of existing rows and remove deleted rows
@@ -447,7 +450,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         const viewRange = this.unitController.viewRange;
-        const resolution = Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
+        const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
+        const resolution = resolutionFactor * Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
         // Compute the visible rowIds to fetch. Fetch all visible rows if update flag is set,
         // otherwise fetch visible rows with no component, no model or obsolete model.
         const rowIds = visibleRowIds.filter(rowId => {
@@ -457,7 +461,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 !rowComponent.providedModel ||
                 viewRange.start < rowComponent.providedModel.range.start ||
                 viewRange.end > rowComponent.providedModel.range.end ||
-                resolution != rowComponent.providedModel.resolution;
+                resolution < rowComponent.providedModel.resolution;
         });
         if (rowIds.length > 0) {
             const request = { viewRange, resolution, rowIds };
@@ -465,6 +469,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 // request ignored because equal to ongoing request
                 return;
             }
+            this._debouncedMaybeFetchNewDataFine.cancel();
             try {
                 this.ongoingRequest = request;
                 const rowData = await this.providers.dataProvider(viewRange, resolution, rowIds);
@@ -487,7 +492,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.ongoingRequest = undefined;
                 }
                 this.isNavigating = false;
+                if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
+                    this._debouncedMaybeFetchNewDataFine();
+                }
             }
+        } else if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
+            // no row to update for coarse resolution, try fine resolution
+            this.maybeFetchNewData(update, true);
         }
     }
 
