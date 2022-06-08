@@ -17,17 +17,21 @@ export class TimeGraphAxis extends TimeGraphLayer {
     private _keyUpHandler: { (event: KeyboardEvent): void; (this: Document, ev: KeyboardEvent): any; };
     private _keyDownHandler: { (event: KeyboardEvent): void; (this: Document, ev: KeyboardEvent): any; };
 
-    constructor(id: string, protected style?: { color?: number, lineColor?: number }) {
+    constructor(id: string, protected style?: { color?: number, lineColor?: number, verticalAlign?: string }) {
         super(id);
     }
 
     protected getOptions(): TimeGraphAxisStyle {
         let color;
         let lineColor;
+        let verticalAlign: string | undefined = 'top'; // Default position is top, same as CSS verticalAlign is 'baseline'
+        
         if (this.style) {
             color = this.style.color;
             lineColor = this.style.lineColor;
+            verticalAlign = this.style.verticalAlign;
         }
+
         return {
             height: this.stateController.canvasDisplayHeight,
             width: this.stateController.canvasDisplayWidth,
@@ -36,7 +40,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
                 y: 0
             },
             color,
-            lineColor
+            lineColor,
+            verticalAlign
         }
     }
 

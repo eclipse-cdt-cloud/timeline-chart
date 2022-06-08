@@ -7,7 +7,8 @@ import * as _ from "lodash";
 import { TimelineChart } from "../time-graph-model";
 
 export interface TimeGraphAxisStyle extends TimeGraphStyledRect {
-    lineColor?: number
+    lineColor?: number,
+    verticalAlign?: string
 }
 import { BIMath } from "../bigint-utils";
 
@@ -84,7 +85,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
             for (let time = startTime; time <= viewRangeEnd; time += stepLength) {
                 const xpos = Number(time - viewRangeStart) * zoomFactor;
                 if (xpos >= 0 && xpos < canvasDisplayWidth) {
-                    const position = {
+                    const labelCenter = {
                         x: xpos,
                         y: this._options.position.y
                     };
@@ -96,16 +97,24 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                                 fontSize: 10,
                                 fill: lineColor
                             });
-                            text.x = position.x - (text.width / 2);
-                            text.y = position.y + lineStyle(label).lineHeight;
+
+                            const textPosition = this.getTextPosition(labelCenter, text, lineStyle);
+                            text.x = textPosition.x;
+                            text.y = textPosition.y;
                             this.labels.push(text);
                             this._displayObject.addChild(text);
                         }
                     }
+
+                    const verticalLinePosition = {
+                        x: xpos,
+                        y: this.getVerticalLineYPosition(lineStyle(label).lineHeight)
+                    };
+                    
                     this.vline({
-                        position,
+                        position: verticalLinePosition,
                         height: lineStyle(label).lineHeight,
-                        color: lineColor
+                        color: lineColor 
                     });
                 }
             }
@@ -134,6 +143,30 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                 start,
                 end
             }
+        }
+    }
+
+    private getVerticalLineYPosition(lineHeight: number) {
+        if (this._options.verticalAlign === 'bottom') {
+            return this._options.height - lineHeight;
+        } 
+
+        // By default the tick will be at the top
+        return 0;
+    }
+
+    private getTextPosition(labelCenter: {x: number, y: number}, textElement: PIXI.Text, lineStyle: (label: string | undefined) => { lineHeight: number }): {x: number, y: number}{
+        const xPosition = labelCenter.x - (textElement.width / 2);
+        let yPosition = labelCenter.y + lineStyle(textElement.text).lineHeight;
+
+        // If the vertical line is at the bottom, we add some space between the line and the textElement
+        if (this._options.verticalAlign === 'bottom') {
+            yPosition = yPosition - 3;
+        }
+
+        return {
+            x: xPosition,
+            y: yPosition
         }
     }
 }
