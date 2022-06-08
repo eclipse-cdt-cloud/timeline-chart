@@ -132,7 +132,7 @@ const timeGraphAxisContainer = new TimeGraphContainer({
 }, unitController, axisCanvas);
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
-const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor });
+const timeAxisLayer = new TimeGraphAxis('timeGraphAxis', { color: styleConfig.naviBackgroundColor, verticalAlign: 'bottom'});
 timeGraphAxisContainer.addLayers([timeAxisLayer]);
 
 const chartHTMLContainer = document.createElement('div');
