@@ -49,6 +49,7 @@ export class TimeGraphContainer {
             view: canvas,
             backgroundColor: config.backgroundColor,
             transparent: config.transparent,
+            sharedTicker: true,
             antialias: true,
             resolution: ratio,
             autoDensity: true,

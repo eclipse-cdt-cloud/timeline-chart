@@ -1,4 +1,5 @@
-import * as PIXI from "pixi.js-legacy"
+import * as PIXI from "pixi.js-legacy";
+import { RenderEvents } from "../time-graph-render-controller";
 
 export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'rightdown' | 'click';
 export type TimeGraphInteractionHandler = (event: PIXI.InteractionEvent) => void;
@@ -77,6 +78,11 @@ export abstract class TimeGraphComponent<T> {
         }
         this.clear();
         this.render();
+        this.startPixiRender();
+    }
+
+    protected startPixiRender() {
+        RenderEvents.startRender();
     }
 
     abstract render(): void;
@@ -87,6 +93,7 @@ export abstract class TimeGraphComponent<T> {
         this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
         this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
+        this.startPixiRender();
     }
 
     protected rectTruncated(opts: TimeGraphStyledRect) {
@@ -104,6 +111,7 @@ export abstract class TimeGraphComponent<T> {
             this.displayObject.drawRect(position.x + 0.5, position.y + 0.5, width, height);
         }
         this.displayObject.endFill();
+        this.startPixiRender();
     }
 
     protected roundedRect(opts: TimeGraphStyledRect) {
@@ -114,6 +122,7 @@ export abstract class TimeGraphComponent<T> {
         this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
 
         this.displayObject.endFill();
+        this.startPixiRender();
     }
 
     protected hline(opts: TimeGraphHorizontalLine) {
@@ -121,6 +130,7 @@ export abstract class TimeGraphComponent<T> {
         this.displayObject.lineStyle(thickness || 1, color || 0x000000, this.getPIXIOpacity(opacity));
         this.displayObject.moveTo(position.x, position.y + 0.5);
         this.displayObject.lineTo(position.x + width, position.y + 0.5);
+        this.startPixiRender();
     }
 
     protected vline(opts: TimeGraphVerticalLine) {
@@ -128,6 +138,7 @@ export abstract class TimeGraphComponent<T> {
         this.displayObject.lineStyle(thickness || 1, color || 0x000000, this.getPIXIOpacity(opacity));
         this.displayObject.moveTo(position.x + 0.5, position.y);
         this.displayObject.lineTo(position.x + 0.5, position.y + height);
+        this.startPixiRender();
     }
 
     /**

@@ -1,4 +1,5 @@
 import { TimelineChart } from "./time-graph-model";
+import { TimeGraphRenderController } from "./time-graph-render-controller";
 
 export class TimeGraphUnitController {
     protected viewRangeChangedHandlers: ((newRange: TimelineChart.TimeGraphRange) => void)[];
@@ -9,6 +10,7 @@ export class TimeGraphUnitController {
 
     protected _offset: bigint = BigInt(0);
 
+    protected _renderer: TimeGraphRenderController;
     /**
      *  Create a string from the given number, which is shown in TimeAxis.
      *  Or return undefined to not show any text for that number.
@@ -21,6 +23,7 @@ export class TimeGraphUnitController {
         this._viewRange = viewRange || { start: BigInt(0), end: absoluteRange };
 
         this.selectionRangeChangedHandlers = [];
+        this._renderer = new TimeGraphRenderController();
     }
 
     protected handleViewRangeChange() {
@@ -88,4 +91,5 @@ export class TimeGraphUnitController {
     set offset(offset: bigint) {
         this._offset = offset;
     }
+
 }
