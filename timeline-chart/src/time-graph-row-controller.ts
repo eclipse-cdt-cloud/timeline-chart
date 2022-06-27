@@ -1,4 +1,5 @@
 import { TimelineChart } from "./time-graph-model";
+import { RenderEvents } from "./time-graph-render-controller";
 
 export class TimeGraphRowController {
     private _selectedRow: TimelineChart.TimeGraphRowModel | undefined = undefined;
@@ -14,6 +15,7 @@ export class TimeGraphRowController {
 
     protected handleVerticalOffsetChanged() {
         this.verticalOffsetChangedHandlers.forEach(h => h(this._verticalOffset));
+        this.startRender();
     }
 
     protected handleSelectedRowChanged() {
@@ -25,6 +27,11 @@ export class TimeGraphRowController {
 
     protected handleTotalHeightChanged(){
         this.totalHeightChangedHandlers.forEach(h=>h(this._totalHeight));
+        this.startRender();
+    }
+
+    protected startRender() {
+        RenderEvents.startRender();
     }
 
     onSelectedRowChangedHandler(handler: (row: TimelineChart.TimeGraphRowModel) => void) {
