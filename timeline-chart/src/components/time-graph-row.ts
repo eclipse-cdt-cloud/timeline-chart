@@ -103,6 +103,7 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
     set style(style: TimeGraphRowStyle) {
         if (style.backgroundColor !== undefined) {
             this._options.color = style.backgroundColor;
+            this._style.backgroundColor = style.backgroundColor;
         }
         if (style.backgroundOpacity !== undefined) {
             this._style.backgroundOpacity = style.backgroundOpacity;
