@@ -847,7 +847,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     selectAndReveal(rowIndex: number) {
         if (rowIndex >= 0 && rowIndex < this.rowIds.length) {
             this.rowController.selectedRowIndex = rowIndex;
-            this.navigate(rowIndex);
+            this.navigate(rowIndex, true);
         }
     }
 
@@ -875,8 +875,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    protected navigate(rowIndex: number) {
-        this.ensureVisible(rowIndex);
+    protected navigate(rowIndex: number, center?: boolean) {
+        this.ensureVisible(rowIndex, center);
         const selectedRowId = this.rowIds[rowIndex];
         const selectedRowComponent = this.rowComponents.get(selectedRowId);
         if (!selectedRowComponent) {
@@ -907,14 +907,42 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return visibleRowIds;
     }
 
-    protected ensureVisible(rowIndex: number) {
+    protected ensureVisible(rowIndex: number, center?: boolean) {
         if (rowIndex === -1) {
             return;
         }
         if (rowIndex * this.rowController.rowHeight < this.rowController.verticalOffset) {
-            this.rowController.verticalOffset = rowIndex * this.rowController.rowHeight;
+            center ? this.centerRow(rowIndex) : this.rowController.verticalOffset = rowIndex * this.rowController.rowHeight;
         } else if ((rowIndex + 1) * this.rowController.rowHeight > this.rowController.verticalOffset + this.stateController.canvasDisplayHeight) {
-            this.rowController.verticalOffset = (rowIndex + 1) * this.rowController.rowHeight - this.stateController.canvasDisplayHeight
+            center ? this.centerRow(rowIndex) : this.rowController.verticalOffset = (rowIndex + 1) * this.rowController.rowHeight - this.stateController.canvasDisplayHeight;
         }
     }
+
+    protected centerRow(rowIndex: number) {
+
+        if (rowIndex === -1) {
+            return;
+        }
+
+        const { rowHeight } = this.rowController;
+        const { canvasDisplayHeight } = this.stateController;
+
+        const numberOfVisibleRows = Math.floor(canvasDisplayHeight / rowHeight);
+        const halfVizRows = Math.floor(numberOfVisibleRows / 2);
+        const numberOfRows = this.rowComponents.size;
+        
+        if (rowIndex < halfVizRows) {
+            // Index too low to center.
+            this.rowController.verticalOffset = 0;
+        } else if (rowIndex > (numberOfRows - halfVizRows - 1)) {
+            // Index too high to center.
+            this.rowController.verticalOffset = (numberOfRows - numberOfVisibleRows) * rowHeight;
+        } else {
+            // Can be centered.
+            const numberOfHiddenRows = rowIndex - halfVizRows;
+            this.rowController.verticalOffset = numberOfHiddenRows * rowHeight;
+        }
+
+    }
+
 }
