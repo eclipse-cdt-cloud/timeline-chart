@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js-legacy"
+import * as PIXI from "pixi.js"
 import * as keyboardKey from "keyboard-key"
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";
@@ -16,9 +16,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected secondCursor?: TimeGraphCursor;
     protected color: number = 0x0000ff;
 
-    private _stageMouseDownHandler: Function;
-    private _stageMouseMoveHandler: Function;
-    private _stageMouseUpHandler: Function;
+    private _stageMouseDownHandler: (event: PIXI.InteractionEvent) => void;
+    private _stageMouseMoveHandler: (event: PIXI.InteractionEvent) => void;
+    private _stageMouseUpHandler: (event: PIXI.InteractionEvent) => void;
     
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };

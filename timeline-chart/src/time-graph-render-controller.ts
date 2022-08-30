@@ -1,5 +1,5 @@
 import { throttle, debounce } from 'lodash';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 const START_RENDER_STRING = 'startPixiRender';
 const STOP_RENDER_STRING = 'stopPixiRender';

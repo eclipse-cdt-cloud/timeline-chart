@@ -20,7 +20,8 @@
         ],
         "declaration": true,
         "sourceMap": true,
-        "outDir": "./lib"
+        "outDir": "./lib",
+        "allowSyntheticDefaultImports": true,
     },
     "include": [
         "./src/**/*"

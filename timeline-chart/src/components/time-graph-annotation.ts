@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js-legacy"
+import * as PIXI from "pixi.js"
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphComponentOptions } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row"

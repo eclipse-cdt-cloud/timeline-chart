@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js-legacy";
+import * as PIXI from "pixi.js";
 
 export class FontController {
     private fontFamily: string;
@@ -21,12 +21,12 @@ export class FontController {
 
     createFontName(fontColor: string, fontSize: number): string {
         const fontName = "LabelFont" + fontSize.toString() + fontColor;
-        const fontStyle = {
+        const fontStyle = new PIXI.TextStyle({
             fontFamily: this.fontFamily,
             fontSize: fontSize,
             fill: fontColor === "White" ? "white" : "black",
-            fontWeight: 900
-        };
+            fontWeight: '900'
+        });
         PIXI.BitmapFont.from(fontName, fontStyle, { chars: PIXI.BitmapFont.ASCII });
         return fontName;
     }
