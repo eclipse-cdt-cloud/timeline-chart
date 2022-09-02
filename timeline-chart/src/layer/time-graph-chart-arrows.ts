@@ -7,11 +7,11 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected arrows: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>;
     protected rowIds: number[] = [];
-    private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; };
+    private _updateHandler: { (): void; (worldRange: TimelineChart.TimeGraphRange): void; (worldRange: TimelineChart.TimeGraphRange): void; };
 
     protected afterAddToContainer() {
         this._updateHandler = (): void => this.update();
-        this.unitController.onViewRangeChanged(this._updateHandler);
+        this.stateController.onWorldRender(this._updateHandler);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;
@@ -24,13 +24,12 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
         if (sourceIndex === -1 || destinationIndex === -1) {
             return undefined;
         }
-        const relativeStartPosition = arrow.range.start - this.unitController.viewRange.start;
         const start: TimeGraphElementPosition = {
-            x: this.getPixel(relativeStartPosition),
+            x: this.getWorldPixel(arrow.range.start),
             y: (sourceIndex * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         const end: TimeGraphElementPosition = {
-            x: this.getPixel(relativeStartPosition + arrow.range.end - arrow.range.start),
+            x: this.getWorldPixel(arrow.range.end),
             y: (destinationIndex * this.rowController.rowHeight) + (this.rowController.rowHeight / 2)
         }
         return { start, end };
@@ -83,7 +82,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     destroy() : void {
         if (this.unitController) {
-            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.stateController.removeWorldRenderHandler(this._updateHandler);
         }
         super.destroy();
     }

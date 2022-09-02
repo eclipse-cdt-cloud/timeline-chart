@@ -1,11 +1,10 @@
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimelineChart } from "../time-graph-model";
-import { TimeGraphLayer } from "./time-graph-layer";
+import { TimeGraphViewportLayer } from "./time-graph-viewport-layer";
 
-export class TimeGraphChartSelectionRange extends TimeGraphLayer {
+export class TimeGraphChartSelectionRange extends TimeGraphViewportLayer {
     protected selectionRange?: TimeGraphRectangle;
     protected color: number = 0x0000ff;
-    private _viewRangeUpdateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; };
     private _updateHandler: { (): void; (selectionRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
 
     constructor(id: string, style?: { color?: number }) {
@@ -17,8 +16,8 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     protected updateScaleAndPosition() {
         if (this.unitController.selectionRange && this.selectionRange) {
-            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const width = this.getPixel(this.unitController.selectionRange.end - this.unitController.selectionRange.start)
+            const firstCursorPosition = this.getWorldPixel(this.unitController.selectionRange.start);
+            const width = this.getPixel(this.unitController.selectionRange.end - this.unitController.selectionRange.start);
             this.selectionRange.update({
                 position: {
                     x: firstCursorPosition,
@@ -31,12 +30,9 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
     }
 
     protected afterAddToContainer() {
-        this._viewRangeUpdateHandler = () => {
-            this.updateScaleAndPosition();
-        };
 
         this._updateHandler = (): void => this.update();
-        this.unitController.onViewRangeChanged(this._viewRangeUpdateHandler);
+        this.stateController.onWorldRender(this._updateHandler);
         this.unitController.onSelectionRangeChange(this._updateHandler);
         this.update();
     }
@@ -48,8 +44,8 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     update() {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const secondCursorPosition = this.getPixel(this.unitController.selectionRange.end - this.unitController.viewRange.start);
+            const firstCursorPosition = this.getWorldPixel(this.unitController.selectionRange.start);
+            const secondCursorPosition = this.getWorldPixel(this.unitController.selectionRange.end);
             if (secondCursorPosition !== firstCursorPosition) {
                 if (!this.selectionRange) {
                     this.selectionRange = new TimeGraphRectangle({
@@ -83,7 +79,7 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     destroy() : void {
         if (this.unitController) {
-            this.unitController.removeViewRangeChangedHandler(this._viewRangeUpdateHandler);
+            this.stateController.removeWorldRenderHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
         }
         super.destroy();

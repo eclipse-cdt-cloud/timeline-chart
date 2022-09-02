@@ -1,3 +1,4 @@
+import { TimelineChart } from "./time-graph-model";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 
 export class TimeGraphStateController {
@@ -20,9 +21,11 @@ export class TimeGraphStateController {
         y: number;
     };
 
-    protected zoomChangedHandlers: (() => void)[];
-    protected positionChangedHandlers: (() => void)[];
-    protected canvasDisplayWidthChangedHandlers: (() => void)[];
+    private _worldRenderedHandlers: ((worldRange: TimelineChart.TimeGraphRange) => void)[] = [];
+    protected zoomChangedHandlers: ((zoomFactor: number) => void)[] = [];
+    protected positionChangedHandlers: (() => void)[] = [];
+    protected canvasDisplayWidthChangedHandlers: (() => void)[] = [];
+
 
     constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
         this.ratio = window.devicePixelRatio;
@@ -31,14 +34,13 @@ export class TimeGraphStateController {
         this._initialZoomFactor = this.zoomFactor;
         this._positionOffset = { x: 0, y: 0 };
         this.oldPositionOffset = { x: 0, y: 0 };
-        this.zoomChangedHandlers = [];
-        this.positionChangedHandlers = [];
-        this.canvasDisplayWidthChangedHandlers = [];
         this.snapped = false;
+
+        this.unitController.onViewRangeChanged(this.updateZoomFactor);
     }
 
-    protected handleZoomChange() {
-        this.zoomChangedHandlers.forEach(handler => handler());
+    protected handleZoomChange(zoomFactor: number) {
+        this.zoomChangedHandlers.forEach(handler => handler(zoomFactor));
     }
     protected handlePositionChange() {
         this.positionChangedHandlers.forEach(handler => handler());
@@ -47,7 +49,7 @@ export class TimeGraphStateController {
         this.canvasDisplayWidthChangedHandlers.forEach(handler => handler());
     }
 
-    onZoomChanged(handler: () => void) {
+    onZoomChanged(handler: (zoomFactor: number) => void) {
         this.zoomChangedHandlers.push(handler);
     }
     onPositionChanged(handler: () => void) {
@@ -55,6 +57,13 @@ export class TimeGraphStateController {
     }
     onCanvasDisplayWidthChanged(handler: () => void) {
         this.canvasDisplayWidthChangedHandlers.push(handler);
+    }
+
+    removeOnZoomChanged(handler: (zoomFactor: number) => void) {
+        const index = this.zoomChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.zoomChangedHandlers.splice(index, 1);
+        }
     }
 
     /**
@@ -83,8 +92,15 @@ export class TimeGraphStateController {
         return this._initialZoomFactor;
     }
 
+    updateZoomFactor = () => {
+        let newZoom = this.canvasDisplayWidth / Number(this.unitController.viewRangeLength);
+        if (this._zoomFactor !== newZoom) {
+            this.handleZoomChange(this._zoomFactor = newZoom);
+        }
+    }
+
     get zoomFactor(): number {
-        this._zoomFactor = this.canvasDisplayWidth / Number(this.unitController.viewRangeLength);
+        this.updateZoomFactor();
         return this._zoomFactor;
     }
 
@@ -104,6 +120,21 @@ export class TimeGraphStateController {
     }) {
         this._positionOffset = value;
         this.handlePositionChange();
+    }
+
+    onWorldRender = (handler: (worldRange: TimelineChart.TimeGraphRange) => void) => {
+        this._worldRenderedHandlers.push(handler);
+    }
+    
+    handleOnWorldRender = () => {
+        this._worldRenderedHandlers.forEach(handler => handler(this.unitController.worldRange));
+    }
+
+    removeWorldRenderHandler = (handler: (worldRange: TimelineChart.TimeGraphRange) => void) => {
+        const index = this._worldRenderedHandlers.indexOf(handler);
+        if (index > -1) {
+            this._worldRenderedHandlers.splice(index, 1);
+        }
     }
 
 }

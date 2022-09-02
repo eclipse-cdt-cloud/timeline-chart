@@ -144,7 +144,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         };
         this.onCanvasEvent('mousedown', this._mouseDownHandler);
-        this.unitController.onViewRangeChanged(this._updateHandler);
+        this.stateController.onWorldRender(this._updateHandler);
         this.unitController.onSelectionRangeChange(this._updateHandler);
         this.update();
     }
@@ -224,8 +224,8 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     update() {
         if (this.unitController.selectionRange) {
-            const firstCursorPosition = this.getPixel(this.unitController.selectionRange.start - this.unitController.viewRange.start);
-            const secondCursorPosition = this.getPixel(this.unitController.selectionRange.end - this.unitController.viewRange.start);
+            const firstCursorPosition = this.getWorldPixel(this.unitController.selectionRange.start);
+            const secondCursorPosition = this.getWorldPixel(this.unitController.selectionRange.end);
             const firstCursorOptions = {
                 color: this.color,
                 height: this.stateController.canvasDisplayHeight,
@@ -268,7 +268,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     destroy() : void {
         if (this.unitController) {
-            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
+            this.stateController.removeWorldRenderHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
         }
         if (this._mouseDownHandler) {

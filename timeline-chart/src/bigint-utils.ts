@@ -30,4 +30,11 @@ export class BIMath {
         val = BIMath.round(val);
         return val >= 0 ? val : -val;
     };
+
+    static readonly multiply = (a: bigint | number, b: bigint | number): bigint => {
+        a = Number(a);
+        b = Number(b);
+        let c = a * b;
+        return BIMath.round(c);
+    }
 };
