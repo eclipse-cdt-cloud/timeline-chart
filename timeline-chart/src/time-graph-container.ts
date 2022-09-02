@@ -17,15 +17,16 @@ export interface TimeGraphContainerOptions {
 export class TimeGraphContainer {
 
     protected stage: PIXI.Container;
+    protected renderer: PIXI.AbstractRenderer;
+    protected application: PIXI.Application;
+
     protected _canvas: HTMLCanvasElement;
 
     protected stateController: TimeGraphStateController;
 
     protected layers: TimeGraphLayer[];
 
-    private application: PIXI.Application;
-
-    private background: TimeGraphRectangle;
+    protected background: TimeGraphRectangle;
 
     constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController, protected extCanvas?: HTMLCanvasElement) {
         let canvas: HTMLCanvasElement
@@ -57,9 +58,12 @@ export class TimeGraphContainer {
         });
 
         this.stage = this.application.stage;
+        this.renderer = this.application.renderer;
         this._canvas = this.application.view;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
+        this.unitController.onViewRangeChanged(this.calculatePositionOffset);
+        this.stateController.onWorldRender(this.calculatePositionOffset);
 
         this.layers = [];
 
@@ -93,6 +97,7 @@ export class TimeGraphContainer {
         this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
         this.stateController.updateDisplayHeight();
+        
         this.background.update({
             position: {
                 x: 0, y: 0
@@ -116,6 +121,20 @@ export class TimeGraphContainer {
 
     destroy() {
         this.layers.forEach(l => l.destroy());
+        this.unitController.removeViewRangeChangedHandler(this.calculatePositionOffset);
         this.application.destroy(true);
     }
+
+    protected calculatePositionOffset = () => {
+        // Currently only using horizontal offset, or "x"
+        const { unitController, stateController } = this;
+        const { viewRange, worldRange } = unitController;
+        let timeOffset = Number(viewRange.start - worldRange.start);
+        let x = -1 * (timeOffset * stateController.zoomFactor);
+        this.stateController.positionOffset = {
+            x,
+            y: 0
+        }
+    }
+
 }

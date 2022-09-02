@@ -65,7 +65,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
         return stepLength;
     }
 
-    protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
+    protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }, viewport?: boolean) {
         if (this.unitController.viewRangeLength > 0 && this.stateController.canvasDisplayWidth > 0) {
             let labelWidth = 0;
             if (this.unitController.numberTranslator) {
@@ -79,12 +79,17 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
             const stepLength = BigInt(this.getStepLength(labelWidth));
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
             const zoomFactor = this.stateController.zoomFactor;
-            const viewRangeStart = this.unitController.viewRange.start + this.unitController.offset;
-            const viewRangeEnd = this.unitController.viewRange.end + this.unitController.offset;
-            const startTime = (viewRangeStart / stepLength) * stepLength;
-            for (let time = startTime; time <= viewRangeEnd; time += stepLength) {
-                const xpos = Number(time - viewRangeStart) * zoomFactor;
-                if (xpos >= 0 && xpos < canvasDisplayWidth) {
+            const rangeStart = viewport ? this.unitController.worldRange.start + this.unitController.offset : this.unitController.viewRange.start + this.unitController.offset;
+            const rangeEnd = viewport ? this.unitController.worldRange.end + this.unitController.offset : this.unitController.viewRange.end + this.unitController.offset;
+            const startTime = (rangeStart / stepLength) * stepLength;
+            for (let time = startTime; time <= rangeEnd; time += stepLength) {
+                const xpos = Number(time - rangeStart) * zoomFactor;
+                const worldRatio = this.unitController.worldRangeLength / this.unitController.viewRangeLength;
+                const xposEnd = canvasDisplayWidth * Number(worldRatio);
+                const viewportCondition = xpos >= 0 && xpos < xposEnd;
+                const notViewportCondition = xpos >= 0 && xpos < canvasDisplayWidth;
+                const shouldContinue = (viewport && viewportCondition) || (!viewport && notViewportCondition);
+                if (shouldContinue) {
                     const labelCenter = {
                         x: xpos,
                         y: this._options.position.y
@@ -110,11 +115,11 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
                         x: xpos,
                         y: this.getVerticalLineYPosition(lineStyle(label).lineHeight)
                     };
-                    
+
                     this.vline({
                         position: verticalLinePosition,
                         height: lineStyle(label).lineHeight,
-                        color: lineColor 
+                        color: lineColor
                     });
                 }
             }
@@ -149,13 +154,13 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
     private getVerticalLineYPosition(lineHeight: number) {
         if (this._options.verticalAlign === 'bottom') {
             return this._options.height - lineHeight;
-        } 
+        }
 
         // By default the tick will be at the top
         return 0;
     }
 
-    private getTextPosition(labelCenter: {x: number, y: number}, textElement: PIXI.Text, lineStyle: (label: string | undefined) => { lineHeight: number }): {x: number, y: number}{
+    private getTextPosition(labelCenter: { x: number, y: number }, textElement: PIXI.Text, lineStyle: (label: string | undefined) => { lineHeight: number }): { x: number, y: number } {
         const xPosition = labelCenter.x - (textElement.width / 2);
         let yPosition = labelCenter.y + lineStyle(textElement.text).lineHeight;
 

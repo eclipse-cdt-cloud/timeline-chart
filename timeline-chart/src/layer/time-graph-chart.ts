@@ -39,13 +39,12 @@ const VISIBLE_ROW_BUFFER = 3; // number of buffer rows above and below visible r
 const FINE_RESOLUTION_FACTOR = 1; // fine resolution factor or default to disable coarse update
 
 export class TimeGraphChart extends TimeGraphChartLayer {
-
     protected rowIds: number[]; // complete ordered list of rowIds
     protected rowComponents: Map<number, TimeGraphRow> = new Map(); // map of rowId to row component
     protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
     protected selectedStateChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
-    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange, resolution: number, rowIds: number[] } | undefined;
+    protected ongoingRequest: { worldRange: TimelineChart.TimeGraphRange; resolution: number; rowIds: number[] } | undefined;
 
     protected isNavigating: boolean;
 
@@ -63,13 +62,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _stageMouseMoveHandler: Function;
     private _stageMouseUpHandler: Function;
 
-    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
-    private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };
-    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
-    private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void; };
-    private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void; };
-    private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
-    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
+    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void };
+    private _zoomRangeChangedHandler: (zoomFactor: number) => void;
+    private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void };
+    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void };
+    private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void };
+    private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void };
+    private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void };
+    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void };
 
     private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400);
     private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
@@ -94,8 +94,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             return;
         }
         if (zoomPosition === undefined) {
-            const start = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.start - this.unitController.viewRange.start : BigInt(0));
-            const end = this.getPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end - this.unitController.viewRange.start : this.unitController.viewRangeLength);
+            const start = this.getWorldPixel(this.unitController.selectionRange ? this.unitController.selectionRange.start : BigInt(0));
+            const end = this.getWorldPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end : this.unitController.worldRangeLength);
             zoomPosition = (start + end) / 2;
         }
         const zoomTime = zoomPosition / this.stateController.zoomFactor;
@@ -110,9 +110,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.unitController.viewRange = {
                 start,
                 end
-            }
+            };
         }
-    };
+    }
 
     protected afterAddToContainer() {
         this.stage.cursor = 'default';
@@ -335,13 +335,29 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
 
         this._viewRangeChangedHandler = () => {
-            this.updateScaleAndPosition();
-            if (this.mouseZooming) {
-                this.updateZoomingSelection();
-            }
+            this.updateZoomingSelection();
+            this.ensureRowLinesFitViewWidth();
         };
         this.unitController.onViewRangeChanged(this._viewRangeChangedHandler);
         this.unitController.onViewRangeChanged(this._debouncedMaybeFetchNewData);
+
+        /**
+         * We need to explicitly re-render every zoom change because of edge case:
+         *   WorldRange = Absolute Range && ViewRange < WorldRange
+         * When we are at above state, and reset view to home, nothing happens.
+         *   We already rendered the world and don't rerender (WorldRange doesn't change)
+         *   this.maybeFetchNewData is called and we don't fetch or trigger viewport.handleOnWorldRange.
+         *   This is because don't re-render the world since it's we already have the entire trace rendered.
+         *   We don't currently have any logic for scaling the world down.
+         * UpdatingScaleAndPosition also scales everything down nicely when zooming out :)
+         * Side effect - stage.width is always reset to renderer.width when this is called.  
+         */
+        this._zoomRangeChangedHandler = (zoomFactor) => {
+            this.updateScaleAndPosition();
+            this.ensureRowLinesFitViewWidth();
+            this.stateController.handleOnWorldRender();
+        };
+        this.stateController.onZoomChanged(this._zoomRangeChangedHandler);
 
         if (this.unitController.viewRangeLength && this.stateController.canvasDisplayWidth) {
             this.maybeFetchNewData();
@@ -361,23 +377,31 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     updateZoomingSelection() {
-        if (this.zoomingSelection) {
+        if (!this.mouseZooming && this.zoomingSelection) {
             this.removeChild(this.zoomingSelection);
             delete this.zoomingSelection;
-        }
-        if (this.mouseZooming) {
-            const mouseStartX = Number(this.mouseZoomingStart - this.unitController.viewRange.start) * this.stateController.zoomFactor;
-            this.zoomingSelection = new TimeGraphRectangle({
+        } else if (this.mouseZooming) {
+
+            const x = this.getWorldPixel(this.mouseZoomingStart);
+            const options = {
                 color: 0xbbbbbb,
                 opacity: 0.2,
                 position: {
-                    x: mouseStartX,
+                    x,
                     y: 0
                 },
                 height: Math.max(this.stateController.canvasDisplayHeight, this.rowController.totalHeight),
-                width: this.mouseEndX - mouseStartX
-            });
-            this.addChild(this.zoomingSelection);
+                width: this.mouseEndX - this.mouseStartX
+            };
+
+            if (!this.zoomingSelection) {
+                // Add the rectangle if we don't have one
+                this.zoomingSelection = new TimeGraphRectangle(options);
+                this.addChild(this.zoomingSelection);
+            } else {
+                // Update the rectangle if we do
+                this.zoomingSelection.update(options);
+            }
         }
     }
 
@@ -387,7 +411,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     destroy() {
+        this.stateController.removeOnZoomChanged(this._zoomRangeChangedHandler);
         this.unitController.removeViewRangeChangedHandler(this._debouncedMaybeFetchNewData);
+        this.unitController.removeViewRangeChangedHandler(this._viewRangeChangedHandler);
         if (this._viewRangeChangedHandler) {
             this.unitController.removeViewRangeChangedHandler(this._viewRangeChangedHandler);
         }
@@ -442,29 +468,36 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             }
             // create placeholder rows
-            this.rowIds.forEach(rowId => {
+            this.rowIds.forEach((rowId) => {
                 if (!this.rowComponents.get(rowId)) {
                     this.addRow(rowId);
                 }
             });
         }
         const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
-        const viewRange = this.unitController.viewRange;
+        const { viewRange } = this.unitController;
         const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
-        const resolution = resolutionFactor * Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
+        const resolution = (resolutionFactor * Number(this.unitController.viewRangeLength)) / this.stateController.canvasDisplayWidth;
         // Compute the visible rowIds to fetch. Fetch all visible rows if update flag is set,
         // otherwise fetch visible rows with no component, no model or obsolete model.
         const rowIds = visibleRowIds.filter(rowId => {
             const rowComponent = this.rowComponents.get(rowId);
-            return update ||
+            return (
+                update ||
                 !rowComponent ||
                 !rowComponent.providedModel ||
-                viewRange.start < rowComponent.providedModel.range.start ||
-                viewRange.end > rowComponent.providedModel.range.end ||
-                resolution < rowComponent.providedModel.resolution;
+                viewRange.start < rowComponent.providedModel.range.start || // This logic can be updated for pre-rendering before we reach the end.
+                viewRange.end > rowComponent.providedModel.range.end || // This logic can be updated for pre-rendering before we reach the end.
+                resolution < rowComponent.providedModel.resolution
+            );
         });
         if (rowIds.length > 0) {
-            const request = { viewRange, resolution, rowIds };
+            // When we fetch data, update the world range from the current view range.
+            // Only on coarse renders
+            // Only if we are updating all rows and not increasing vertical height.  See: https://github.com/eclipse-cdt-cloud/theia-trace-extension/pull/832#issuecomment-1259902534.
+            const allRowsUpdated = rowIds.length === visibleRowIds.length;
+            const worldRange = (!fine && allRowsUpdated) ? this.unitController.updateWorldRangeFromViewRange() : this.unitController.worldRange;
+            const request = { worldRange, resolution, rowIds };
             if (isEqual(request, this.ongoingRequest)) {
                 // request ignored because equal to ongoing request
                 return;
@@ -472,7 +505,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this._debouncedMaybeFetchNewDataFine.cancel();
             try {
                 this.ongoingRequest = request;
-                const rowData = await this.providers.dataProvider(viewRange, resolution, rowIds);
+                const rowData = await this.providers.dataProvider(worldRange, resolution, rowIds);
                 if (!isEqual(request, this.ongoingRequest)) {
                     // response discarded because not equal to ongoing request
                     return;
@@ -496,6 +529,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this._debouncedMaybeFetchNewDataFine();
                 }
             }
+            // After we build the new world from new data, execute render handlers.
+            // Only execute after first, coarse render.  Don't need to repeat after second, fine render.
+            this.stateController.handleOnWorldRender();
         } else if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
             // no row to update for coarse resolution, try fine resolution
             this.maybeFetchNewData(update, true);
@@ -522,25 +558,27 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             row?.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
                 const el = rowComponent.getStateById(state.id);
                 const start = state.range.start;
-                const xStart = this.getPixel(start - this.unitController.viewRange.start);
+                const xStart = this.getWorldPixel(start, true);
                 if (el) {
                     const end = state.range.end;
-                    const xEnd = this.getPixel(end - this.unitController.viewRange.start);
+                    const xEnd = this.getWorldPixel(end, true);
+                    const width = Math.max(1, xEnd - xStart);
                     const opts: TimeGraphStyledRect = {
                         height: el.height,
                         position: {
                             x: xStart,
                             y: el.position.y
                         },
-                        width: Math.max(1, xEnd - xStart),
-                        displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
-                    }
+                        width,
+                        displayWidth: width
+                    };
                     el.update(opts);
                 }
                 if (rowComponent && row.gapStyle) {
                     this.updateGap(state, rowComponent, row.gapStyle, xStart, lastX, lastTime, lastBlank);
                 }
-                lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
+                // Does clamping xEnd effect lastX calculation in some way?
+                lastX = Math.max(xStart + 1, this.getWorldPixel(state.range.end));
                 lastTime = state.range.end;
                 lastBlank = (state.data?.style === undefined);
             });
@@ -551,7 +589,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     const start = annotation.range.start;
                     const opts: TimeGraphAnnotationComponentOptions = {
                         position: {
-                            x: this.getPixel(start - this.unitController.viewRange.start),
+                            x: this.getWorldPixel(start),
                             y: el.displayObject.y
                         }
                     }
@@ -562,12 +600,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected handleSelectedStateChange() {
-        this.selectedStateChangedHandler.forEach(handler => handler(this.selectedStateModel));
+        this.selectedStateChangedHandler.forEach((handler) => handler(this.selectedStateModel));
     }
 
     protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
         if (!this.stateController) {
-            throw ('Add this TimeGraphChart to a container before adding rows.');
+            throw 'Add this TimeGraphChart to a container before adding rows.';
         }
         const providedModel = { range: rowData.range, resolution: rowData.resolution };
         rowData.rows.forEach(row => {
@@ -576,19 +614,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.removeChild(rowComponent);
             }
             this.addRow(row.id, row, providedModel);
-        })
+        });
     }
 
-    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange; resolution: number }) {
         const id = 'row_' + rowId;
         const rowIndex = this.rowIds.indexOf(rowId);
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
         const rowComponent = new TimeGraphRow(id, {
             position: {
                 x: 0,
-                y: (this.rowController.rowHeight * rowIndex)
+                y: this.rowController.rowHeight * rowIndex
             },
-            width: this.stateController.canvasDisplayWidth,
+            width: this.rowWidth,
             height: this.rowController.rowHeight
         }, rowIndex, row, rowStyle);
         rowComponent.displayObject.interactive = true;
@@ -610,7 +648,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         let lastTime: bigint | undefined;
         let lastBlank = false;
         row.states.forEach((stateModel: TimelineChart.TimeGraphState) => {
-            const x = this.getPixel(stateModel.range.start - this.unitController.viewRange.start);
+            const x = this.getWorldPixel(stateModel.range.start);
             if (stateModel.data?.style) {
                 const el = this.createNewState(stateModel, rowComponent);
                 if (el) {
@@ -621,7 +659,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (row.gapStyle) {
                 this.updateGap(stateModel, rowComponent, row.gapStyle, x, lastX, lastTime, lastBlank);
             }
-            lastX = Math.max(x + 1, this.getPixel(stateModel.range.end - this.unitController.viewRange.start));
+            lastX = Math.max(x + 1, this.getWorldPixel(stateModel.range.end));
             lastTime = stateModel.range.end;
             lastBlank = (stateModel.data?.style === undefined);
         });
@@ -686,7 +724,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewAnnotation(annotation: TimelineChart.TimeGraphAnnotation, rowComponent: TimeGraphRow) {
-        const start = this.getPixel(annotation.range.start - this.unitController.viewRange.start);
+        const start = this.getWorldPixel(annotation.range.start);
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
         el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
@@ -694,12 +732,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
-        const xStart = this.getPixel(stateModel.range.start - this.unitController.viewRange.start);
-        const xEnd = this.getPixel(stateModel.range.end - this.unitController.viewRange.start);
+        const xStart = this.getWorldPixel(stateModel.range.start, true);
+        const xEnd = this.getWorldPixel(stateModel.range.end, true);
         let el: TimeGraphStateComponent | undefined;
-        const displayStart = this.getPixel(BIMath.max(stateModel.range.start, this.unitController.viewRange.start));
-        const displayEnd = this.getPixel(BIMath.min(stateModel.range.end, this.unitController.viewRange.end));
-        const displayWidth = displayEnd - displayStart;
+        const displayWidth = xEnd - xStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
         el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
         return el;
@@ -720,7 +756,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
 
             // Mouse clicks count keeps increasing without limit as long as we keep clicking on the same coordinate.
-            if (this._recentlyClickedGlobal && (this._recentlyClickedGlobal.equals(e.data.global))){
+            if (this._recentlyClickedGlobal && this._recentlyClickedGlobal.equals(e.data.global)) {
                 this._mouseClicks++;
             } else {
                 // Only clear the timer and reset the click count if the global position is NOT 
@@ -945,4 +981,25 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     }
 
+    /**
+     * Ensures that we always see the row lines.
+     * This is a hacky solution that triggers every view range change.
+     */
+    protected ensureRowLinesFitViewWidth = () => {
+        this.rowComponents.forEach(rowComponent => {
+            rowComponent.update({
+                height: this.rowController.rowHeight,
+                position: {
+                    x: -this.stateController.positionOffset.x,
+                    y: rowComponent.position.y
+                },
+                width: this.stateController.canvasDisplayWidth,
+            });
+        })
+
+    }
+
+    get rowWidth(): number {
+        return Number(this.unitController.worldRangeLength) * this.stateController.zoomFactor;
+    }
 }
