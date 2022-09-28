@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js-legacy"
-import * as keyboardKey from "keyboard-key"
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";
 import { TimelineChart } from "../time-graph-model";
@@ -22,8 +21,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
-    private _keyDownHandler: (event: KeyboardEvent) => void;
-    private _keyUpHandler: (event: KeyboardEvent) => void;
+    private _cursorKeyDownHandler: (event: KeyboardEvent) => void;
+    private _cursorKeyUpHandler: (event: KeyboardEvent) => void;
+    protected _keyboardShortcutKeyDownHandler: (event: KeyboardEvent) => void;
 
     constructor(id: string, protected chartLayer: TimeGraphChart, protected rowController: TimeGraphRowController, style?: { color?: number }) {
         super(id, rowController);
@@ -39,7 +39,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
         this._updateHandler = (): void => this.update();
 
-        this._keyDownHandler = (event: KeyboardEvent) => {
+        this._cursorKeyDownHandler = (event: KeyboardEvent) => {
             if (event.key === 'Shift' && this.mouseButtons === 0 && !event.ctrlKey && !event.altKey) {
                 this.stage.cursor = 'crosshair';
             } else if (this.stage.cursor === 'crosshair' && !this.mouseSelecting &&
@@ -47,23 +47,31 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 this.stage.cursor = 'default';
             }
             this.shiftKeyDown = event.shiftKey;
-            // TODO: keyCode is deprecated. We should change these.
-            if (event.keyCode === keyboardKey.ArrowLeft) {
-                this.navigateOrSelectLeft();
-            } else if (event.keyCode === keyboardKey.ArrowRight) {
-                this.navigateOrSelectRight();
-            }
-        };
+        }
 
-        this._keyUpHandler = (event: KeyboardEvent) => {
+        this._cursorKeyUpHandler = (event: KeyboardEvent) => {
             this.shiftKeyDown = event.shiftKey;
             if (this.stage.cursor === 'crosshair' && !this.mouseSelecting && event.key === 'Shift' ) {
                 this.stage.cursor = 'default';
             }
+        }
+
+        this._keyboardShortcutKeyDownHandler = (event: KeyboardEvent) => {
+            switch(event.key) {
+                case "ArrowLeft":
+                    this.navigateOrSelectLeft();
+                    break;
+                case "ArrowRight":
+                    this.navigateOrSelectRight();
+                    break;
+                default:
+                    break;
+            }
         };
 
-        this.onCanvasEvent('keydown', this._keyDownHandler);
-        this.onCanvasEvent('keyup', this._keyUpHandler);
+        this.onCanvasEvent('keydown', this._cursorKeyDownHandler);
+        this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
+        this.onCanvasEvent('keyup', this._cursorKeyUpHandler);
 
         this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
@@ -274,11 +282,14 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         if (this._mouseDownHandler) {
             this.removeOnCanvasEvent('mousedown', this._mouseDownHandler);
         }
-        if (this._keyDownHandler) {
-            this.removeOnCanvasEvent('keydown', this._keyDownHandler);
+        if (this._cursorKeyDownHandler) {
+            this.removeOnCanvasEvent('keydown', this._cursorKeyDownHandler);
         }
-        if (this._keyUpHandler) {
-            this.removeOnCanvasEvent('mousedown', this._keyUpHandler);
+        if (this._keyboardShortcutKeyDownHandler) {
+            this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler);
+        }
+        if (this._cursorKeyUpHandler) {
+            this.removeOnCanvasEvent('mousedown', this._cursorKeyUpHandler);
         }
         if (this.stage) {
             this.stage.off('mousedown', this._stageMouseDownHandler);
