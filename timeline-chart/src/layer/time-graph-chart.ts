@@ -732,13 +732,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
-        const xStart = this.getWorldPixel(stateModel.range.start, true);
-        const xEnd = this.getWorldPixel(stateModel.range.end, true);
+        const { xStart, xEnd, displayWidth, elementStyle } = this.getNewStateParams(stateModel);
         let el: TimeGraphStateComponent | undefined;
-        const displayWidth = xEnd - xStart;
-        const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
         el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
         return el;
+    }
+
+    protected getNewStateParams = (stateModel: TimelineChart.TimeGraphState): { xStart: number, xEnd: number, displayWidth: number, elementStyle?: TimeGraphStateStyle } => {
+        const xStart = this.getWorldPixel(stateModel.range.start, true);
+        const xEnd = this.getWorldPixel(stateModel.range.end, true);
+        const displayWidth = xEnd - xStart;
+        const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
+        return { xStart, xEnd, displayWidth, elementStyle };
     }
 
     protected addElementInteractions(el: TimeGraphComponent<any>) {

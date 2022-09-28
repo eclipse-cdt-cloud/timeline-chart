@@ -36,5 +36,5 @@ export class BIMath {
         b = Number(b);
         let c = a * b;
         return BIMath.round(c);
-    }
+    };
 };
