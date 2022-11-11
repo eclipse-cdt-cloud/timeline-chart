@@ -34,6 +34,9 @@ export abstract class TimeGraphViewportLayer extends TimeGraphLayer {
     }
 
     protected shiftStage = () => {
+        if (this.layer.position === undefined || this.layer.position === null) {
+            return;
+        }
         this.layer.position.x = this.stateController.positionOffset.x;
     }
 
