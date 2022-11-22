@@ -91,11 +91,13 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         if (displayLabel === this.model.label) {
             textObj.x = textObjX;
             textObj.y = textObjY;
+            textObj.alpha = this._options.opacity ?? 1;
             this.displayObject.addChild(textObj);
         } else {
             const newTextObj = new PIXI.BitmapText(displayLabel, { fontName: fontName });
             newTextObj.x = textObjX;
             newTextObj.y = textObjY;
+            newTextObj.alpha = this._options.opacity ?? 1;
             this.displayObject.addChild(newTextObj);
         }
     }
