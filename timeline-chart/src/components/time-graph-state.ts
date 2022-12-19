@@ -17,6 +17,8 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     static fontController: FontController = new FontController();
 
     protected _options: TimeGraphStyledRect;
+    private textLabelObject: PIXI.BitmapText | undefined;
+    private textWidth: number;
 
     constructor(
         id: string,
@@ -63,48 +65,49 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         const labelText = this.model.label;
         const textPadding = 0.5;
         if (displayWidth < 3) {
-            this.clearLabel();
+            if (this.textLabelObject) {
+                this.textLabelObject.text = "";
+            }
             return;
         }
-        const textObj = new PIXI.BitmapText(this.model.label, { fontName: fontName });
-        const textWidth = textObj.getLocalBounds().width;
+
+        let addLabel = false;
+        if (!this.textLabelObject) {
+            this.textLabelObject = new PIXI.BitmapText(this.model.label, { fontName: fontName });
+            this.textWidth = this.textLabelObject.getLocalBounds().width;
+            addLabel = true;
+        } 
+
         let textObjX = position.x + textPadding;
         const textObjY = position.y + textPadding;
         let displayLabel = "";
 
-        if (displayWidth > textWidth) {
-            textObjX = position.x + (displayWidth - textWidth) / 2;
+        if (displayWidth > this.textWidth) {
+            textObjX = position.x + (displayWidth - this.textWidth) / 2;
             displayLabel = labelText;
         }
         else {
-            const textScaler = displayWidth / textWidth;
+            const textScaler = displayWidth / this.textWidth;
             const index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
             const partialLabel = labelText.substr(0, Math.max(index - 3, 0));
             if (partialLabel.length > 0) {
                 displayLabel = partialLabel.concat("...");
             }
         }
+
+        this.textLabelObject.text = displayLabel;
+
         if (displayLabel === "") {
-            this.clearLabel();
             return;
         }
-        if (displayLabel === this.model.label) {
-            textObj.x = textObjX;
-            textObj.y = textObjY;
-            textObj.alpha = this._options.opacity ?? 1;
-            this.displayObject.addChild(textObj);
-        } else {
-            const newTextObj = new PIXI.BitmapText(displayLabel, { fontName: fontName });
-            newTextObj.x = textObjX;
-            newTextObj.y = textObjY;
-            newTextObj.alpha = this._options.opacity ?? 1;
-            this.displayObject.addChild(newTextObj);
-        }
-    }
 
-    clearLabel() {
-        this.displayObject.children.forEach(element => element.destroy());
-        this.displayObject.removeChildren();
+        this.textLabelObject.alpha = this._options.opacity ?? 1;
+        this.textLabelObject.x = textObjX;
+        this.textLabelObject.y = textObjY;
+
+        if (addLabel) {
+            this.displayObject.addChild(this.textLabelObject);
+        }
     }
 
     get height(): number {
@@ -161,7 +164,6 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     }
 
     clear() {
-        this.clearLabel();
         super.clear()
     }
 }
