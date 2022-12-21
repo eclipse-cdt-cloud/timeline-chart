@@ -6,7 +6,7 @@ export class FontController {
     private fontColorMap: Map<number, string>;
     private defaultFontName: string = "LabelFont8White";
 
-    constructor(fontFamily: string = "Verdana") {
+    constructor(fontFamily: string = "monospace") {
         this.fontFamily = fontFamily;
         this.fontNameMap = new Map<number, Map<string, string>>();
         this.fontColorMap = new Map<number, string>();
@@ -25,7 +25,7 @@ export class FontController {
             fontFamily: this.fontFamily,
             fontSize: fontSize,
             fill: fontColor === "White" ? "white" : "black",
-            fontWeight: 900
+            fontWeight: "bold"
         };
         PIXI.BitmapFont.from(fontName, fontStyle, { chars: PIXI.BitmapFont.ASCII });
         return fontName;
