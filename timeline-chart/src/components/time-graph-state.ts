@@ -80,24 +80,28 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
 
         let textObjX = position.x + textPadding;
         const textObjY = position.y + textPadding;
-        let displayLabel = "";
 
         if (displayWidth > this.textWidth) {
             textObjX = position.x + (displayWidth - this.textWidth) / 2;
-            displayLabel = labelText;
+            this.textLabelObject.text = labelText
         }
         else {
+            let removeCount = 3; // Set to 3 because we need to append "..." to truncated text
             const textScaler = displayWidth / this.textWidth;
             const index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
-            const partialLabel = labelText.substr(0, Math.max(index - 3, 0));
-            if (partialLabel.length > 0) {
-                displayLabel = partialLabel.concat("...");
-            }
+
+            do {
+                let displayLabel = "";
+                const partialLabel = labelText.substring(0, Math.max(index - removeCount, 0));
+                if (partialLabel.length > 0) {
+                    displayLabel = partialLabel.concat("...");
+                }
+                this.textLabelObject.text = displayLabel;
+                removeCount++;
+            } while (this.textLabelObject.getLocalBounds().width > displayWidth);
         }
 
-        this.textLabelObject.text = displayLabel;
-
-        if (displayLabel === "") {
+        if (this.textLabelObject.text === "") {
             return;
         }
 
