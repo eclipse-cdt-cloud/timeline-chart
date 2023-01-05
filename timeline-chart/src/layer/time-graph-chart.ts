@@ -496,7 +496,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             // Only on coarse renders
             // Only if we are updating all rows and not increasing vertical height.  See: https://github.com/eclipse-cdt-cloud/theia-trace-extension/pull/832#issuecomment-1259902534.
             const allRowsUpdated = rowIds.length === visibleRowIds.length;
-            const worldRange = (!fine && allRowsUpdated) ? this.unitController.updateWorldRangeFromViewRange() : this.unitController.worldRange;
+            const worldRange = allRowsUpdated ? this.unitController.updateWorldRangeFromViewRange() : this.unitController.worldRange;
             const request = { worldRange, resolution, rowIds };
             if (isEqual(request, this.ongoingRequest)) {
                 // request ignored because equal to ongoing request
