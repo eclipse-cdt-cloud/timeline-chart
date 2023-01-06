@@ -12,13 +12,15 @@ export interface TimeGraphStateStyle {
     borderColor?: number
 }
 
+const LABEL_CACHE_SIZE = 10;
+
 export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.TimeGraphState> {
 
     static fontController: FontController = new FontController();
 
     protected _options: TimeGraphStyledRect;
-    private textLabelObject: PIXI.BitmapText | undefined;
     private textWidth: number;
+    private labelCache: Map<number, PIXI.BitmapText> = new Map<number, PIXI.BitmapText>();
 
     constructor(
         id: string,
@@ -55,6 +57,10 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         if (!this.model.label) {
             return;
         }
+
+        // Clear the label
+        this.displayObject.removeChildren();
+
         const fontName = TimeGraphStateComponent.fontController.getFontName(this._options.color ? this._options.color : 0, this._options.height - 2) ||
             TimeGraphStateComponent.fontController.getDefaultFontName();
         const position = {
@@ -62,51 +68,78 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
             y: this._options.position.y
         }
         const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0;
-        const labelText = this.model.label;
         const textPadding = 0.5;
         if (displayWidth < 3) {
-            if (this.textLabelObject) {
-                this.textLabelObject.text = "";
-            }
             return;
         }
 
-        let addLabel = false;
-        if (!this.textLabelObject) {
-            this.textLabelObject = new PIXI.BitmapText(this.model.label, { fontName: fontName });
-            this.textWidth = this.textLabelObject.getLocalBounds().width;
-            addLabel = true;
-        } 
+        // If there is no label previously displayed, we get the width of the full label
+        if (this.textWidth === undefined) {
+            const bitmapText = new PIXI.BitmapText(this.model.label, { fontName: fontName });
+            this.textWidth = bitmapText.getLocalBounds().width; //Get the text width
+        }
 
         let textObjX = position.x + textPadding;
         const textObjY = position.y + textPadding;
-        let displayLabel = "";
+        let textScaler = 1;
 
         if (displayWidth > this.textWidth) {
             textObjX = position.x + (displayWidth - this.textWidth) / 2;
-            displayLabel = labelText;
         }
         else {
-            const textScaler = displayWidth / this.textWidth;
-            const index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
-            const partialLabel = labelText.substr(0, Math.max(index - 3, 0));
-            if (partialLabel.length > 0) {
-                displayLabel = partialLabel.concat("...");
+            textScaler = displayWidth / this.textWidth;
+        }
+
+        let displayObject = this.getDisplayLabelObject(this.model.label, textScaler, fontName);
+        if (displayObject) {
+            displayObject.alpha = this._options.opacity ?? 1;
+            displayObject.x = textObjX;
+            displayObject.y = textObjY;
+            this.displayObject.addChild(displayObject);
+        }
+    }
+
+    private getDisplayLabelObject(stateFullLabel: string, textScaler: number, fontName: string): PIXI.BitmapText | undefined {
+        if (textScaler > 0 && textScaler <= 1) {
+            let displayObject = this.labelCache.get(textScaler);
+
+            if (displayObject) {
+                return displayObject;
             }
-        }
 
-        this.textLabelObject.text = displayLabel;
+            // Generate the new label
+            let displayLabel = "";
+            if (textScaler < 1) {
+                const index = Math.min(Math.floor(textScaler * stateFullLabel.length), stateFullLabel.length - 1)
+                const partialLabel = stateFullLabel.substr(0, Math.max(index - 3, 0));
+                if (partialLabel.length > 0) {
+                    displayLabel = partialLabel.concat("...");
+                }
+            } else {
+                displayLabel = stateFullLabel;
+            }
 
-        if (displayLabel === "") {
-            return;
-        }
+            /*
+            * Update the cache using a FIFO policy since the users are
+            * more likely to zoom in/out once or twice, rather than multiple.
+            */
+            if (this.labelCache.size === LABEL_CACHE_SIZE) {
+                // The keys are returned in order of insertion
+                const firstKey = this.labelCache.keys().next().value;
+                const updateObject = this.labelCache.get(firstKey);
 
-        this.textLabelObject.alpha = this._options.opacity ?? 1;
-        this.textLabelObject.x = textObjX;
-        this.textLabelObject.y = textObjY;
+                if (updateObject) {
+                    this.labelCache.delete(firstKey);
+                    updateObject.text = displayLabel;
+                    displayObject = updateObject;
+                    this.labelCache.set(textScaler, displayObject);
+                }
+            } else {
+                displayObject = new PIXI.BitmapText(displayLabel, { fontName: fontName });
+                this.labelCache.set(textScaler, displayObject);
+            }
 
-        if (addLabel) {
-            this.displayObject.addChild(this.textLabelObject);
+            return displayObject;
         }
     }
 
