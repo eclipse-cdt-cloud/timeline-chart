@@ -27,7 +27,7 @@ export class FontController {
             fill: fontColor === "White" ? "white" : "black",
             fontWeight: "bold"
         };
-        PIXI.BitmapFont.from(fontName, fontStyle, { chars: PIXI.BitmapFont.ASCII });
+        PIXI.BitmapFont.from(fontName, fontStyle, { chars: this.getCharacterSet() });
         return fontName;
     }
 
@@ -71,5 +71,14 @@ export class FontController {
             fontName = size2FontMap ? size2FontMap.get(fontColor) : undefined;
         }
         return fontName ? fontName : "";
+    }
+
+    private getCharacterSet(): string[][] {
+        let letters: string[][]= [];
+        letters.push(PIXI.BitmapFont.ASCII[0]);
+        letters.push(['★','★']);
+        letters.push(['…','…']);
+
+        return letters;
     }
 }
