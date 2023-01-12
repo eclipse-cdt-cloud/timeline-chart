@@ -89,9 +89,9 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         else {
             const textScaler = displayWidth / this.textWidth;
             const index = Math.min(Math.floor(textScaler * labelText.length), labelText.length - 1)
-            const partialLabel = labelText.substr(0, Math.max(index - 3, 0));
+            const partialLabel = labelText.substr(0, Math.max(index - 1, 0));
             if (partialLabel.length > 0) {
-                displayLabel = partialLabel.concat("...");
+                displayLabel = partialLabel.concat("…");
             }
         }
 
