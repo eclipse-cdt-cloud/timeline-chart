@@ -1,6 +1,6 @@
 # LC_COLLATE=C sort
+.vscode
 bundle.js
 coverage
 lib
 node_modules
-.vscode
