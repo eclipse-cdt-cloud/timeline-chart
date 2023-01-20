@@ -9,6 +9,7 @@ import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
 import { debounce, cloneDeep, DebouncedFunc, isEqual } from 'lodash';
+import { TimeGraphLayerOptions } from "./time-graph-layer";
 
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent, clickCount: number) => void
@@ -371,9 +372,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    update() {
+    update(opts: TimeGraphLayerOptions) {
+        this.updateRowLineColor(opts);
         this.updateScaleAndPosition();
         this._debouncedMaybeFetchNewData();
+    }
+    
+    updateRowLineColor(opts: TimeGraphLayerOptions) {
+        this.rowComponents.forEach(row => {
+            row.style = { ...row.style, ...opts };
+        })
     }
 
     updateZoomingSelection() {
