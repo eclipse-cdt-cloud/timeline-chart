@@ -511,6 +511,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     return;
                 }
                 if (rowData) {
+                    console.dir(rowData);
                     this.addOrUpdateRows(rowData);
                     if (this.isNavigating) {
                         this.selectStateInNavigation();
@@ -732,18 +733,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
-        const { xStart, xEnd, displayWidth, elementStyle } = this.getNewStateParams(stateModel);
-        let el: TimeGraphStateComponent | undefined;
-        el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
-        return el;
-    }
-
-    protected getNewStateParams = (stateModel: TimelineChart.TimeGraphState): { xStart: number, xEnd: number, displayWidth: number, elementStyle?: TimeGraphStateStyle } => {
         const xStart = this.getWorldPixel(stateModel.range.start, true);
         const xEnd = this.getWorldPixel(stateModel.range.end, true);
         const displayWidth = xEnd - xStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
-        return { xStart, xEnd, displayWidth, elementStyle };
+        let el: TimeGraphStateComponent | undefined;
+        el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
+        return el;
     }
 
     protected addElementInteractions(el: TimeGraphComponent<any>) {
@@ -817,6 +813,48 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     registerMouseInteractions(interactions: TimeGraphMouseInteractions) {
         this.mouseInteractions = interactions;
+    }
+
+    public selectClosestStateAndMakeSelectionRange = (dir: 'next' | 'prev')  => {
+        
+        const next = dir === 'next';
+        const selectedRow = this.rowComponents.get(this.rowController.selectedRow ? this.rowController.selectedRow.id : 1);
+
+        if (this.unitController.selectionRange && selectedRow) {
+
+            const { start, end } = this.unitController.selectionRange;
+            let point1 = next ? end : start;
+            let closestState: TimelineChart.TimeGraphState | undefined;
+            let closestDiff = Number.POSITIVE_INFINITY;
+            let isValid = false;
+
+            selectedRow?.states.forEach((marker, key) => {
+
+                const { start, end } = marker.model.range;
+
+                if (start === this.unitController.selectionRange?.start && end === this.unitController.selectionRange?.end) {
+                    return;
+                }
+
+                let point2 = next ? start : end;
+                let innerIsValid = next ? (point1 <= point2) : (point1 >= point2);
+                let diff = Math.abs(Number(point1 - point2));
+
+
+                if (diff < closestDiff && innerIsValid) {
+                    closestDiff = diff;
+                    closestState = marker.model;
+                    isValid = innerIsValid;
+                }
+
+            });
+
+            if (isValid && closestState) {
+                this.selectedStateModel = closestState;
+                this.unitController.selectionRange = closestState.range;
+            }
+
+        }
     }
 
     onSelectedStateChanged(handler: (el: TimelineChart.TimeGraphState | undefined) => void) {
