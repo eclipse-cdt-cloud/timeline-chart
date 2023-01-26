@@ -511,7 +511,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     return;
                 }
                 if (rowData) {
-                    console.dir(rowData);
                     this.addOrUpdateRows(rowData);
                     if (this.isNavigating) {
                         this.selectStateInNavigation();
@@ -735,9 +734,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected createNewState(stateModel: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow): TimeGraphStateComponent | undefined {
         const xStart = this.getWorldPixel(stateModel.range.start, true);
         const xEnd = this.getWorldPixel(stateModel.range.end, true);
+        let el: TimeGraphStateComponent | undefined;
         const displayWidth = xEnd - xStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
-        let el: TimeGraphStateComponent | undefined;
         el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
         return el;
     }

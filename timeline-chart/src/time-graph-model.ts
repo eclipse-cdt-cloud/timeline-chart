@@ -40,9 +40,6 @@ export namespace TimelineChart {
         readonly data?: { [key: string]: any }
     }
 
-    export interface TimeGraphMarkerState extends TimeGraphState {
-    }
-
     export interface TimeGraphArrow {
         sourceId: number
         destinationId: number
