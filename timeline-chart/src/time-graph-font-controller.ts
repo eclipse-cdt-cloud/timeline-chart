@@ -1,25 +1,37 @@
 import * as PIXI from "pixi.js-legacy";
 
+const DEFAULT_FONT_SIZE = 8;
+const DEFAULT_FONT_NAME = "LabelFont8White";
+const DEFAULT_FONT_STYLE = {
+    fontFamily: "monospace",
+    fontSize: 8,
+    fill: "white",
+    fontWeight: "bold"
+};
+
 export class FontController {
     private fontFamily: string;
+    private fontStyleMap: Map<number, Map<string, PIXI.TextStyle>>;
     private fontNameMap: Map<number, Map<string, string>>;
     private fontColorMap: Map<number, string>;
-    private defaultFontName: string = "LabelFont8White";
 
     constructor(fontFamily: string = "monospace") {
         this.fontFamily = fontFamily;
+        this.fontStyleMap = new Map<number, Map<string, PIXI.TextStyle>>();
         this.fontNameMap = new Map<number, Map<string, string>>();
         this.fontColorMap = new Map<number, string>();
 
-        const defaultFontSize = 8;
-        this.updateFontNameMap(defaultFontSize);
+        this.updateFontNameMapAndFontStyleMap(DEFAULT_FONT_SIZE);
     }
 
-    getDefaultFontName(): string {
-        return this.defaultFontName;
+    getDefaultFont(): { fontName: string, fontStyle: PIXI.TextStyle} {
+        return {
+            fontName: DEFAULT_FONT_NAME,
+            fontStyle: new PIXI.TextStyle(DEFAULT_FONT_STYLE)
+        }
     }
 
-    createFontName(fontColor: string, fontSize: number): string {
+    createFont(fontColor: string, fontSize: number): { fontName: string, fontStyle: PIXI.TextStyle } {
         const fontName = "LabelFont" + fontSize.toString() + fontColor;
         const fontStyle = {
             fontFamily: this.fontFamily,
@@ -28,17 +40,30 @@ export class FontController {
             fontWeight: "bold"
         };
         PIXI.BitmapFont.from(fontName, fontStyle, { chars: this.getCharacterSet() });
-        return fontName;
+
+        return { 
+            fontName: fontName, 
+            fontStyle: new PIXI.TextStyle(fontStyle)
+        }
     }
 
-    updateFontNameMap(size: number) {
+    updateFontNameMapAndFontStyleMap(size: number) {
         let color2FontMap = new Map<string, string>();
-        color2FontMap.set("black", this.createFontName("Black", size));
-        color2FontMap.set("white", this.createFontName("White", size));
+        let style2FontMap = new Map<string, PIXI.TextStyle>();
+
+        const blackFont = this.createFont("Black", size);
+        color2FontMap.set("black", blackFont.fontName);
+        style2FontMap.set("black", blackFont.fontStyle);
+
+        const whiteFont = this.createFont("White", size);
+        color2FontMap.set("white", whiteFont.fontName);
+        style2FontMap.set("white", blackFont.fontStyle);
+
         this.fontNameMap.set(size, color2FontMap);
+        this.fontStyleMap.set(size, style2FontMap);
     }
 
-    getFontName(color: number, size: number): string {
+    getFont(color: number, size: number): { fontName: string, fontStyle: PIXI.TextStyle | undefined} {
         let fontColor = this.fontColorMap.get(color);
         if (!fontColor) {
             let colorInHex = color.toString(16);
@@ -61,16 +86,23 @@ export class FontController {
         }
 
         let fontName: string | undefined;
+        let fontStyle: PIXI.TextStyle | undefined;
         if (size) {
             const MIN_FONT_SIZE = 6;
             size = Math.max(size, MIN_FONT_SIZE);
             if (!this.fontNameMap.has(size)) {
-                this.updateFontNameMap(size);
+                this.updateFontNameMapAndFontStyleMap(size);
             }
             const size2FontMap = this.fontNameMap.get(size);
             fontName = size2FontMap ? size2FontMap.get(fontColor) : undefined;
+
+            const size2StyleMap = this.fontStyleMap.get(size);
+            fontStyle = size2StyleMap ? size2StyleMap.get(fontColor) : undefined;
         }
-        return fontName ? fontName : "";
+        return {
+            fontName: fontName ? fontName : "",
+            fontStyle: fontStyle
+        }
     }
 
     private getCharacterSet(): string[][] {
