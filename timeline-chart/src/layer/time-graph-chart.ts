@@ -20,7 +20,7 @@ export interface TimeGraphMouseInteractions {
 
 export interface TimeGraphChartProviders {
     rowProvider: () => { rowIds: number[] }
-    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number, rowIds?: number[]) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number, fetchArrows: boolean, rowIds?: number[], additionalProperties?: { [key: string]: any }) => Promise<{ rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }> | { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number } | undefined
     stateStyleProvider?: (el: TimelineChart.TimeGraphState) => TimeGraphStateStyle | undefined
     rowAnnotationStyleProvider?: (el: TimelineChart.TimeGraphAnnotation) => TimeGraphAnnotationStyle | undefined
     rowStyleProvider?: (row?: TimelineChart.TimeGraphRowModel) => TimeGraphRowStyle | undefined
@@ -44,7 +44,15 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
     protected selectedStateChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
-    protected ongoingRequest: { worldRange: TimelineChart.TimeGraphRange; resolution: number; rowIds: number[] } | undefined;
+    protected ongoingRequest: {
+        worldRange: TimelineChart.TimeGraphRange;
+        resolution: number;
+        rowIds: number[];
+        additionalParams: {
+            [key: string]: any;
+        };
+        fullSearch?: boolean;
+    } | undefined;
 
     protected isNavigating: boolean;
 
@@ -71,9 +79,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void };
     private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void };
     private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void };
+    private _filterExpressionsMap: {[key: number]: string[]} | undefined = undefined;
 
     private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400);
     private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
+    private _debouncedMaybeFetchNewDataFineFullSearch = debounce(() => this.maybeFetchNewData(false,true,true), 400);
 
     // Keep track of the most recently clicked point.
     // If clicked again during _multiClickTime duration (milliseconds) record multi-click
@@ -370,8 +380,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    updateChart() {
+    updateChart(filterExpressionsMap?: {[key: number]: string[]}) {
         const update = true;
+        this._filterExpressionsMap = filterExpressionsMap;
         if (this.unitController && this.stateController) {
             this.maybeFetchNewData(update);
         }
@@ -453,7 +464,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         super.destroy();
     }
 
-    protected async maybeFetchNewData(update?: boolean, fine?: boolean) {
+    protected async maybeFetchNewData(update?: boolean, fine?: boolean, fullSearch?: boolean) {
         this.rowIds = this.providers.rowProvider().rowIds;
         if (update) {
             // update position of existing rows and remove deleted rows
@@ -495,7 +506,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 !rowComponent.providedModel ||
                 viewRange.start < rowComponent.providedModel.range.start || // This logic can be updated for pre-rendering before we reach the end.
                 viewRange.end > rowComponent.providedModel.range.end || // This logic can be updated for pre-rendering before we reach the end.
-                resolution < rowComponent.providedModel.resolution
+                resolution < rowComponent.providedModel.resolution || !isEqual(rowComponent.providedModel.filterExpressionsMap, this._filterExpressionsMap)
             );
         });
         if (rowIds.length > 0) {
@@ -504,61 +515,98 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             // Only if we are updating all rows and not increasing vertical height.  See: https://github.com/eclipse-cdt-cloud/theia-trace-extension/pull/832#issuecomment-1259902534.
             const allRowsUpdated = rowIds.length === visibleRowIds.length;
             const worldRange = allRowsUpdated ? this.unitController.updateWorldRangeFromViewRange() : this.unitController.worldRange;
-            const request = { worldRange, resolution, rowIds };
-            if (isEqual(request, this.ongoingRequest)) {
-                // request ignored because equal to ongoing request
-                return;
+            const additionalParams: { [key: string]: any } = {};
+            if (this._filterExpressionsMap) {
+                additionalParams['filter_query_parameters'] = {'filter_expressions_map': this._filterExpressionsMap, 'strategy': fullSearch ? 'DEEP' : 'SAMPLED'};
             }
-            this._debouncedMaybeFetchNewDataFine.cancel();
-            try {
-                this.ongoingRequest = request;
-                const rowData = await this.providers.dataProvider(worldRange, resolution, rowIds);
-                if (!isEqual(request, this.ongoingRequest)) {
-                    // response discarded because not equal to ongoing request
+
+            if (fullSearch) {
+                for (let i = 0; i < rowIds.length; i++) {
+                    try {
+                        const request = { worldRange, resolution, rowIds: [rowIds[i]], additionalParams, fullSearch };
+                        await this.fetchRows(request, i === rowIds.length -1, fine);
+                    } catch(error) {
+                        break;
+                    }
+                }
+            } else {
+                try {
+                    const request = { worldRange, resolution, rowIds, additionalParams, fullSearch };
+                    this.fetchRows(request, !fullSearch, fine);
+                } catch(error) {
                     return;
                 }
-                if (rowData) {
-                    this.addOrUpdateRows(rowData);
-                    if (this.isNavigating) {
-                        this.selectStateInNavigation();
-                    }
-                    if (this.mouseZooming) {
-                        if (this.zoomingSelection) {
-                            this.removeChild(this.zoomingSelection);
-                        }
-
-                        delete this.zoomingSelection;
-                        this.updateZoomingSelection();
-                    }
-                }
-            } finally {
-                if (isEqual(request, this.ongoingRequest)) {
-                    this.ongoingRequest = undefined;
-                }
-                this.isNavigating = false;
-                if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
-                    this._debouncedMaybeFetchNewDataFine();
-                }
-                this.stateController.resetScale();
             }
-            // After we build the new world from new data, execute render handlers.
-            // Only execute after first, coarse render.  Don't need to repeat after second, fine render.
-            this.stateController.handleOnWorldRender();
         } else if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
             // no row to update for coarse resolution, try fine resolution
             this.maybeFetchNewData(update, true);
         }
     }
 
+    private async fetchRows(request: {
+        worldRange: TimelineChart.TimeGraphRange;
+        resolution: number;
+        rowIds: number[];
+        additionalParams: {
+            [key: string]: any;
+        };
+        fullSearch?: boolean;
+    }, fetchArrows: boolean, fine?: boolean) {
+        if (isEqual(request, this.ongoingRequest)) {
+            // request ignored because equal to ongoing request
+            return;
+        }
+        this._debouncedMaybeFetchNewDataFine.cancel();
+        this._debouncedMaybeFetchNewDataFineFullSearch.cancel();
+        try {
+            this.ongoingRequest = request;
+            const rowData = await this.providers.dataProvider(request.worldRange, request.resolution, fetchArrows, request.rowIds, request.additionalParams);
+            if (!isEqual(request, this.ongoingRequest)) {
+                // response discarded because not equal to ongoing request
+                return Promise.reject(new Error("Ongoing request updated"));
+            }
+            if (rowData) {
+                this.addOrUpdateRows(rowData, request.fullSearch);
+                if (this.isNavigating) {
+                    this.selectStateInNavigation();
+                }
+                if (this.mouseZooming) {
+                    if (this.zoomingSelection) {
+                        this.removeChild(this.zoomingSelection);
+                    }
+
+                    delete this.zoomingSelection;
+                    this.updateZoomingSelection();
+                }
+            }
+        } finally {
+            if (isEqual(request, this.ongoingRequest)) {
+                this.ongoingRequest = undefined;
+            }
+            this.isNavigating = false;
+            if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
+                this._debouncedMaybeFetchNewDataFine();
+            }
+            if (this._filterExpressionsMap && !request.fullSearch && (fine || this._coarseResolutionFactor === FINE_RESOLUTION_FACTOR)) {
+                // fine resolution done for sampled search, time for deep search in fine res
+                this._debouncedMaybeFetchNewDataFineFullSearch();
+            }
+            this.stateController.resetScale();
+        }
+        // After we build the new world from new data, execute render handlers.
+        // Only execute after first, coarse render.  Don't need to repeat after second, fine render.
+        this.stateController.handleOnWorldRender();
+    }
+
     protected handleSelectedStateChange() {
         this.selectedStateChangedHandler.forEach((handler) => handler(this.selectedStateModel));
     }
 
-    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }, fullSearch?: boolean) {
         if (!this.stateController) {
             throw 'Add this TimeGraphChart to a container before adding rows.';
         }
-        const providedModel = { range: rowData.range, resolution: rowData.resolution };
+        const providedModel = { range: rowData.range, resolution: rowData.resolution, filterExpressionsMap: fullSearch ? this._filterExpressionsMap : undefined };
         rowData.rows.forEach(row => {
             const rowComponent = this.rowComponents.get(row.id);
             if (rowComponent) {
@@ -568,7 +616,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
     }
 
-    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange; resolution: number }) {
+    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange; resolution: number; filterExpressionsMap?: {[key: number]: string[]} }) {
         const id = 'row_' + rowId;
         const rowIndex = this.rowIds.indexOf(rowId);
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
@@ -594,7 +642,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    protected updateRow(rowComponent: TimeGraphRow, row: TimelineChart.TimeGraphRowModel, providedModel: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected updateRow(rowComponent: TimeGraphRow, row: TimelineChart.TimeGraphRowModel, providedModel: { range: TimelineChart.TimeGraphRange, resolution: number, filterExpressionsMap?: {[key: number]: string[]} }) {
         let lastX: number | undefined;
         let lastTime: bigint | undefined;
         let lastBlank = false;
