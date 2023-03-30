@@ -13,7 +13,7 @@ export interface TimeGraphRowStyle {
 
 export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowModel> implements TimeGraphParentComponent {
 
-    protected _providedModel: { range: TimelineChart.TimeGraphRange, resolution: number } | undefined;
+    protected _providedModel: { range: TimelineChart.TimeGraphRange, resolution: number, filterExpressionsMap?: {[key: number]: string[]} } | undefined;
     protected _rowStateComponents: Map<string, TimeGraphStateComponent> = new Map();
     protected _rowAnnotationComponents: Map<string, TimeGraphAnnotationComponent> = new Map();
 
@@ -124,7 +124,7 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
         return this._providedModel;
     }
 
-    set providedModel(providedModel: { range: TimelineChart.TimeGraphRange, resolution: number } | undefined) {
+    set providedModel(providedModel: { range: TimelineChart.TimeGraphRange, resolution: number, filterExpressionsMap?: {[key: number]: string[]} } | undefined) {
         this._providedModel = providedModel;
     }
 }
