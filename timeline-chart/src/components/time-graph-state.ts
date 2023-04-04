@@ -12,6 +12,7 @@ export interface TimeGraphStateStyle {
     borderColor?: number
 }
 
+
 /**
  * Using BitMapText.getLocalBounds() to measure the full label width is expensive, because
  * we need to create a BitMapText object to use it. This means that we need to create a BitMapText
