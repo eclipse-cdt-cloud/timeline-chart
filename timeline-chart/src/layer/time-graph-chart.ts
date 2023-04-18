@@ -373,6 +373,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     update() {
         this.updateScaleAndPosition();
+        this.ensureRowLinesFitViewWidth();
         this._debouncedMaybeFetchNewData();
     }
 
