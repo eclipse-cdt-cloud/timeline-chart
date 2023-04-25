@@ -27,6 +27,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     constructor(id: string, protected chartLayer: TimeGraphChart, protected rowController: TimeGraphRowController, style?: { color?: number }) {
         super(id, rowController);
+        this.isScalable = false;
         if (style && style.color) {
             this.color = style.color;
         }
@@ -154,6 +155,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.onCanvasEvent('mousedown', this._mouseDownHandler);
         this.stateController.onWorldRender(this._updateHandler);
         this.unitController.onSelectionRangeChange(this._updateHandler);
+        this.stateController.onScaleFactorChange(this._updateHandler);
         this.update();
     }
 
@@ -232,6 +234,10 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
 
     update() {
         if (this.unitController.selectionRange) {
+            /**
+             * When user selects a range on the timeline chart, the selection position must correspond to the cursor of the user,
+             * and not the timeline chart itself since scaling might be applied.
+             */
             const firstCursorPosition = this.getWorldPixel(this.unitController.selectionRange.start);
             const secondCursorPosition = this.getWorldPixel(this.unitController.selectionRange.end);
             const firstCursorOptions = {

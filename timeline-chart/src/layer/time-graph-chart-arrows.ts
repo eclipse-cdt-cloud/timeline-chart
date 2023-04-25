@@ -1,6 +1,7 @@
 import { TimeGraphArrowComponent, TimeGraphArrowCoordinates } from "../components/time-graph-arrow";
 import { TimeGraphElementPosition } from "../components/time-graph-component";
 import { TimelineChart } from "../time-graph-model";
+import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
@@ -9,9 +10,15 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
     protected rowIds: number[] = [];
     private _updateHandler: { (): void; (worldRange: TimelineChart.TimeGraphRange): void; (worldRange: TimelineChart.TimeGraphRange): void; };
 
+    constructor(id: string, protected rowController: TimeGraphRowController) {
+        super(id, rowController);
+        this.isScalable = false;
+    }
+
     protected afterAddToContainer() {
         this._updateHandler = (): void => this.update();
         this.stateController.onWorldRender(this._updateHandler);
+        this.stateController.onScaleFactorChange(this._updateHandler);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;

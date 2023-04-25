@@ -11,8 +11,11 @@ export class TimeGraphStateController {
 
     protected ratio: number;
 
+    private _unscaledCanvasWidth: number;
     protected _canvasDisplayWidth: number;
     protected _canvasDisplayHeight: number;
+
+    private _scaleFactor: number;
 
     protected _zoomFactor: number;
     protected _initialZoomFactor: number;
@@ -23,9 +26,9 @@ export class TimeGraphStateController {
 
     private _worldRenderedHandlers: ((worldRange: TimelineChart.TimeGraphRange) => void)[] = [];
     protected zoomChangedHandlers: ((zoomFactor: number) => void)[] = [];
+    protected canvasWidthChangedHandlers: ((baseWidth: number) => void)[] = [];
     protected positionChangedHandlers: (() => void)[] = [];
-    protected canvasDisplayWidthChangedHandlers: (() => void)[] = [];
-
+    protected scaleFactorChangedHandlers: ((newScaleFactor: number) => void)[] = [];
 
     constructor(protected canvas: HTMLCanvasElement, protected unitController: TimeGraphUnitController) {
         this.ratio = window.devicePixelRatio;
@@ -36,7 +39,10 @@ export class TimeGraphStateController {
         this.oldPositionOffset = { x: 0, y: 0 };
         this.snapped = false;
 
+        this._unscaledCanvasWidth = this._canvasDisplayWidth;
+        this._scaleFactor = 1;
         this.unitController.onViewRangeChanged(this.updateZoomFactor);
+        this.unitController.onViewRangeChanged(this.updateScaleFactor);
     }
 
     protected handleZoomChange(zoomFactor: number) {
@@ -45,8 +51,8 @@ export class TimeGraphStateController {
     protected handlePositionChange() {
         this.positionChangedHandlers.forEach(handler => handler());
     }
-    protected handleCanvasDisplayWidthChange() {
-        this.canvasDisplayWidthChangedHandlers.forEach(handler => handler());
+    protected handleScaleFactorChange() {
+        this.scaleFactorChangedHandlers.forEach(handler => handler(this._scaleFactor));
     }
 
     onZoomChanged(handler: (zoomFactor: number) => void) {
@@ -55,8 +61,8 @@ export class TimeGraphStateController {
     onPositionChanged(handler: () => void) {
         this.positionChangedHandlers.push(handler);
     }
-    onCanvasDisplayWidthChanged(handler: () => void) {
-        this.canvasDisplayWidthChangedHandlers.push(handler);
+    onScaleFactorChange(handler: (newWidth: number) => void) {
+        this.scaleFactorChangedHandlers.push(handler);
     }
 
     removeOnZoomChanged(handler: (zoomFactor: number) => void) {
@@ -75,6 +81,9 @@ export class TimeGraphStateController {
 
     updateDisplayWidth() {
         this._canvasDisplayWidth = this.canvas.width / this.ratio;
+
+        // Adjust the scale factor if the display canvas width changes
+        this.scaleFactor = this._canvasDisplayWidth / this._unscaledCanvasWidth;
     }
 
     /**
@@ -97,6 +106,29 @@ export class TimeGraphStateController {
         if (this._zoomFactor !== newZoom) {
             this.handleZoomChange(this._zoomFactor = newZoom);
         }
+    }
+
+    // Adjust the scale factor if the view range changes
+    updateScaleFactor = (oldViewRange: TimelineChart.TimeGraphRange, newViewRange: TimelineChart.TimeGraphRange) => {
+        const oldViewRangeLength = oldViewRange.end - oldViewRange.start;
+        const newViewRangeLength = newViewRange.end - newViewRange.start;
+
+        const newScaleFactor = Number(oldViewRangeLength) / Number(newViewRangeLength) * this._scaleFactor;
+        this.scaleFactor = newScaleFactor;
+    }
+
+    resetScale() {
+        this._unscaledCanvasWidth = this._canvasDisplayWidth;
+        this.scaleFactor = 1;
+    }
+
+    get scaleFactor(): number {
+        return this._scaleFactor;
+    }
+
+    set scaleFactor(newScaleFactor: number) {
+        this._scaleFactor = newScaleFactor;
+        this.handleScaleFactorChange();
     }
 
     get zoomFactor(): number {
@@ -137,4 +169,8 @@ export class TimeGraphStateController {
         }
     }
 
+    removeHandlers() {
+        this.unitController.removeViewRangeChangedHandler(this.updateZoomFactor);
+        this.unitController.removeViewRangeChangedHandler(this.updateScaleFactor);
+    }
 }

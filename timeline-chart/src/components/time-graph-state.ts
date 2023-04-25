@@ -10,6 +10,7 @@ export interface TimeGraphStateStyle {
     height?: number
     borderWidth?: number
     borderColor?: number
+    scale?: number
 }
 
 /**
@@ -71,7 +72,12 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         };
     }
 
-    renderLabel() {
+    /**
+     * Conveniently generate the labels of states and apply proper scaling when zooming
+     *
+     * @param scaleFactor
+     */
+    renderLabel(scaleFactor: number = 1) {
         if (!this.model.label) {
             return;
         }
@@ -92,7 +98,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
         if (fontStyle) {
             const metrics = PIXI.TextMetrics.measureText(this.model.label, fontStyle);
             // Round the text width up just to be sure that it will fit in the state
-            const textWidth = Math.ceil(metrics.width * SCALING_FACTOR);
+            const textWidth = Math.ceil(metrics.width * SCALING_FACTOR / scaleFactor);
 
             let textObjX = position.x + textPadding;
             const textObjY = position.y + textPadding;
@@ -126,6 +132,18 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
             this.textLabelObject.alpha = this._options.opacity ?? 1;
             this.textLabelObject.x = textObjX;
             this.textLabelObject.y = textObjY;
+            this.textLabelObject.scale.x = 1 / scaleFactor;
+        }
+    }
+
+    /**
+     * Scale only state labels that actually have text displayed.
+     *
+     * @param scaleFactor
+     */
+    scaleLabel(scaleFactor?: number) {
+        if (this.textLabelObject && this.textLabelObject.scale && scaleFactor !== 1) {
+            this.renderLabel(scaleFactor);
         }
     }
 

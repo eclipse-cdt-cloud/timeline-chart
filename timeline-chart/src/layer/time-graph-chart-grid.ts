@@ -1,9 +1,9 @@
-import { TimeGraphViewportLayer } from "./time-graph-viewport-layer";
 import { TimeGraphGrid } from "../components/time-graph-grid";
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphAxisLayerOptions } from "./time-graph-axis";
+import { TimeGraphLayer } from "./time-graph-layer";
 
-export class TimeGraphChartGrid extends TimeGraphViewportLayer {
+export class TimeGraphChartGrid extends TimeGraphLayer {
 
     protected gridComponent: TimeGraphGrid;
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };;
@@ -22,6 +22,7 @@ export class TimeGraphChartGrid extends TimeGraphViewportLayer {
         this.addChild(this.gridComponent);
         this._updateHandler = (): void => this.update();
         this.stateController.onWorldRender(this._updateHandler);
+        this.unitController.onViewRangeChanged(this._updateHandler);
     }
 
     update(opts?: TimeGraphAxisLayerOptions) {
@@ -32,6 +33,7 @@ export class TimeGraphChartGrid extends TimeGraphViewportLayer {
         if (this.unitController) {
             this.stateController.removeWorldRenderHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
+            this.unitController.removeViewRangeChangedHandler(this._updateHandler);
         }
         super.destroy();
     }

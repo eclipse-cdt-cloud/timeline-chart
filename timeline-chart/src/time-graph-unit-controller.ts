@@ -5,7 +5,7 @@ import { TimeGraphRenderController } from "./time-graph-render-controller";
 export class TimeGraphUnitController {
 
     
-    protected viewRangeChangedHandlers: ((newRange: TimelineChart.TimeGraphRange) => void)[];
+    protected viewRangeChangedHandlers: ((oldRange: TimelineChart.TimeGraphRange, newRange: TimelineChart.TimeGraphRange) => void)[];
     protected _viewRange: TimelineChart.TimeGraphRange;
     
     /**
@@ -41,19 +41,19 @@ export class TimeGraphUnitController {
         this._renderer = new TimeGraphRenderController();
     }
 
-    protected handleViewRangeChange() {
-        this.viewRangeChangedHandlers.forEach(handler => handler(this._viewRange));
+    protected handleViewRangeChange(oldRange: TimelineChart.TimeGraphRange) {
+        this.viewRangeChangedHandlers.forEach(handler => handler(oldRange, this._viewRange));
     }
 
     protected handleSelectionRangeChange() {
         this.selectionRangeChangedHandlers.forEach(handler => handler(this._selectionRange));
     }
 
-    onViewRangeChanged(handler: (viewRange: TimelineChart.TimeGraphRange) => void) {
+    onViewRangeChanged(handler: (oldRange: TimelineChart.TimeGraphRange, viewRange: TimelineChart.TimeGraphRange) => void) {
         this.viewRangeChangedHandlers.push(handler);
     }
 
-    removeViewRangeChangedHandler(handler: (viewRange: TimelineChart.TimeGraphRange) => void) {
+    removeViewRangeChangedHandler(handler: (oldRange: TimelineChart.TimeGraphRange, viewRange: TimelineChart.TimeGraphRange) => void) {
         const index = this.viewRangeChangedHandlers.indexOf(handler);
         if (index > -1) {
             this.viewRangeChangedHandlers.splice(index, 1);
@@ -82,6 +82,12 @@ export class TimeGraphUnitController {
         return this._viewRange;
     }
     set viewRange(newRange: TimelineChart.TimeGraphRange) {
+        // Making a deep copy
+        const oldRange = {
+            start: this._viewRange.start,
+            end: this._viewRange.end
+        };
+
         if (newRange.end > newRange.start) {
             this._viewRange = { start: newRange.start, end: newRange.end };
         }
@@ -91,7 +97,7 @@ export class TimeGraphUnitController {
         if (this._viewRange.end > this.absoluteRange) {
             this._viewRange.end = this.absoluteRange;
         }
-        this.handleViewRangeChange();
+        this.handleViewRangeChange(oldRange);
     }
 
     get worldRange(): TimelineChart.TimeGraphRange {
