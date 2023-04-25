@@ -122,6 +122,7 @@ export class TimeGraphContainer {
     destroy() {
         this.layers.forEach(l => l.destroy());
         this.unitController.removeViewRangeChangedHandler(this.calculatePositionOffset);
+        this.stateController.removeHandlers();
         this.application.destroy(true);
     }
 
