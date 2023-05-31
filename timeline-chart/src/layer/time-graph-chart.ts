@@ -64,6 +64,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void };
     private _zoomRangeChangedHandler: (zoomFactor: number) => void;
+    private _scaleFactorChangedHandler: (scaleFactor: number) => void;
     private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void };
     private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void };
@@ -335,12 +336,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
 
         this._viewRangeChangedHandler = () => {
-            this.scaleStateLabels();
             this.updateZoomingSelection();
             this.ensureRowLinesFitViewWidth();
         };
         this.unitController.onViewRangeChanged(this._viewRangeChangedHandler);
         this.unitController.onViewRangeChanged(this._debouncedMaybeFetchNewData);
+
+        this._scaleFactorChangedHandler = () => {
+            this.scaleStateLabels();
+        }
+
+        this.stateController.onScaleFactorChange(this._scaleFactorChangedHandler);
 
         /**
          * We need to explicitly re-render every zoom change because of edge case:
@@ -372,7 +378,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     update() {
-        this.scaleStateLabels();
         this.ensureRowLinesFitViewWidth();
         this._debouncedMaybeFetchNewData();
     }
@@ -413,6 +418,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     destroy() {
         this.stateController.removeOnZoomChanged(this._zoomRangeChangedHandler);
+        this.stateController.removeOnScaleFactorChanged(this._scaleFactorChangedHandler);
         this.unitController.removeViewRangeChangedHandler(this._debouncedMaybeFetchNewData);
         this.unitController.removeViewRangeChangedHandler(this._viewRangeChangedHandler);
         if (this._viewRangeChangedHandler) {
