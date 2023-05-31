@@ -72,6 +72,13 @@ export class TimeGraphStateController {
         }
     }
 
+    removeOnScaleFactorChanged(handler: (zoomFactor: number) => void) {
+        const index = this.scaleFactorChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.scaleFactorChangedHandlers.splice(index, 1);
+        }
+    }
+
     /**
         It is not the width of the canvas display buffer but of the canvas element in browser. Can be different depending on the display pixel ratio.
     */
