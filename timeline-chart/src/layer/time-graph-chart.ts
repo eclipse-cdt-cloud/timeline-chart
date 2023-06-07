@@ -520,7 +520,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const request = { worldRange, resolution, rowIds: [rowIds[i]], additionalParams, fullSearch };
                         await this.fetchRows(request, i === rowIds.length -1, fine);
                     } catch(error) {
-                        break;
+                        return;
+                    }
+                }
+                // When row-by-row fetch is completed (not interrupted by new request), update model with filter
+                for (let i = 0; i < rowIds.length; i++) {
+                    const rowComponent = this.rowComponents.get(rowIds[i]);
+                    if (rowComponent && rowComponent.providedModel) {
+                        rowComponent.providedModel.filterExpressionsMap = this._filterExpressionsMap;   
                     }
                 }
             } else {
@@ -560,7 +567,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 return Promise.reject(new Error("Ongoing request updated"));
             }
             if (rowData) {
-                this.addOrUpdateRows(rowData, request.fullSearch);
+                this.addOrUpdateRows(rowData);
                 if (this.isNavigating) {
                     this.selectStateInNavigation();
                 }
@@ -596,11 +603,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.selectedStateChangedHandler.forEach((handler) => handler(this.selectedStateModel));
     }
 
-    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }, fullSearch?: boolean) {
+    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
         if (!this.stateController) {
             throw 'Add this TimeGraphChart to a container before adding rows.';
         }
-        const providedModel = { range: rowData.range, resolution: rowData.resolution, filterExpressionsMap: fullSearch ? this._filterExpressionsMap : undefined };
+        const providedModel = { range: rowData.range, resolution: rowData.resolution };
         rowData.rows.forEach(row => {
             const rowComponent = this.rowComponents.get(row.id);
             if (rowComponent) {
