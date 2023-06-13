@@ -526,6 +526,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const request = { worldRange, resolution, rowIds: [rowIds[i]], additionalParams, fullSearch };
                         await this.fetchRows(request, i === rowIds.length -1, fine);
                     } catch(error) {
+                        this.stateController.resetScale();
                         return;
                     }
                 }
