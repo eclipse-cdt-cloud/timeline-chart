@@ -129,7 +129,8 @@ export class TimeGraphContainer {
     protected calculatePositionOffset = () => {
         // Currently only using horizontal offset, or "x"
         const { unitController, stateController } = this;
-        const { viewRange, worldRange } = unitController;
+        const viewRange = unitController.viewRange;
+        const worldRange = stateController.worldRange;
         let timeOffset = Number(viewRange.start - worldRange.start);
         let x = -1 * (timeOffset * stateController.zoomFactor);
         this.stateController.positionOffset = {

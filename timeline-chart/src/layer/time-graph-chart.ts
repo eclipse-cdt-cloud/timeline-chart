@@ -106,7 +106,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         if (zoomPosition === undefined) {
             const start = this.getWorldPixel(this.unitController.selectionRange ? this.unitController.selectionRange.start : BigInt(0));
-            const end = this.getWorldPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end : this.unitController.worldRangeLength);
+            const end = this.getWorldPixel(this.unitController.selectionRange ? this.unitController.selectionRange.end : this.stateController.worldRangeLength);
             zoomPosition = (start + end) / 2;
         }
         const zoomTime = zoomPosition / this.stateController.zoomFactor;
@@ -506,6 +506,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 !rowComponent.providedModel ||
                 viewRange.start < rowComponent.providedModel.range.start || // This logic can be updated for pre-rendering before we reach the end.
                 viewRange.end > rowComponent.providedModel.range.end || // This logic can be updated for pre-rendering before we reach the end.
+                !isEqual(this.stateController.worldRange, rowComponent.providedModel.range) ||
                 resolution < rowComponent.providedModel.resolution || !isEqual(rowComponent.providedModel.filterExpressionsMap, this._filterExpressionsMap)
             );
         });
@@ -514,7 +515,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             // Only on coarse renders
             // Only if we are updating all rows and not increasing vertical height.  See: https://github.com/eclipse-cdt-cloud/theia-trace-extension/pull/832#issuecomment-1259902534.
             const allRowsUpdated = rowIds.length === visibleRowIds.length;
-            const worldRange = allRowsUpdated ? this.unitController.updateWorldRangeFromViewRange() : this.unitController.worldRange;
+            const worldRange = allRowsUpdated ? this.stateController.computeWorldRangeFromViewRange() : this.stateController.worldRange;
             const additionalParams: { [key: string]: any } = {};
             if (this._filterExpressionsMap) {
                 additionalParams['filter_query_parameters'] = {'filter_expressions_map': this._filterExpressionsMap, 'strategy': fullSearch ? 'DEEP' : 'SAMPLED'};
@@ -526,7 +527,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         const request = { worldRange, resolution, rowIds: [rowIds[i]], additionalParams, fullSearch };
                         await this.fetchRows(request, i === rowIds.length -1, fine);
                     } catch(error) {
-                        this.stateController.resetScale();
                         return;
                     }
                 }
@@ -540,7 +540,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             } else {
                 try {
                     const request = { worldRange, resolution, rowIds, additionalParams, fullSearch };
-                    this.fetchRows(request, !fullSearch, fine);
+                    await this.fetchRows(request, !fullSearch, fine);
                 } catch(error) {
                     return;
                 }
@@ -574,6 +574,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 return Promise.reject(new Error("Ongoing request updated"));
             }
             if (rowData) {
+                if (!request.fullSearch) {
+                    this.stateController.worldRange = request.worldRange;
+                    this.stateController.worldZoomFactor = this.stateController.zoomFactor;
+                    this.stateController.resetScale();
+                }
                 this.addOrUpdateRows(rowData);
                 if (this.isNavigating) {
                     this.selectStateInNavigation();
@@ -599,7 +604,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 // fine resolution done for sampled search, time for deep search in fine res
                 this._debouncedMaybeFetchNewDataFineFullSearch();
             }
-            this.stateController.resetScale();
         }
         // After we build the new world from new data, execute render handlers.
         // Only execute after first, coarse render.  Don't need to repeat after second, fine render.
@@ -744,7 +748,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         let el: TimeGraphStateComponent | undefined;
         const displayWidth = xEnd - xStart;
         const elementStyle = this.providers.stateStyleProvider ? this.providers.stateStyleProvider(stateModel) : undefined;
-        el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth);
+        el = new TimeGraphStateComponent(stateModel.id, stateModel, xStart, xEnd, rowComponent, elementStyle, displayWidth, this.stateController.scaleFactor);
         return el;
     }
 
@@ -1020,6 +1024,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     get rowWidth(): number {
-        return Number(this.unitController.worldRangeLength) * this.stateController.zoomFactor;
+        return Number(this.stateController.worldRangeLength) * this.stateController.zoomFactor;
     }
 }

@@ -1,5 +1,6 @@
 import { TimelineChart } from "./time-graph-model";
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
+import { BIMath } from './bigint-utils';
 
 export class TimeGraphStateController {
     oldPositionOffset: {
@@ -24,6 +25,9 @@ export class TimeGraphStateController {
         y: number;
     };
 
+    protected _worldRange: TimelineChart.TimeGraphRange = { start: BigInt(0), end: BigInt(0) };
+    protected _worldZoomFactor = 1;
+
     private _worldRenderedHandlers: ((worldRange: TimelineChart.TimeGraphRange) => void)[] = [];
     protected zoomChangedHandlers: ((zoomFactor: number) => void)[] = [];
     protected canvasWidthChangedHandlers: ((baseWidth: number) => void)[] = [];
@@ -41,6 +45,7 @@ export class TimeGraphStateController {
 
         this._unscaledCanvasWidth = this._canvasDisplayWidth;
         this._scaleFactor = 1;
+        this.worldRange = this.computeWorldRangeFromViewRange();
         this.unitController.onViewRangeChanged(this.updateZoomFactor);
         this.unitController.onViewRangeChanged(this.updateScaleFactor);
     }
@@ -161,12 +166,47 @@ export class TimeGraphStateController {
         this.handlePositionChange();
     }
 
+    computeWorldRangeFromViewRange() {
+        const deltaV = this.unitController.viewRange.end - this.unitController.viewRange.start;
+        const start = this.unitController.viewRange.start - BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
+        const end = this.unitController.viewRange.end + BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
+        return { start, end };
+    }
+
+    get worldRange(): TimelineChart.TimeGraphRange {
+        return this._worldRange;
+    }
+
+    set worldRange(newRange: TimelineChart.TimeGraphRange) {
+        if (newRange.end > newRange.start) {
+            this._worldRange = { start: newRange.start, end: newRange.end };
+        }
+        if (newRange.start < 0) {
+            this._worldRange.start = BigInt(0);
+        }
+        if (this._worldRange.end > this.unitController.absoluteRange) {
+            this._worldRange.end = this.unitController.absoluteRange;
+        }
+    }
+
+    get worldZoomFactor(): number {
+        return this._worldZoomFactor
+    }
+
+    set worldZoomFactor(worldZoomFactor: number) {
+        this._worldZoomFactor = worldZoomFactor;
+    }
+
+    get worldRangeLength(): bigint {
+        return this._worldRange.end - this._worldRange.start;
+    }
+
     onWorldRender = (handler: (worldRange: TimelineChart.TimeGraphRange) => void) => {
         this._worldRenderedHandlers.push(handler);
     }
     
     handleOnWorldRender = () => {
-        this._worldRenderedHandlers.forEach(handler => handler(this.unitController.worldRange));
+        this._worldRenderedHandlers.forEach(handler => handler(this.worldRange));
     }
 
     removeWorldRenderHandler = (handler: (worldRange: TimelineChart.TimeGraphRange) => void) => {
