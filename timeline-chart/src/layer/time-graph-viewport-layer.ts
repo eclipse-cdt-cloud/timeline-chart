@@ -20,14 +20,19 @@ export abstract class TimeGraphViewportLayer extends TimeGraphLayer {
      * @return pixel relative to world range
      */
     protected getWorldPixel = (time: bigint, clamp?: boolean): number => {
-        if (!this.unitController) {
-            throw 'No unit controller to calculate world pixel.';
+        if (!this.stateController) {
+            throw 'No state controller to calculate world pixel.';
         }
-        const { start, end } = this.unitController.worldRange;
+        const { start, end } = this.stateController.worldRange;
 
         time = clamp ? BIMath.clamp(time, start, end) : time;
         let diff = time - start;
-        return this.getPixel(diff);
+
+        const div = 0x100000000;
+        const hi = Number(diff / BigInt(div));
+        const lo = Number(diff % BigInt(div));
+        const zoomFactor = this.isScalable ? this.stateController.worldZoomFactor : this.stateController.zoomFactor;
+        return Math.floor(hi * zoomFactor * div + lo * zoomFactor);
     };
 
     initializeLayer(canvas: HTMLCanvasElement, stage: PIXI.Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController) {

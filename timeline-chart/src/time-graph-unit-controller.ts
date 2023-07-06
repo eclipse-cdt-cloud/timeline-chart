@@ -1,5 +1,4 @@
 import { TimelineChart } from "./time-graph-model";
-import { BIMath } from './bigint-utils';
 import { TimeGraphRenderController } from "./time-graph-render-controller";
 
 export class TimeGraphUnitController {
@@ -7,15 +6,13 @@ export class TimeGraphUnitController {
     
     protected viewRangeChangedHandlers: ((oldRange: TimelineChart.TimeGraphRange, newRange: TimelineChart.TimeGraphRange) => void)[];
     protected _viewRange: TimelineChart.TimeGraphRange;
-    
+
     /**
      * This determines the world size.
      * worldRenderFactor = 1 renders one extra viewRange to the left and right,
      *      so there are three viewRanges rendered.
      */
     private _worldRenderFactor = 1;
-
-    protected _worldRange: TimelineChart.TimeGraphRange;
 
     protected selectionRangeChangedHandlers: ((newRange?: TimelineChart.TimeGraphRange) => void)[];
     protected _selectionRange?: TimelineChart.TimeGraphRange;
@@ -32,12 +29,10 @@ export class TimeGraphUnitController {
 
     constructor(public absoluteRange: bigint, viewRange?: TimelineChart.TimeGraphRange) {
         this._viewRange = viewRange || { start: BigInt(0), end: absoluteRange };
-        this._worldRange = this._viewRange;
         
         this.viewRangeChangedHandlers = [];
         this.selectionRangeChangedHandlers = [];
         
-        this.updateWorldRangeFromViewRange();
         this._renderer = new TimeGraphRenderController();
     }
 
@@ -60,13 +55,6 @@ export class TimeGraphUnitController {
         }
     }
 
-    updateWorldRangeFromViewRange() {
-        const deltaV = this.viewRange.end - this.viewRange.start;
-        const start = this.viewRange.start - BIMath.multiply(deltaV, this.worldRenderFactor);
-        const end = this.viewRange.end + BIMath.multiply(deltaV, this.worldRenderFactor);
-        return this.worldRange = { start, end };
-    }
-
     onSelectionRangeChange(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
         this.selectionRangeChangedHandlers.push(handler);
     }
@@ -81,6 +69,7 @@ export class TimeGraphUnitController {
     get viewRange(): TimelineChart.TimeGraphRange {
         return this._viewRange;
     }
+
     set viewRange(newRange: TimelineChart.TimeGraphRange) {
         // Making a deep copy
         const oldRange = {
@@ -100,25 +89,10 @@ export class TimeGraphUnitController {
         this.handleViewRangeChange(oldRange);
     }
 
-    get worldRange(): TimelineChart.TimeGraphRange {
-        return this._worldRange;
-    }
-
-    set worldRange(newRange: TimelineChart.TimeGraphRange) {
-        if (newRange.end > newRange.start) {
-            this._worldRange = { start: newRange.start, end: newRange.end };
-        }
-        if (newRange.start < 0) {
-            this._worldRange.start = BigInt(0);
-        }
-        if (this._worldRange.end > this.absoluteRange) {
-            this._worldRange.end = this.absoluteRange;
-        }
-    }
-
     get selectionRange(): TimelineChart.TimeGraphRange | undefined {
         return this._selectionRange;
     }
+
     set selectionRange(value: TimelineChart.TimeGraphRange | undefined) {
         this._selectionRange = value;
         this.handleSelectionRangeChange();
@@ -126,10 +100,6 @@ export class TimeGraphUnitController {
 
     get viewRangeLength(): bigint {
         return this._viewRange.end - this._viewRange.start;
-    }
-
-    get worldRangeLength(): bigint {
-        return this._worldRange.end - this._worldRange.start;
     }
 
     get offset(): bigint {
