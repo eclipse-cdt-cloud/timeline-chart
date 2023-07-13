@@ -353,7 +353,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.unitController.onViewRangeChanged(this._debouncedMaybeFetchNewData);
 
         this._scaleFactorChangedHandler = () => {
-            this.scaleStateLabels();
+            this.scaleComponents();
         }
 
         this.stateController.onScaleFactorChange(this._scaleFactorChangedHandler);
@@ -738,7 +738,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const start = this.getWorldPixel(annotation.range.start);
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
-        el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
+        el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent, this.stateController.scaleFactor);
         return el;
     }
 
@@ -1011,13 +1011,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     }
 
-    protected scaleStateLabels() {
+    protected scaleComponents() {
         this.rowComponents.forEach((rowComponent) => {
             const row = rowComponent.model;
-            row?.states.forEach((state: TimelineChart.TimeGraphState, elementIndex: number) => {
+            row?.states.forEach((state: TimelineChart.TimeGraphState) => {
                 const el = rowComponent.getStateById(state.id);
                 if (el) {
                     el.scaleLabel(this.stateController.scaleFactor);
+                }
+            });
+            row?.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation) => {
+                const el = rowComponent.getAnnotationById(annotation.id);
+                if (el) {
+                    el.scaleAnnotation(this.stateController.scaleFactor);
                 }
             });
         });
