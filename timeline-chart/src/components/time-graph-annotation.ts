@@ -32,7 +32,9 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
         protected _options: TimeGraphAnnotationComponentOptions,
         protected _style: TimeGraphAnnotationStyle = { color: 0, size: 7, symbol: 'cross', verticalAlign: 'middle' },
         protected _row: TimeGraphRow,
-        displayObject?: PIXI.Graphics) {
+        protected scaleFactor: number,
+        displayObject?: PIXI.Graphics
+    ) {
         super(id, displayObject, model);
         this._size = _style.size || 7;
         // called to ensure consistency. Only the X component is used from options.
@@ -63,7 +65,7 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
     render(): void {
         const { symbol } = this._style as TimeGraphAnnotationStyle;
         const size = this._size;
-        const x = this._options.position.x;
+        const x = this._options.position.x * this.scaleFactor;
         const y = this._options.position.y;
 
         if (symbol === undefined || symbol == 'none') {
@@ -83,6 +85,19 @@ export class TimeGraphAnnotationComponent extends TimeGraphComponent<TimelineCha
             this.drawInvertedTriangle(x, y, size);
         } else {
             this.drawPlus(x, y, size);
+        }
+        this._displayObject.scale.x = 1 / this.scaleFactor;
+    }
+
+    /**
+     * Scale only annotations labels that actually have object displayed.
+     *
+     * @param scaleFactor
+     */
+    scaleAnnotation(scaleFactor: number) {
+        this.scaleFactor = scaleFactor;
+        if (this._displayObject && this._displayObject.scale) {
+            this.render();
         }
     }
 
