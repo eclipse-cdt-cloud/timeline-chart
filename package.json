@@ -26,9 +26,8 @@
     },
     "homepage": "https://github.com/theia-ide/timeline-chart",
     "devDependencies": {
-        "@types/pixi.js": "^5.0.0",
-        "lerna": "4.0.0",
-        "typescript": "latest"
+        "lerna": "^7.0.0",
+        "typescript": "^5.2.2"
     },
     "workspaces": [
         "timeline-chart",
