@@ -25,6 +25,6 @@
     "enzyme-adapter-react-16": "^1.15.6",
     "jest": "^27.4.3",
     "jest-canvas-mock": "^2.3.1",
-    "ts-jest": "^27.0.7"
+    "ts-jest": "^29.0.0"
   }
 }
