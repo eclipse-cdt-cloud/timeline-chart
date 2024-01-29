@@ -4,3 +4,4 @@ bundle.js
 coverage
 lib
 node_modules
+license-check-summary.txt*

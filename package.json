@@ -9,7 +9,9 @@
         "start": "lerna run start",
         "test": "lerna run test --",
         "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact --no-git-tag-version --no-push",
-        "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary minor --preid=next.$(date -u '+%Y%m%d%H%M%S').$(git rev-parse --short HEAD) --dist-tag=next --no-git-tag-version --no-push --yes"
+        "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary minor --preid=next.$(date -u '+%Y%m%d%H%M%S').$(git rev-parse --short HEAD) --dist-tag=next --no-git-tag-version --no-push --yes",
+        "license:check": "npx dash-licenses-wrapper  --configFile=./configs/license-check-config.json",
+        "license:check:review": "npx dash-licenses-wrapper  --configFile=./configs/license-check-config.json --review"
     },
     "keywords": [
         "gantt",
@@ -26,6 +28,7 @@
     },
     "homepage": "https://github.com/theia-ide/timeline-chart",
     "devDependencies": {
+        "@eclipse-dash/nodejs-wrapper": "^0.0.1",
         "lerna": "^7.0.0",
         "typescript": "^5.2.2"
     },
