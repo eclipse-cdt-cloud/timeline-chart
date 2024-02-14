@@ -1,7 +1,8 @@
-# Time Graph
+# Time Graph - Developer's README
 
 [![Gitpod - Code Now][gitpod-icon-small]][gitpod-link]
 [![Build Status][build-status-icon]][build-status-link]
+
 
 A time graph / gantt chart library for large data (e.g. traces)
 
@@ -60,13 +61,48 @@ You can view an example [here](./timeline-chart/src/layer/__tests__/time-graph-c
 2. It is important to re-construct the timeline chart before each test to make sure the results are consistent.
 3. The tests themselves only print out the results and don't compare them to an actual value, because the threshold depends on the environment it runs. Therefore, make sure to output the performance measurement to the output console, so that it can be viewed once the tests finished running.
 
-## Test coverage
+### Test coverage
 
 The following command prints a coverage report to the terminal. As of now it covers all typescript files of the project, including those that are not supposed to have tests.
 
 ```shell
 yarn test --coverage --collectCoverageFrom='src/**/*.ts'
 ```
+
+## Release/publish
+
+Publishing of npm package and creating GitHub releases / git tags, all happen on GitHub CI.
+
+### Publish next package
+
+A `next` package is automatically published to `npm` every time a PR is merged.
+
+### publish latest / release
+
+Whenever a new release is desired, including publishing a corresponding `latest` package to `npm`, it can be triggered through a PR. The following has to be done:
+
+Create a new branch for your PR. e.g. 
+```bash
+git branch new-release && git checkout new-release
+```
+
+Then decide if the release shall be a `Major`, `Minor` or `Patch` release and use the corresponding command below to step packages versions, according to the release type. A new release commit will be created:
+
+``` bash
+yarn version:major
+# or
+yarn version:minor
+# or
+yarn version:patch
+```
+
+Modify the _version tag_ in file `./RELEASE`, to match the new release. Amend the release commit to include this change:
+
+```bash
+git add RELEASE && git commit --amend
+```
+
+Finally, push the branch and use it to create a PR. When the PR is merged, a GitHub release should be created with auto-generated release notes, as well as a git tag. Then the `publish-latest` CI job should trigger and if everything goes well, publish the new version of the package to `npm`.
 
 [build-status-icon]: https://github.com/eclipse-cdt-cloud/timeline-chart/workflows/CI-CD/badge.svg?branch=master
 [build-status-link]: https://github.com/eclipse-cdt-cloud/timeline-chart/actions?query=branch%3Amaster
@@ -75,7 +111,7 @@ yarn test --coverage --collectCoverageFrom='src/**/*.ts'
 [gitpod-icon-large]: https://gitpod.io/button/open-in-gitpod.svg
 [gitpod-icon-small]: https://img.shields.io/badge/Gitpod-code%20now-blue.svg?longCache=true
 [gitpod-link]: https://gitpod.io#https://github.com/eclipse-cdt-cloud/timeline-chart
-[sample-app]: https://github.com/theia-ide/theia-timeline-extension
+[sample-app]: https://github.com/eclipse-cdt-cloud/timeline-chart/blob/master/example/
 [screenshot-1]: https://raw.githubusercontent.com/eclipse-cdt-cloud/timeline-chart/master/doc/images/screenshot1-0.0.1.png
 [screenshot-2]: https://raw.githubusercontent.com/eclipse-cdt-cloud/timeline-chart/master/doc/images/screenshot2-0.0.1.png
 [trace-extension]: https://github.com/eclipse-cdt-cloud/theia-trace-extension
