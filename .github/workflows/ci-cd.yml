@@ -8,7 +8,9 @@ on:
     branches:
       - master
   workflow_dispatch:
-
+  release:
+    types:
+      - published
 
 jobs:
   build:
@@ -38,7 +40,7 @@ jobs:
           yarn
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # https://github.com/microsoft/vscode-ripgrep/issues/9
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Test
         shell: bash
@@ -47,7 +49,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
 
-  publish:
+  publish-next:
     needs: build
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' && github.repository == 'eclipse-cdt-cloud/timeline-chart'
 
@@ -75,7 +77,7 @@ jobs:
           yarn
         env:
           NODE_OPTIONS: --max_old_space_size=4096
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # https://github.com/microsoft/vscode-ripgrep/issues/9
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish
         uses: nick-invision/retry@v2
@@ -87,3 +89,39 @@ jobs:
           command: yarn publish:next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }} # The variable name comes from here: https://github.com/actions/setup-node/blob/70b9252472eee7495c93bb1588261539c3c2b98d/src/authutil.ts#L48
+
+  publish-latest:
+    needs: build
+    if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'eclipse-cdt-cloud/timeline-chart'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Pre-Publish 
+        shell: bash
+        run: |
+          yarn
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 5
+          retry_wait_seconds: 60
+          max_attempts: 3
+          retry_on: error
+          command: yarn publish:latest:ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }} # The variable name comes from here: https://github.com/actions/setup-node/blob/70b9252472eee7495c93bb1588261539c3c2b98d/src/authutil.ts#L48
+        
