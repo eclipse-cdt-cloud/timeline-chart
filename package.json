@@ -1,5 +1,4 @@
 {
-    "version": "0.1.0",
     "private": true,
     "license": "MIT",
     "scripts": {
@@ -8,25 +7,15 @@
         "watch": "lerna run watch",
         "start": "lerna run start",
         "test": "lerna run test --",
-        "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --exact --no-git-tag-version --no-push",
+        "publish:latest:ci": "lerna publish from-git --registry=https://registry.npmjs.org/ --exact --no-push --yes",
+        "publish:latest:manual": "lerna publish --registry=https://registry.npmjs.org/ --exact --no-git-tag-version --no-push --yes",
         "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary minor --preid=next.$(date -u '+%Y%m%d%H%M%S').$(git rev-parse --short HEAD) --dist-tag=next --no-git-tag-version --no-push --yes",
+        "version:major": "lerna version major --exact --no-push --git-tag-command /usr/bin/true --yes -m \"Release %s (Major)\"",
+        "version:minor": "lerna version minor --exact --no-push --git-tag-command /usr/bin/true --yes -m \"Release %s (Minor)\"",
+        "version:patch": "lerna version patch --exact --no-push --git-tag-command /usr/bin/true --yes -m \"Release %s (Patch)\"",
         "license:check": "npx dash-licenses-wrapper  --configFile=./configs/license-check-config.json",
         "license:check:review": "npx dash-licenses-wrapper  --configFile=./configs/license-check-config.json --review"
     },
-    "keywords": [
-        "gantt",
-        "timeline",
-        "tracing",
-        "trace"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/theia-ide/timeline-chart"
-    },
-    "bugs": {
-        "url": "https://github.com/theia-ide/timeline-chart/issues"
-    },
-    "homepage": "https://github.com/theia-ide/timeline-chart",
     "devDependencies": {
         "@eclipse-dash/nodejs-wrapper": "^0.0.1",
         "lerna": "^7.0.0",
