@@ -5,6 +5,28 @@
 
 A time graph / gantt chart library for large data (e.g. traces)
 
+## Prerequisites
+
+First, you need Node.js and yarn:
+
+It's suggested to install [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to manage node on your machine. Once that's done, install the required version:
+
+```bash
+   nvm install 18
+   # optional: make it the default version
+   nvm alias default
+   # or set it every time like so
+   nvm use 18
+```
+
+Then install `yarn`:
+
+```bash
+npm i -g yarn  # the default version should be ok
+```
+
+# Build
+
 To build, from the root type `yarn`
 
 To test an application type `yarn start` then open localhost:8080 on your web browser
