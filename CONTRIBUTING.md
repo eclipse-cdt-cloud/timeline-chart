@@ -15,7 +15,7 @@ A committer will then review your contribution and help to get it merged.
 
 ## Code of Conduct
 
-This project is governed by the [Eclipse Community Code of Conduct][conduct].
+This project is governed by the [Eclipse Community Code of Conduct](CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 
 ## Eclipse Development Process
@@ -44,7 +44,6 @@ The Time Graph is part of `eclipse-cdt-cloud`. If you have any questions regardi
 please refer to the contact options listed on the [CDT.Cloud website][cdt].
 
 [cdt]: https://cdt-cloud.io/contact/
-[conduct]: https://github.com/eclipse/.github/blob/master/CODE_OF_CONDUCT.md
 [dev-process]: https://eclipse.org/projects/dev_process
 [eca]: https://www.eclipse.org/legal/ECA.php
 [handbook]: https://www.eclipse.org/projects/handbook/#resources-commit
