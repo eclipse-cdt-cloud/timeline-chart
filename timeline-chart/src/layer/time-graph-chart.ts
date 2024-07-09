@@ -719,7 +719,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint, lastBlank?: boolean) {
         /* add gap if there is visible space between states or if there is a time gap between two blank states */
-        if (lastX && lastTime && (x > lastX || (lastBlank && !state.data?.style && state.range.start > lastTime))) {
+        const isFilteredOut = state.data?.tags >= 4;
+        if (
+                lastX &&
+                lastTime &&
+                (x > lastX || (lastBlank && !state.data?.style && state.range.start > lastTime)) &&
+                !isFilteredOut
+            ) {
             const gap = state.data?.gap;
             if (gap) {
                 const width = Math.max(1, x - lastX);
