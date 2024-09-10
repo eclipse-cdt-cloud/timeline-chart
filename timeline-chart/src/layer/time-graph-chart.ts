@@ -85,6 +85,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
     private _debouncedMaybeFetchNewDataFineFullSearch = debounce(() => this.maybeFetchNewData(false,true,true), 400);
 
+    private _fetchingRows = false;
+    private _pendingFetch: { update: boolean | undefined, fine: boolean | undefined, fullSearch: boolean | undefined } | undefined = undefined;
+
     // Keep track of the most recently clicked point.
     // If clicked again during _multiClickTime duration (milliseconds) record multi-click
     private _recentlyClickedGlobal: PIXI.Point | null = null;
@@ -465,6 +468,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected async maybeFetchNewData(update?: boolean, fine?: boolean, fullSearch?: boolean) {
+        if (this._fetchingRows) {
+            this._pendingFetch = {
+                update: this._pendingFetch?.update || update,
+                fine: this._pendingFetch?.fine || fine,
+                fullSearch: this._pendingFetch?.fullSearch || fullSearch
+            }
+            return;
+        }
         this.rowIds = this.providers.rowProvider().rowIds;
         if (update) {
             // update position of existing rows and remove deleted rows
@@ -525,9 +536,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 for (let i = 0; i < rowIds.length; i++) {
                     try {
                         const request = { worldRange, resolution, rowIds: [rowIds[i]], additionalParams, fullSearch };
+                        this._fetchingRows = true;
                         await this.fetchRows(request, i === rowIds.length -1, fine);
                     } catch(error) {
                         return;
+                    } finally {
+                        this._fetchingRows = false;
+                        if (this._pendingFetch !== undefined) {
+                            const pendingFetch = this._pendingFetch;
+                            this._pendingFetch = undefined;
+                            this.maybeFetchNewData(pendingFetch.update, pendingFetch.fine, pendingFetch.fullSearch);
+                            return;
+                        }
                     }
                 }
                 // When row-by-row fetch is completed (not interrupted by new request), update model with filter
@@ -540,9 +560,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             } else {
                 try {
                     const request = { worldRange, resolution, rowIds, additionalParams, fullSearch };
+                    this._fetchingRows = true;
                     await this.fetchRows(request, !fullSearch, fine);
                 } catch(error) {
                     return;
+                } finally {
+                    this._fetchingRows = false;
+                    if (this._pendingFetch !== undefined) {
+                        const pendingUpdate = this._pendingFetch;
+                        this._pendingFetch = undefined;
+                        this.maybeFetchNewData(pendingUpdate.update, pendingUpdate.fine, pendingUpdate.fullSearch);
+                    }
                 }
             }
         } else if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
