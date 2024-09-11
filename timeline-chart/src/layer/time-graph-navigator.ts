@@ -16,6 +16,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 
     afterAddToContainer() {
         this._updateHandler = (): void => this.update();
+        this.unitController.onAbsoluteRangeChanged(this._updateHandler);
         this.unitController.onViewRangeChanged(this._updateHandler);
         this.navigatorBackground = new TimeGraphNavigatorBackground(this.unitController, this.stateController);
         this.addChild(this.navigatorBackground);
@@ -59,6 +60,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 
     destroy() : void {
         if (this.unitController) {
+            this.unitController.removeAbsoluteRangeChangedHandler(this._updateHandler);
             this.unitController.removeViewRangeChangedHandler(this._updateHandler);
             this.unitController.removeSelectionRangeChangedHandler(this._updateHandler);
         }

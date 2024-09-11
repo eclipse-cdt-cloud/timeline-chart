@@ -3,6 +3,8 @@ import { TimeGraphRenderController } from "./time-graph-render-controller";
 
 export class TimeGraphUnitController {
 
+    protected absoluteRangeChangedHandlers: ((absoluteRange: bigint) => void)[];
+    protected _absoluteRange: bigint;
     
     protected viewRangeChangedHandlers: ((oldRange: TimelineChart.TimeGraphRange, newRange: TimelineChart.TimeGraphRange) => void)[];
     protected _viewRange: TimelineChart.TimeGraphRange;
@@ -27,13 +29,19 @@ export class TimeGraphUnitController {
     numberTranslator?: (theNumber: bigint) => string | undefined;
     scaleSteps?: number[]
 
-    constructor(public absoluteRange: bigint, viewRange?: TimelineChart.TimeGraphRange) {
+    constructor(absoluteRange: bigint, viewRange?: TimelineChart.TimeGraphRange) {
+        this._absoluteRange = absoluteRange;
         this._viewRange = viewRange || { start: BigInt(0), end: absoluteRange };
         
+        this.absoluteRangeChangedHandlers = [];
         this.viewRangeChangedHandlers = [];
         this.selectionRangeChangedHandlers = [];
         
         this._renderer = new TimeGraphRenderController();
+    }
+
+    protected handleAbsoluteRangeChange() {
+        this.absoluteRangeChangedHandlers.forEach(handler => handler(this._absoluteRange));
     }
 
     protected handleViewRangeChange(oldRange: TimelineChart.TimeGraphRange) {
@@ -44,8 +52,19 @@ export class TimeGraphUnitController {
         this.selectionRangeChangedHandlers.forEach(handler => handler(this._selectionRange));
     }
 
+    onAbsoluteRangeChanged(handler: (absoluteRange: bigint) => void) {
+        this.absoluteRangeChangedHandlers.push(handler);
+    }
+
     onViewRangeChanged(handler: (oldRange: TimelineChart.TimeGraphRange, viewRange: TimelineChart.TimeGraphRange) => void) {
         this.viewRangeChangedHandlers.push(handler);
+    }
+
+    removeAbsoluteRangeChangedHandler(handler: (absoluteRange: bigint) => void) {
+        const index = this.absoluteRangeChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.absoluteRangeChangedHandlers.splice(index, 1);
+        }
     }
 
     removeViewRangeChangedHandler(handler: (oldRange: TimelineChart.TimeGraphRange, viewRange: TimelineChart.TimeGraphRange) => void) {
@@ -63,6 +82,17 @@ export class TimeGraphUnitController {
         const index = this.selectionRangeChangedHandlers.indexOf(handler);
         if (index > -1) {
             this.selectionRangeChangedHandlers.splice(index, 1);
+        }
+    }
+
+    get absoluteRange(): bigint {
+        return this._absoluteRange;
+    }
+
+    set absoluteRange(absoluteRange: bigint) {
+        if (this._absoluteRange !== absoluteRange) {
+            this._absoluteRange = absoluteRange;
+            this.handleAbsoluteRangeChange();
         }
     }
 
