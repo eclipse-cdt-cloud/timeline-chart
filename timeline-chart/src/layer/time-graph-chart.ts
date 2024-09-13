@@ -505,6 +505,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         const { viewRange } = this.unitController;
+        const worldRange = this.stateController.computeWorldRangeFromViewRange();
         const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
         const resolution = (resolutionFactor * Number(this.unitController.viewRangeLength)) / this.stateController.canvasDisplayWidth;
         // Compute the visible rowIds to fetch. Fetch all visible rows if update flag is set,
@@ -517,16 +518,11 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 !rowComponent.providedModel ||
                 viewRange.start < rowComponent.providedModel.range.start || // This logic can be updated for pre-rendering before we reach the end.
                 viewRange.end > rowComponent.providedModel.range.end || // This logic can be updated for pre-rendering before we reach the end.
-                !isEqual(this.stateController.worldRange, rowComponent.providedModel.range) ||
+                !isEqual(worldRange, rowComponent.providedModel.range) ||
                 resolution < rowComponent.providedModel.resolution || !isEqual(rowComponent.providedModel.filterExpressionsMap, this._filterExpressionsMap)
             );
         });
         if (rowIds.length > 0) {
-            // When we fetch data, update the world range from the current view range.
-            // Only on coarse renders
-            // Only if we are updating all rows and not increasing vertical height.  See: https://github.com/eclipse-cdt-cloud/theia-trace-extension/pull/832#issuecomment-1259902534.
-            const allRowsUpdated = rowIds.length === visibleRowIds.length;
-            const worldRange = allRowsUpdated ? this.stateController.computeWorldRangeFromViewRange() : this.stateController.worldRange;
             const additionalParams: { [key: string]: any } = {};
             if (this._filterExpressionsMap) {
                 additionalParams['filter_query_parameters'] = {'filter_expressions_map': this._filterExpressionsMap, 'strategy': fullSearch ? 'DEEP' : 'SAMPLED'};
@@ -606,6 +602,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.stateController.worldRange = request.worldRange;
                     this.stateController.worldZoomFactor = this.stateController.zoomFactor;
                     this.stateController.resetScale();
+                } else if (!isEqual(request.worldRange, this.stateController.worldRange)) {
+                    // response discarded because world range updated
+                    return Promise.reject(new Error("Request for outdated world range"));
                 }
                 this.addOrUpdateRows(rowData);
                 if (this.isNavigating) {
