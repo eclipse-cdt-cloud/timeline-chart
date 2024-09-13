@@ -168,8 +168,14 @@ export class TimeGraphStateController {
 
     computeWorldRangeFromViewRange() {
         const deltaV = this.unitController.viewRange.end - this.unitController.viewRange.start;
-        const start = this.unitController.viewRange.start - BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
-        const end = this.unitController.viewRange.end + BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
+        let start = this.unitController.viewRange.start - BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
+        let end = this.unitController.viewRange.end + BIMath.multiply(deltaV, this.unitController.worldRenderFactor);
+        if (start < 0) {
+            start = BigInt(0);
+        }
+        if (end > this.unitController.absoluteRange) {
+            end = this.unitController.absoluteRange;
+        }
         return { start, end };
     }
 
