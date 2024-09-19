@@ -37,6 +37,7 @@ export type TimeGraphRowStyleHook = (row: TimelineChart.TimeGraphRowModel) => Ti
 
 const VISIBLE_ROW_BUFFER = 3; // number of buffer rows above and below visible range
 const FINE_RESOLUTION_FACTOR = 1; // fine resolution factor or default to disable coarse update
+const EXCLUDED = 4; // EXCLUDED filter expression property key
 
 export class TimeGraphChart extends TimeGraphChartLayer {
     protected rowIds: number[]; // complete ordered list of rowIds
@@ -80,6 +81,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void };
     private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void };
     private _filterExpressionsMap: {[key: number]: string[]} | undefined = undefined;
+    private _allRowIds: number[]; // full ordered list of row ids including excluded rows
+    private _excludedRows: Map<number, TimelineChart.TimeGraphRange> = new Map(); // known excluded rows after filtering
 
     private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400);
     private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
@@ -162,12 +165,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
 
         const moveVertically = (magnitude: number) => {
-            if (this.rowController.totalHeight <= this.stateController.canvasDisplayHeight) {
+            const totalHeight = this.rowController.totalHeight - this.rowController.rowHeight * this._excludedRows.size;
+            if (totalHeight <= this.stateController.canvasDisplayHeight) {
                 return;
             }
             let verticalOffset = Math.max(0, this.rowController.verticalOffset + magnitude);
-            if (this.rowController.totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
-                verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
+            if (totalHeight - verticalOffset <= this.stateController.canvasDisplayHeight) {
+                verticalOffset = totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.rowController.verticalOffset = verticalOffset;
         }
@@ -476,7 +480,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
             return;
         }
-        this.rowIds = this.providers.rowProvider().rowIds;
+        if (!fine && this._filterExpressionsMap?.[EXCLUDED]) {
+            // skip the coarse update when EXCLUDED filter is applied
+            fine = true;
+        }
+        this._allRowIds = this.providers.rowProvider().rowIds;
+        if (update) {
+            this._excludedRows.clear();
+            this.rowIds = this._allRowIds.slice();
+        } else {
+            this.rowIds = this._allRowIds.filter(rowId => !this._excludedRows.has(rowId));
+        }
+        const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         if (update) {
             // update position of existing rows and remove deleted rows
             this.rowComponents.forEach((rowComponent, rowId) => {
@@ -486,7 +501,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.removeChild(rowComponent);
                 } else {
                     rowComponent.position.y = this.rowController.rowHeight * index;
-                    rowComponent.providedModel = undefined;
+                    if (!visibleRowIds.includes(rowId)) {
+                        this.rowComponents.delete(rowId);
+                        this.removeChild(rowComponent);
+                    }
                 }
             });
             // update selected row
@@ -503,7 +521,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             });
         }
-        const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         const { viewRange } = this.unitController;
         const worldRange = this.stateController.computeWorldRangeFromViewRange();
         const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
@@ -522,6 +539,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 resolution < rowComponent.providedModel.resolution || !isEqual(rowComponent.providedModel.filterExpressionsMap, this._filterExpressionsMap)
             );
         });
+        if (fullSearch && this._filterExpressionsMap?.[EXCLUDED]) {
+            this._excludedRows.forEach((range, rowId) => {
+                // add excluded rows to request to determine if they should reappear
+                if (!isEqual(worldRange, range)) {
+                    rowIds.push(rowId);
+                }
+            });
+            // reorder rows
+            rowIds.sort((a, b) => this._allRowIds.indexOf(a) - this._allRowIds.indexOf(b));
+        }
         if (rowIds.length > 0) {
             const additionalParams: { [key: string]: any } = {};
             if (this._filterExpressionsMap) {
@@ -552,6 +579,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     if (rowComponent && rowComponent.providedModel) {
                         rowComponent.providedModel.filterExpressionsMap = this._filterExpressionsMap;   
                     }
+                }
+                if (this._filterExpressionsMap?.[EXCLUDED]) {
+                    // restart full search to check if newly visible rows need to be filled after filtering
+                    this._debouncedMaybeFetchNewDataFineFullSearch();
                 }
             } else {
                 try {
@@ -606,6 +637,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     // response discarded because world range updated
                     return Promise.reject(new Error("Request for outdated world range"));
                 }
+                this.updateExcludedRows(request.rowIds, request.worldRange, rowData.rows);
                 this.addOrUpdateRows(rowData);
                 if (this.isNavigating) {
                     this.selectStateInNavigation();
@@ -639,6 +671,35 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected handleSelectedStateChange() {
         this.selectedStateChangedHandler.forEach((handler) => handler(this.selectedStateModel));
+    }
+
+    protected updateExcludedRows(requestedRowIds: number[], worldRange: TimelineChart.TimeGraphRange, rows: TimelineChart.TimeGraphRowModel[]) {
+        let update = false;
+        requestedRowIds.forEach(rowId => {
+            if (!rows.find(row => row.id === rowId)) {
+                // an excluded row is removed
+                update = true;
+                this._excludedRows.set(rowId, worldRange);
+                const rowComponent = this.rowComponents.get(rowId);
+                if (rowComponent) {
+                    this.rowComponents.delete(rowId);
+                    this.removeChild(rowComponent);
+                }
+            } else if (this._excludedRows.delete(rowId)) {
+                // a previously excluded row reappears
+                update = true;
+            }
+        });
+        if (update) {
+            // reposition all rows
+            this.rowIds = this._allRowIds.filter(rowId => !this._excludedRows.has(rowId));
+            this.rowComponents.forEach((rowComponent, rowId) => {
+                const index = this.rowIds.indexOf(rowId);
+                if (index != -1) {
+                    rowComponent.position.y = this.rowController.rowHeight * index;
+                }
+            });
+        }
     }
 
     protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
@@ -719,7 +780,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
     protected updateGap(state: TimelineChart.TimeGraphState, rowComponent: TimeGraphRow, gapStyle: any, x: number, lastX?: number, lastTime?: bigint, lastBlank?: boolean) {
         /* add gap if there is visible space between states or if there is a time gap between two blank states */
-        const isFilteredOut = state.data?.tags >= 4;
+        const isFilteredOut = state.data?.tags >= EXCLUDED;
         if (
                 lastX &&
                 lastTime &&
