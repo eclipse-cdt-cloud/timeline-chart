@@ -124,7 +124,7 @@ Modify the _version tag_ in file `./RELEASE`, to match the new release. Amend th
 git add RELEASE && git commit --amend
 ```
 
-Finally, push the branch and use it to create a PR. When the PR is merged, a GitHub release should be created with auto-generated release notes, as well as a git tag. Then the `publish-latest` CI job should trigger and if everything goes well, publish the new version of the package to `npm`.
+Finally, push the branch to the main repository (not a fork) and use it to create a PR. When the PR is merged, a GitHub release should be created with auto-generated release notes, as well as a git tag. Then the `publish-latest` CI job should trigger and if everything goes well, publish the new version of the package to `npm`.
 
 [build-status-icon]: https://github.com/eclipse-cdt-cloud/timeline-chart/workflows/CI-CD/badge.svg?branch=master
 [build-status-link]: https://github.com/eclipse-cdt-cloud/timeline-chart/actions?query=branch%3Amaster
