@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js-legacy";
 import { TimeGraphAnnotationComponent, TimeGraphAnnotationStyle } from "../components/time-graph-annotation";
-import { TimeGraphComponent, TimeGraphStyledRect } from "../components/time-graph-component";
+import { TimeGraphComponent } from "../components/time-graph-component";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphStateComponent, TimeGraphStateStyle } from "../components/time-graph-state";
@@ -388,10 +388,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     updateChart(filterExpressionsMap?: {[key: number]: string[]}) {
-        const update = true;
+        if (!isEqual(filterExpressionsMap?.[EXCLUDED], this._filterExpressionsMap?.[EXCLUDED])) {
+            this._excludedRows.clear();
+        }
         this._filterExpressionsMap = filterExpressionsMap;
         if (this.unitController && this.stateController) {
-            this.maybeFetchNewData(update);
+            this.maybeFetchNewData(true);
         }
     }
 
@@ -485,42 +487,39 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             fine = true;
         }
         this._allRowIds = this.providers.rowProvider().rowIds;
-        if (update) {
-            this._excludedRows.clear();
-            this.rowIds = this._allRowIds.slice();
-        } else {
-            this.rowIds = this._allRowIds.filter(rowId => !this._excludedRows.has(rowId));
-        }
+        this.rowIds = this._allRowIds.filter(rowId => !this._excludedRows.has(rowId));
         const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
-        if (update) {
-            // update position of existing rows and remove deleted rows
-            this.rowComponents.forEach((rowComponent, rowId) => {
-                const index = this.rowIds.indexOf(rowId);
-                if (index == -1) {
+        // update position of existing rows and remove deleted rows
+        const movedRows: TimeGraphRow[] = [];
+        this.rowComponents.forEach((rowComponent, rowId) => {
+            const index = this.rowIds.indexOf(rowId);
+            if (index == -1) {
+                this.rowComponents.delete(rowId);
+                this.removeChild(rowComponent);
+            } else {
+                const y = this.rowController.rowHeight * index;
+                if (!visibleRowIds.includes(rowId)) {
                     this.rowComponents.delete(rowId);
                     this.removeChild(rowComponent);
-                } else {
-                    rowComponent.position.y = this.rowController.rowHeight * index;
-                    if (!visibleRowIds.includes(rowId)) {
-                        this.rowComponents.delete(rowId);
-                        this.removeChild(rowComponent);
-                    }
+                } else if (rowComponent.position.y !== y) {
+                    movedRows.push(rowComponent);
                 }
-            });
-            // update selected row
-            if (this.rowController.selectedRow) {
-                this.rowController.selectedRowIndex = this.rowIds.indexOf(this.rowController.selectedRow.id);
-                if (this.rowController.selectedRowIndex === -1) {
-                    this.rowController.selectedRow = undefined;
-                }
+                rowComponent.position.y = y;
             }
-            // create placeholder rows
-            this.rowIds.forEach((rowId) => {
-                if (!this.rowComponents.get(rowId)) {
-                    this.addRow(rowId);
-                }
-            });
+        });
+        // update selected row
+        if (this.rowController.selectedRow) {
+            this.rowController.selectedRowIndex = this.rowIds.indexOf(this.rowController.selectedRow.id);
+            if (this.rowController.selectedRowIndex === -1) {
+                this.rowController.selectedRow = undefined;
+            }
         }
+        // create placeholder rows
+        this.rowIds.forEach((rowId) => {
+            if (!this.rowComponents.get(rowId)) {
+                this.addRow(rowId);
+            }
+        });
         const { viewRange } = this.unitController;
         const worldRange = this.stateController.computeWorldRangeFromViewRange();
         const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
@@ -538,6 +537,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 !isEqual(worldRange, rowComponent.providedModel.range) ||
                 resolution < rowComponent.providedModel.resolution || !isEqual(rowComponent.providedModel.filterExpressionsMap, this._filterExpressionsMap)
             );
+        });
+        // rebuild rows that have changed position but that won't be fetched
+        movedRows.forEach(rowComponent => {
+            if (rowComponent.model && !rowIds.includes(rowComponent.model.id) && rowComponent.providedModel) {
+                const rowData = { rows: [rowComponent.model], range: rowComponent.providedModel?.range, resolution: rowComponent.providedModel?.resolution };
+                this.addOrUpdateRows(rowData);
+            }
         });
         if (fullSearch && this._filterExpressionsMap?.[EXCLUDED]) {
             this._excludedRows.forEach((range, rowId) => {
@@ -600,9 +606,16 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     }
                 }
             }
-        } else if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
-            // no row to update for coarse resolution, try fine resolution
-            this.maybeFetchNewData(update, true);
+        } else {
+            if (movedRows.length > 0) {
+                // no rows to update but may need to fetch arrows
+                const request = { worldRange, resolution, rowIds: [], additionalParams: {}, fullSearch };
+                await this.fetchRows(request, true, fine);
+            }
+            if (!fine && this._coarseResolutionFactor !== FINE_RESOLUTION_FACTOR) {
+                // no row to update for coarse resolution, try fine resolution
+                this.maybeFetchNewData(update, true);
+            }
         }
     }
 
@@ -787,43 +800,20 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 (x > lastX || (lastBlank && !state.data?.style && state.range.start > lastTime)) &&
                 !isFilteredOut
             ) {
-            const gap = state.data?.gap;
+            const stateModel = {
+                id: rowComponent.id + '-gap',
+                range: {
+                    start: lastTime,
+                    end: state.range.start
+                },
+                data: {
+                    style: gapStyle
+                }
+            };
+            const gap = this.createNewState(stateModel, rowComponent);
             if (gap) {
-                const width = Math.max(1, x - lastX);
-                const opts: TimeGraphStyledRect = {
-                    height: gap.height,
-                    position: {
-                        x: lastX,
-                        y: gap.position.y
-                    },
-                    width: width,
-                    displayWidth: width
-                }
-                gap.update(opts);
-            } else {
-                const stateModel = {
-                    id: rowComponent.id + '-gap',
-                    range: {
-                        start: lastTime,
-                        end: state.range.start
-                    },
-                    data: {
-                        style: gapStyle
-                    }
-                };
-                const gap = this.createNewState(stateModel, rowComponent);
-                if (gap) {
-                    rowComponent.addChild(gap);
-                    if (state.data) {
-                        state.data['gap'] = gap;
-                    }
-                    this.addElementInteractions(gap);
-                }
-            }
-        } else {
-            if (state.data && state.data?.gap) {
-                rowComponent.removeChild(state.data?.gap);
-                state.data.gap = undefined;
+                rowComponent.addChild(gap);
+                this.addElementInteractions(gap);
             }
         }
     }
