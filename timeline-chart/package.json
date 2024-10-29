@@ -1,6 +1,6 @@
 {
   "name": "timeline-chart",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A time graph / gantt chart library for large data (e.g. traces)",
   "keywords": [
     "gantt",
