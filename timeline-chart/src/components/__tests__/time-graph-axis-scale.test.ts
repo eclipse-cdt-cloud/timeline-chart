@@ -14,6 +14,10 @@ describe ('TimeGraphAxisScale', () => {
     }
     const component = new TimeGraphAxisScale('Test', style, unitController, stateController);
 
+    afterAll(() => {
+        component.destroy();
+    });
+
     it ('Renders', () => {
         expect(component).toBeTruthy();
     })

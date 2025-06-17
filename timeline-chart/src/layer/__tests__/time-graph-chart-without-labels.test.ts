@@ -12,6 +12,12 @@ describe('TImeGraphChart performance test without labels', () => {
             NoLabelTestData.viewRange);
     });
 
+    afterEach(() => {
+        timeGraph.destroy();
+        const canvasCount = document.querySelectorAll('canvas').length;
+        expect(canvasCount).toBe(0);
+    });
+
     it ('onScaleFactorChanged test', () => {
         const start = performance.now();
         // Set the view range so that the on view range handlers are triggered

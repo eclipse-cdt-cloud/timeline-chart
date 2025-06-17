@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js-legacy";
+
 import { TimeGraphLayer } from './time-graph-layer';
 import { BIMath } from '../bigint-utils';
 import { TimeGraphStateController } from '../time-graph-state-controller';

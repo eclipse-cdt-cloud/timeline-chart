@@ -14,23 +14,27 @@
     "watch": "tsc --watch",
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
-    "test": "jest --config jest.config.json"
+    "test": "jest --config jest.config.json",
+    "test:runInBand": "jest --runInBand --no-cache --config jest.config.json",
+    "test:detectOpenHandles": "jest --detectOpenHandles --config jest.config.json",
+    "test:detectLeaks": "jest --detectLeaks --config jest.config.json"
   },
   "dependencies": {
     "@types/lodash.throttle": "^4.1.4",
     "glob": "^7.1.6",
     "keyboard-key": "1.1.0",
     "lodash.throttle": "^4.1.1",
-    "pixi.js-legacy": "^5.3.3"
+    "pixi.js-legacy": "^7.0.0"
   },
   "devDependencies": {
     "@types/enzyme": "^3.10.10",
     "@types/enzyme-adapter-react-16": "^1.0.6",
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^29.0.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
-    "jest": "^27.4.3",
+    "jest": "^29.0.0",
     "jest-canvas-mock": "^2.3.1",
+    "jest-environment-jsdom": "29.0.0",
     "rimraf": "^5.0.0",
     "ts-jest": "^29.0.0"
   },

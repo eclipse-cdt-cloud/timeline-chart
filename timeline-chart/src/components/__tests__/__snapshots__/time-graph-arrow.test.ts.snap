@@ -2,7 +2,7 @@
 
 exports[`TimeGraphArrow Matches snapshot 1`] = `
 TimeGraphArrowComponent {
-  "_displayObject": Graphics {
+  "_displayObject": _Graphics2 {
     "_bounds": Bounds {
       "maxX": -Infinity,
       "maxY": -Infinity,
@@ -15,14 +15,14 @@ TimeGraphArrowComponent {
     "_boundsRect": null,
     "_destroyed": false,
     "_enabledFilters": null,
-    "_events": Object {},
+    "_events": {},
     "_eventsCount": 0,
     "_fillStyle": FillStyle {
       "alpha": 1,
       "color": 16777215,
       "matrix": null,
       "texture": Texture {
-        "_events": Object {},
+        "_events": {},
         "_eventsCount": 0,
         "_frame": Rectangle {
           "height": 16,
@@ -53,10 +53,10 @@ TimeGraphArrowComponent {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
-          "_events": Object {
+          "_events": {
             "update": EE {
               "context": [Circular],
               "fn": [Function],
@@ -64,10 +64,13 @@ TimeGraphArrowComponent {
             },
           },
           "_eventsCount": 1,
-          "_glTextures": Object {},
+          "_glTextures": {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -76,7 +79,6 @@ TimeGraphArrowComponent {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -85,26 +87,26 @@ TimeGraphArrowComponent {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
               "_name": "onError",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onResize": Runner {
               "_aliasCount": 0,
               "_name": "setRealSize",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onUpdate": Runner {
               "_aliasCount": 0,
               "_name": "update",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
@@ -113,21 +115,23 @@ TimeGraphArrowComponent {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -139,14 +143,14 @@ TimeGraphArrowComponent {
           "x": 0,
           "y": 0,
         },
-        "textureCacheIds": Array [],
+        "textureCacheIds": [],
         "trim": undefined,
         "uvMatrix": null,
         "valid": true,
       },
       "visible": false,
     },
-    "_geometry": GraphicsGeometry {
+    "_geometry": _GraphicsGeometry2 {
       "_bounds": Bounds {
         "maxX": -Infinity,
         "maxY": -Infinity,
@@ -156,7 +160,7 @@ TimeGraphArrowComponent {
         "updateID": -1,
       },
       "_buffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -164,14 +168,14 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 0,
-        "index": false,
         "static": false,
+        "type": 34962,
       },
       "_indexBuffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -179,15 +183,16 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 1,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
-      "attributes": Object {
+      "attributes": {
         "aColor": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 4,
@@ -197,6 +202,7 @@ TimeGraphArrowComponent {
         },
         "aTextureCoord": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -206,6 +212,7 @@ TimeGraphArrowComponent {
         },
         "aTextureId": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 1,
@@ -215,6 +222,7 @@ TimeGraphArrowComponent {
         },
         "aVertexPosition": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -225,12 +233,12 @@ TimeGraphArrowComponent {
       },
       "batchDirty": -1,
       "batchable": false,
-      "batches": Array [],
+      "batches": [],
       "boundsDirty": -1,
       "boundsPadding": 0,
-      "buffers": Array [
+      "buffers": [
         Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -238,14 +246,14 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 0,
-          "index": false,
           "static": false,
+          "type": 34962,
         },
         Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -253,29 +261,29 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 1,
-          "index": true,
           "static": false,
+          "type": 34963,
         },
       ],
       "cacheDirty": -1,
       "clearDirty": 0,
       "closePointEps": 0.0001,
-      "colors": Array [],
+      "colors": [],
       "dirty": 0,
       "disposeRunner": Runner {
         "_aliasCount": 0,
         "_name": "disposeGeometry",
-        "items": Array [],
+        "items": [],
       },
-      "drawCalls": Array [],
-      "glVertexArrayObjects": Object {},
-      "graphicsData": Array [],
+      "drawCalls": [],
+      "glVertexArrayObjects": {},
+      "graphicsData": [],
       "id": 0,
       "indexBuffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -283,21 +291,21 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 1,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
-      "indices": Array [],
+      "indices": [],
       "indicesUint16": null,
       "instanceCount": 1,
       "instanced": false,
-      "points": Array [],
+      "points": [],
       "refCount": 1,
       "shapeIndex": 0,
-      "textureIds": Array [],
-      "uvs": Array [],
+      "textureIds": [],
+      "uvs": [],
       "uvsFloat32": null,
     },
     "_holeMode": false,
@@ -312,7 +320,7 @@ TimeGraphArrowComponent {
       "miterLimit": 10,
       "native": false,
       "texture": Texture {
-        "_events": Object {},
+        "_events": {},
         "_eventsCount": 0,
         "_frame": Rectangle {
           "height": 16,
@@ -343,10 +351,10 @@ TimeGraphArrowComponent {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
-          "_events": Object {
+          "_events": {
             "update": EE {
               "context": [Circular],
               "fn": [Function],
@@ -354,10 +362,13 @@ TimeGraphArrowComponent {
             },
           },
           "_eventsCount": 1,
-          "_glTextures": Object {},
+          "_glTextures": {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -366,7 +377,6 @@ TimeGraphArrowComponent {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -375,26 +385,26 @@ TimeGraphArrowComponent {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
               "_name": "onError",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onResize": Runner {
               "_aliasCount": 0,
               "_name": "setRealSize",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onUpdate": Runner {
               "_aliasCount": 0,
               "_name": "update",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
@@ -403,21 +413,23 @@ TimeGraphArrowComponent {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -429,7 +441,7 @@ TimeGraphArrowComponent {
           "x": 0,
           "y": 0,
         },
-        "textureCacheIds": Array [],
+        "textureCacheIds": [],
         "trim": undefined,
         "uvMatrix": null,
         "valid": true,
@@ -440,16 +452,26 @@ TimeGraphArrowComponent {
     "_localBounds": null,
     "_localBoundsRect": null,
     "_mask": null,
+    "_maskRefCount": 0,
     "_matrix": null,
-    "_tint": 16777215,
+    "_tintColor": _Color2 {
+      "_components": Float32Array [
+        1,
+        1,
+        1,
+        1,
+      ],
+      "_int": 16777215,
+      "_value": 16777215,
+    },
     "_transformID": -1,
     "_zIndex": 0,
     "alpha": 1,
     "batchDirty": -1,
     "batchTint": -1,
-    "batches": Array [],
-    "children": Array [
-      Graphics {
+    "batches": [],
+    "children": [
+      _Graphics2 {
         "_bounds": Bounds {
           "maxX": -Infinity,
           "maxY": -Infinity,
@@ -462,14 +484,14 @@ TimeGraphArrowComponent {
         "_boundsRect": null,
         "_destroyed": false,
         "_enabledFilters": null,
-        "_events": Object {},
+        "_events": {},
         "_eventsCount": 0,
         "_fillStyle": FillStyle {
           "alpha": 1,
           "color": 16777215,
           "matrix": null,
           "texture": Texture {
-            "_events": Object {},
+            "_events": {},
             "_eventsCount": 0,
             "_frame": Rectangle {
               "height": 16,
@@ -500,10 +522,10 @@ TimeGraphArrowComponent {
               "y2": 1,
               "y3": 1,
             },
-            "baseTexture": BaseTexture {
+            "baseTexture": _BaseTexture2 {
               "_batchEnabled": 0,
               "_batchLocation": 0,
-              "_events": Object {
+              "_events": {
                 "update": EE {
                   "context": [Circular],
                   "fn": [Function],
@@ -511,10 +533,13 @@ TimeGraphArrowComponent {
                 },
               },
               "_eventsCount": 1,
-              "_glTextures": Object {},
+              "_glTextures": {},
+              "_mipmap": 1,
+              "_scaleMode": 1,
+              "_wrapMode": 33071,
               "alphaMode": 1,
               "anisotropicLevel": 0,
-              "cacheId": null,
+              "cacheId": "pixiid_1",
               "destroy": [Function],
               "destroyed": false,
               "dirtyId": 0,
@@ -523,7 +548,6 @@ TimeGraphArrowComponent {
               "format": 6408,
               "height": 16,
               "isPowerOfTwo": true,
-              "mipmap": 1,
               "on": [Function],
               "once": [Function],
               "parentTextureArray": null,
@@ -532,26 +556,26 @@ TimeGraphArrowComponent {
                 "_height": 16,
                 "_width": 16,
                 "destroyed": false,
-                "internal": false,
+                "internal": true,
                 "noSubImage": false,
                 "onError": Runner {
                   "_aliasCount": 0,
                   "_name": "onError",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
                 "onResize": Runner {
                   "_aliasCount": 0,
                   "_name": "setRealSize",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
                 "onUpdate": Runner {
                   "_aliasCount": 0,
                   "_name": "update",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
@@ -560,21 +584,23 @@ TimeGraphArrowComponent {
                   width="16"
                 />,
               },
-              "scaleMode": 1,
               "target": 3553,
-              "textureCacheIds": Array [],
+              "textureCacheIds": [
+                "pixiid_1",
+              ],
               "touched": 0,
               "type": 5121,
               "uid": 2,
               "valid": true,
               "width": 16,
-              "wrapMode": 33071,
             },
             "defaultAnchor": Point {
               "x": 0,
               "y": 0,
             },
+            "defaultBorders": undefined,
             "destroy": [Function],
+            "destroyed": false,
             "emit": [Function],
             "noFrame": true,
             "on": [Function],
@@ -586,14 +612,14 @@ TimeGraphArrowComponent {
               "x": 0,
               "y": 0,
             },
-            "textureCacheIds": Array [],
+            "textureCacheIds": [],
             "trim": undefined,
             "uvMatrix": null,
             "valid": true,
           },
           "visible": false,
         },
-        "_geometry": GraphicsGeometry {
+        "_geometry": _GraphicsGeometry2 {
           "_bounds": Bounds {
             "maxX": -Infinity,
             "maxY": -Infinity,
@@ -603,7 +629,7 @@ TimeGraphArrowComponent {
             "updateID": -1,
           },
           "_buffer": Buffer {
-            "_glBuffers": Object {},
+            "_glBuffers": {},
             "_updateID": 0,
             "data": Float32Array [
               0,
@@ -611,14 +637,14 @@ TimeGraphArrowComponent {
             "disposeRunner": Runner {
               "_aliasCount": 0,
               "_name": "disposeBuffer",
-              "items": Array [],
+              "items": [],
             },
             "id": 2,
-            "index": false,
             "static": false,
+            "type": 34962,
           },
           "_indexBuffer": Buffer {
-            "_glBuffers": Object {},
+            "_glBuffers": {},
             "_updateID": 0,
             "data": Float32Array [
               0,
@@ -626,15 +652,16 @@ TimeGraphArrowComponent {
             "disposeRunner": Runner {
               "_aliasCount": 0,
               "_name": "disposeBuffer",
-              "items": Array [],
+              "items": [],
             },
             "id": 3,
-            "index": true,
             "static": false,
+            "type": 34963,
           },
-          "attributes": Object {
+          "attributes": {
             "aColor": Attribute {
               "buffer": 0,
+              "divisor": 1,
               "instance": false,
               "normalized": true,
               "size": 4,
@@ -644,6 +671,7 @@ TimeGraphArrowComponent {
             },
             "aTextureCoord": Attribute {
               "buffer": 0,
+              "divisor": 1,
               "instance": false,
               "normalized": false,
               "size": 2,
@@ -653,6 +681,7 @@ TimeGraphArrowComponent {
             },
             "aTextureId": Attribute {
               "buffer": 0,
+              "divisor": 1,
               "instance": false,
               "normalized": true,
               "size": 1,
@@ -662,6 +691,7 @@ TimeGraphArrowComponent {
             },
             "aVertexPosition": Attribute {
               "buffer": 0,
+              "divisor": 1,
               "instance": false,
               "normalized": false,
               "size": 2,
@@ -672,12 +702,12 @@ TimeGraphArrowComponent {
           },
           "batchDirty": -1,
           "batchable": false,
-          "batches": Array [],
+          "batches": [],
           "boundsDirty": -1,
           "boundsPadding": 0,
-          "buffers": Array [
+          "buffers": [
             Buffer {
-              "_glBuffers": Object {},
+              "_glBuffers": {},
               "_updateID": 0,
               "data": Float32Array [
                 0,
@@ -685,14 +715,14 @@ TimeGraphArrowComponent {
               "disposeRunner": Runner {
                 "_aliasCount": 0,
                 "_name": "disposeBuffer",
-                "items": Array [],
+                "items": [],
               },
               "id": 2,
-              "index": false,
               "static": false,
+              "type": 34962,
             },
             Buffer {
-              "_glBuffers": Object {},
+              "_glBuffers": {},
               "_updateID": 0,
               "data": Float32Array [
                 0,
@@ -700,29 +730,29 @@ TimeGraphArrowComponent {
               "disposeRunner": Runner {
                 "_aliasCount": 0,
                 "_name": "disposeBuffer",
-                "items": Array [],
+                "items": [],
               },
               "id": 3,
-              "index": true,
               "static": false,
+              "type": 34963,
             },
           ],
           "cacheDirty": -1,
           "clearDirty": 0,
           "closePointEps": 0.0001,
-          "colors": Array [],
+          "colors": [],
           "dirty": 0,
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeGeometry",
-            "items": Array [],
+            "items": [],
           },
-          "drawCalls": Array [],
-          "glVertexArrayObjects": Object {},
-          "graphicsData": Array [],
+          "drawCalls": [],
+          "glVertexArrayObjects": {},
+          "graphicsData": [],
           "id": 1,
           "indexBuffer": Buffer {
-            "_glBuffers": Object {},
+            "_glBuffers": {},
             "_updateID": 0,
             "data": Float32Array [
               0,
@@ -730,21 +760,21 @@ TimeGraphArrowComponent {
             "disposeRunner": Runner {
               "_aliasCount": 0,
               "_name": "disposeBuffer",
-              "items": Array [],
+              "items": [],
             },
             "id": 3,
-            "index": true,
             "static": false,
+            "type": 34963,
           },
-          "indices": Array [],
+          "indices": [],
           "indicesUint16": null,
           "instanceCount": 1,
           "instanced": false,
-          "points": Array [],
+          "points": [],
           "refCount": 1,
           "shapeIndex": 0,
-          "textureIds": Array [],
-          "uvs": Array [],
+          "textureIds": [],
+          "uvs": [],
           "uvsFloat32": null,
         },
         "_holeMode": false,
@@ -759,7 +789,7 @@ TimeGraphArrowComponent {
           "miterLimit": 10,
           "native": false,
           "texture": Texture {
-            "_events": Object {},
+            "_events": {},
             "_eventsCount": 0,
             "_frame": Rectangle {
               "height": 16,
@@ -790,10 +820,10 @@ TimeGraphArrowComponent {
               "y2": 1,
               "y3": 1,
             },
-            "baseTexture": BaseTexture {
+            "baseTexture": _BaseTexture2 {
               "_batchEnabled": 0,
               "_batchLocation": 0,
-              "_events": Object {
+              "_events": {
                 "update": EE {
                   "context": [Circular],
                   "fn": [Function],
@@ -801,10 +831,13 @@ TimeGraphArrowComponent {
                 },
               },
               "_eventsCount": 1,
-              "_glTextures": Object {},
+              "_glTextures": {},
+              "_mipmap": 1,
+              "_scaleMode": 1,
+              "_wrapMode": 33071,
               "alphaMode": 1,
               "anisotropicLevel": 0,
-              "cacheId": null,
+              "cacheId": "pixiid_1",
               "destroy": [Function],
               "destroyed": false,
               "dirtyId": 0,
@@ -813,7 +846,6 @@ TimeGraphArrowComponent {
               "format": 6408,
               "height": 16,
               "isPowerOfTwo": true,
-              "mipmap": 1,
               "on": [Function],
               "once": [Function],
               "parentTextureArray": null,
@@ -822,26 +854,26 @@ TimeGraphArrowComponent {
                 "_height": 16,
                 "_width": 16,
                 "destroyed": false,
-                "internal": false,
+                "internal": true,
                 "noSubImage": false,
                 "onError": Runner {
                   "_aliasCount": 0,
                   "_name": "onError",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
                 "onResize": Runner {
                   "_aliasCount": 0,
                   "_name": "setRealSize",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
                 "onUpdate": Runner {
                   "_aliasCount": 0,
                   "_name": "update",
-                  "items": Array [
+                  "items": [
                     [Circular],
                   ],
                 },
@@ -850,21 +882,23 @@ TimeGraphArrowComponent {
                   width="16"
                 />,
               },
-              "scaleMode": 1,
               "target": 3553,
-              "textureCacheIds": Array [],
+              "textureCacheIds": [
+                "pixiid_1",
+              ],
               "touched": 0,
               "type": 5121,
               "uid": 2,
               "valid": true,
               "width": 16,
-              "wrapMode": 33071,
             },
             "defaultAnchor": Point {
               "x": 0,
               "y": 0,
             },
+            "defaultBorders": undefined,
             "destroy": [Function],
+            "destroyed": false,
             "emit": [Function],
             "noFrame": true,
             "on": [Function],
@@ -876,7 +910,7 @@ TimeGraphArrowComponent {
               "x": 0,
               "y": 0,
             },
-            "textureCacheIds": Array [],
+            "textureCacheIds": [],
             "trim": undefined,
             "uvMatrix": null,
             "valid": true,
@@ -887,15 +921,27 @@ TimeGraphArrowComponent {
         "_localBounds": null,
         "_localBoundsRect": null,
         "_mask": null,
+        "_maskRefCount": 0,
         "_matrix": null,
-        "_tint": 16777215,
+        "_tintColor": _Color2 {
+          "_components": Float32Array [
+            1,
+            1,
+            1,
+            1,
+          ],
+          "_int": 16777215,
+          "_value": 16777215,
+        },
         "_transformID": -1,
         "_zIndex": 0,
         "alpha": 1,
         "batchDirty": -1,
         "batchTint": -1,
-        "batches": Array [],
-        "children": Array [],
+        "batches": [],
+        "children": [],
+        "cullArea": null,
+        "cullable": false,
         "currentPath": null,
         "filterArea": null,
         "filters": null,
@@ -910,10 +956,10 @@ TimeGraphArrowComponent {
         "state": State {
           "_blendMode": 0,
           "_polygonOffset": 0,
-          "data": 1,
+          "data": 33,
         },
         "tempDisplayObjectParent": null,
-        "transform": Transform {
+        "transform": _Transform {
           "_currentLocalID": 0,
           "_cx": 1,
           "_cy": 0,
@@ -971,6 +1017,8 @@ TimeGraphArrowComponent {
         "worldAlpha": 1,
       },
     ],
+    "cullArea": null,
+    "cullable": false,
     "currentPath": null,
     "filterArea": null,
     "filters": null,
@@ -985,10 +1033,10 @@ TimeGraphArrowComponent {
     "state": State {
       "_blendMode": 0,
       "_polygonOffset": 0,
-      "data": 1,
+      "data": 33,
     },
     "tempDisplayObjectParent": null,
-    "transform": Transform {
+    "transform": _Transform {
       "_currentLocalID": 0,
       "_cx": 1,
       "_cy": 0,
@@ -1046,25 +1094,25 @@ TimeGraphArrowComponent {
     "worldAlpha": 1,
   },
   "_id": "Test",
-  "_model": Object {
+  "_model": {
     "destinationId": 1,
-    "range": Object {
+    "range": {
       "end": 10n,
       "start": 0n,
     },
     "sourceId": 0,
   },
-  "_options": Object {
-    "end": Object {
+  "_options": {
+    "end": {
       "x": 2,
       "y": 3,
     },
-    "start": Object {
+    "start": {
       "x": 0,
       "y": 1,
     },
   },
-  "head": Graphics {
+  "head": _Graphics2 {
     "_bounds": Bounds {
       "maxX": -Infinity,
       "maxY": -Infinity,
@@ -1077,14 +1125,14 @@ TimeGraphArrowComponent {
     "_boundsRect": null,
     "_destroyed": false,
     "_enabledFilters": null,
-    "_events": Object {},
+    "_events": {},
     "_eventsCount": 0,
     "_fillStyle": FillStyle {
       "alpha": 1,
       "color": 16777215,
       "matrix": null,
       "texture": Texture {
-        "_events": Object {},
+        "_events": {},
         "_eventsCount": 0,
         "_frame": Rectangle {
           "height": 16,
@@ -1115,10 +1163,10 @@ TimeGraphArrowComponent {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
-          "_events": Object {
+          "_events": {
             "update": EE {
               "context": [Circular],
               "fn": [Function],
@@ -1126,10 +1174,13 @@ TimeGraphArrowComponent {
             },
           },
           "_eventsCount": 1,
-          "_glTextures": Object {},
+          "_glTextures": {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -1138,7 +1189,6 @@ TimeGraphArrowComponent {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -1147,26 +1197,26 @@ TimeGraphArrowComponent {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
               "_name": "onError",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onResize": Runner {
               "_aliasCount": 0,
               "_name": "setRealSize",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onUpdate": Runner {
               "_aliasCount": 0,
               "_name": "update",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
@@ -1175,21 +1225,23 @@ TimeGraphArrowComponent {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -1201,14 +1253,14 @@ TimeGraphArrowComponent {
           "x": 0,
           "y": 0,
         },
-        "textureCacheIds": Array [],
+        "textureCacheIds": [],
         "trim": undefined,
         "uvMatrix": null,
         "valid": true,
       },
       "visible": false,
     },
-    "_geometry": GraphicsGeometry {
+    "_geometry": _GraphicsGeometry2 {
       "_bounds": Bounds {
         "maxX": -Infinity,
         "maxY": -Infinity,
@@ -1218,7 +1270,7 @@ TimeGraphArrowComponent {
         "updateID": -1,
       },
       "_buffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -1226,14 +1278,14 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 2,
-        "index": false,
         "static": false,
+        "type": 34962,
       },
       "_indexBuffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -1241,15 +1293,16 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 3,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
-      "attributes": Object {
+      "attributes": {
         "aColor": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 4,
@@ -1259,6 +1312,7 @@ TimeGraphArrowComponent {
         },
         "aTextureCoord": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -1268,6 +1322,7 @@ TimeGraphArrowComponent {
         },
         "aTextureId": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 1,
@@ -1277,6 +1332,7 @@ TimeGraphArrowComponent {
         },
         "aVertexPosition": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -1287,12 +1343,12 @@ TimeGraphArrowComponent {
       },
       "batchDirty": -1,
       "batchable": false,
-      "batches": Array [],
+      "batches": [],
       "boundsDirty": -1,
       "boundsPadding": 0,
-      "buffers": Array [
+      "buffers": [
         Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -1300,14 +1356,14 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 2,
-          "index": false,
           "static": false,
+          "type": 34962,
         },
         Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -1315,29 +1371,29 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 3,
-          "index": true,
           "static": false,
+          "type": 34963,
         },
       ],
       "cacheDirty": -1,
       "clearDirty": 0,
       "closePointEps": 0.0001,
-      "colors": Array [],
+      "colors": [],
       "dirty": 0,
       "disposeRunner": Runner {
         "_aliasCount": 0,
         "_name": "disposeGeometry",
-        "items": Array [],
+        "items": [],
       },
-      "drawCalls": Array [],
-      "glVertexArrayObjects": Object {},
-      "graphicsData": Array [],
+      "drawCalls": [],
+      "glVertexArrayObjects": {},
+      "graphicsData": [],
       "id": 1,
       "indexBuffer": Buffer {
-        "_glBuffers": Object {},
+        "_glBuffers": {},
         "_updateID": 0,
         "data": Float32Array [
           0,
@@ -1345,21 +1401,21 @@ TimeGraphArrowComponent {
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeBuffer",
-          "items": Array [],
+          "items": [],
         },
         "id": 3,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
-      "indices": Array [],
+      "indices": [],
       "indicesUint16": null,
       "instanceCount": 1,
       "instanced": false,
-      "points": Array [],
+      "points": [],
       "refCount": 1,
       "shapeIndex": 0,
-      "textureIds": Array [],
-      "uvs": Array [],
+      "textureIds": [],
+      "uvs": [],
       "uvsFloat32": null,
     },
     "_holeMode": false,
@@ -1374,7 +1430,7 @@ TimeGraphArrowComponent {
       "miterLimit": 10,
       "native": false,
       "texture": Texture {
-        "_events": Object {},
+        "_events": {},
         "_eventsCount": 0,
         "_frame": Rectangle {
           "height": 16,
@@ -1405,10 +1461,10 @@ TimeGraphArrowComponent {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
-          "_events": Object {
+          "_events": {
             "update": EE {
               "context": [Circular],
               "fn": [Function],
@@ -1416,10 +1472,13 @@ TimeGraphArrowComponent {
             },
           },
           "_eventsCount": 1,
-          "_glTextures": Object {},
+          "_glTextures": {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -1428,7 +1487,6 @@ TimeGraphArrowComponent {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -1437,26 +1495,26 @@ TimeGraphArrowComponent {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
               "_name": "onError",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onResize": Runner {
               "_aliasCount": 0,
               "_name": "setRealSize",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
             "onUpdate": Runner {
               "_aliasCount": 0,
               "_name": "update",
-              "items": Array [
+              "items": [
                 [Circular],
               ],
             },
@@ -1465,21 +1523,23 @@ TimeGraphArrowComponent {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -1491,7 +1551,7 @@ TimeGraphArrowComponent {
           "x": 0,
           "y": 0,
         },
-        "textureCacheIds": Array [],
+        "textureCacheIds": [],
         "trim": undefined,
         "uvMatrix": null,
         "valid": true,
@@ -1502,21 +1562,33 @@ TimeGraphArrowComponent {
     "_localBounds": null,
     "_localBoundsRect": null,
     "_mask": null,
+    "_maskRefCount": 0,
     "_matrix": null,
-    "_tint": 16777215,
+    "_tintColor": _Color2 {
+      "_components": Float32Array [
+        1,
+        1,
+        1,
+        1,
+      ],
+      "_int": 16777215,
+      "_value": 16777215,
+    },
     "_transformID": -1,
     "_zIndex": 0,
     "alpha": 1,
     "batchDirty": -1,
     "batchTint": -1,
-    "batches": Array [],
-    "children": Array [],
+    "batches": [],
+    "children": [],
+    "cullArea": null,
+    "cullable": false,
     "currentPath": null,
     "filterArea": null,
     "filters": null,
     "isMask": false,
     "isSprite": false,
-    "parent": Graphics {
+    "parent": _Graphics2 {
       "_bounds": Bounds {
         "maxX": -Infinity,
         "maxY": -Infinity,
@@ -1529,14 +1601,14 @@ TimeGraphArrowComponent {
       "_boundsRect": null,
       "_destroyed": false,
       "_enabledFilters": null,
-      "_events": Object {},
+      "_events": {},
       "_eventsCount": 0,
       "_fillStyle": FillStyle {
         "alpha": 1,
         "color": 16777215,
         "matrix": null,
         "texture": Texture {
-          "_events": Object {},
+          "_events": {},
           "_eventsCount": 0,
           "_frame": Rectangle {
             "height": 16,
@@ -1567,10 +1639,10 @@ TimeGraphArrowComponent {
             "y2": 1,
             "y3": 1,
           },
-          "baseTexture": BaseTexture {
+          "baseTexture": _BaseTexture2 {
             "_batchEnabled": 0,
             "_batchLocation": 0,
-            "_events": Object {
+            "_events": {
               "update": EE {
                 "context": [Circular],
                 "fn": [Function],
@@ -1578,10 +1650,13 @@ TimeGraphArrowComponent {
               },
             },
             "_eventsCount": 1,
-            "_glTextures": Object {},
+            "_glTextures": {},
+            "_mipmap": 1,
+            "_scaleMode": 1,
+            "_wrapMode": 33071,
             "alphaMode": 1,
             "anisotropicLevel": 0,
-            "cacheId": null,
+            "cacheId": "pixiid_1",
             "destroy": [Function],
             "destroyed": false,
             "dirtyId": 0,
@@ -1590,7 +1665,6 @@ TimeGraphArrowComponent {
             "format": 6408,
             "height": 16,
             "isPowerOfTwo": true,
-            "mipmap": 1,
             "on": [Function],
             "once": [Function],
             "parentTextureArray": null,
@@ -1599,26 +1673,26 @@ TimeGraphArrowComponent {
               "_height": 16,
               "_width": 16,
               "destroyed": false,
-              "internal": false,
+              "internal": true,
               "noSubImage": false,
               "onError": Runner {
                 "_aliasCount": 0,
                 "_name": "onError",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
               "onResize": Runner {
                 "_aliasCount": 0,
                 "_name": "setRealSize",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
               "onUpdate": Runner {
                 "_aliasCount": 0,
                 "_name": "update",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
@@ -1627,21 +1701,23 @@ TimeGraphArrowComponent {
                 width="16"
               />,
             },
-            "scaleMode": 1,
             "target": 3553,
-            "textureCacheIds": Array [],
+            "textureCacheIds": [
+              "pixiid_1",
+            ],
             "touched": 0,
             "type": 5121,
             "uid": 2,
             "valid": true,
             "width": 16,
-            "wrapMode": 33071,
           },
           "defaultAnchor": Point {
             "x": 0,
             "y": 0,
           },
+          "defaultBorders": undefined,
           "destroy": [Function],
+          "destroyed": false,
           "emit": [Function],
           "noFrame": true,
           "on": [Function],
@@ -1653,14 +1729,14 @@ TimeGraphArrowComponent {
             "x": 0,
             "y": 0,
           },
-          "textureCacheIds": Array [],
+          "textureCacheIds": [],
           "trim": undefined,
           "uvMatrix": null,
           "valid": true,
         },
         "visible": false,
       },
-      "_geometry": GraphicsGeometry {
+      "_geometry": _GraphicsGeometry2 {
         "_bounds": Bounds {
           "maxX": -Infinity,
           "maxY": -Infinity,
@@ -1670,7 +1746,7 @@ TimeGraphArrowComponent {
           "updateID": -1,
         },
         "_buffer": Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -1678,14 +1754,14 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 0,
-          "index": false,
           "static": false,
+          "type": 34962,
         },
         "_indexBuffer": Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -1693,15 +1769,16 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 1,
-          "index": true,
           "static": false,
+          "type": 34963,
         },
-        "attributes": Object {
+        "attributes": {
           "aColor": Attribute {
             "buffer": 0,
+            "divisor": 1,
             "instance": false,
             "normalized": true,
             "size": 4,
@@ -1711,6 +1788,7 @@ TimeGraphArrowComponent {
           },
           "aTextureCoord": Attribute {
             "buffer": 0,
+            "divisor": 1,
             "instance": false,
             "normalized": false,
             "size": 2,
@@ -1720,6 +1798,7 @@ TimeGraphArrowComponent {
           },
           "aTextureId": Attribute {
             "buffer": 0,
+            "divisor": 1,
             "instance": false,
             "normalized": true,
             "size": 1,
@@ -1729,6 +1808,7 @@ TimeGraphArrowComponent {
           },
           "aVertexPosition": Attribute {
             "buffer": 0,
+            "divisor": 1,
             "instance": false,
             "normalized": false,
             "size": 2,
@@ -1739,12 +1819,12 @@ TimeGraphArrowComponent {
         },
         "batchDirty": -1,
         "batchable": false,
-        "batches": Array [],
+        "batches": [],
         "boundsDirty": -1,
         "boundsPadding": 0,
-        "buffers": Array [
+        "buffers": [
           Buffer {
-            "_glBuffers": Object {},
+            "_glBuffers": {},
             "_updateID": 0,
             "data": Float32Array [
               0,
@@ -1752,14 +1832,14 @@ TimeGraphArrowComponent {
             "disposeRunner": Runner {
               "_aliasCount": 0,
               "_name": "disposeBuffer",
-              "items": Array [],
+              "items": [],
             },
             "id": 0,
-            "index": false,
             "static": false,
+            "type": 34962,
           },
           Buffer {
-            "_glBuffers": Object {},
+            "_glBuffers": {},
             "_updateID": 0,
             "data": Float32Array [
               0,
@@ -1767,29 +1847,29 @@ TimeGraphArrowComponent {
             "disposeRunner": Runner {
               "_aliasCount": 0,
               "_name": "disposeBuffer",
-              "items": Array [],
+              "items": [],
             },
             "id": 1,
-            "index": true,
             "static": false,
+            "type": 34963,
           },
         ],
         "cacheDirty": -1,
         "clearDirty": 0,
         "closePointEps": 0.0001,
-        "colors": Array [],
+        "colors": [],
         "dirty": 0,
         "disposeRunner": Runner {
           "_aliasCount": 0,
           "_name": "disposeGeometry",
-          "items": Array [],
+          "items": [],
         },
-        "drawCalls": Array [],
-        "glVertexArrayObjects": Object {},
-        "graphicsData": Array [],
+        "drawCalls": [],
+        "glVertexArrayObjects": {},
+        "graphicsData": [],
         "id": 0,
         "indexBuffer": Buffer {
-          "_glBuffers": Object {},
+          "_glBuffers": {},
           "_updateID": 0,
           "data": Float32Array [
             0,
@@ -1797,21 +1877,21 @@ TimeGraphArrowComponent {
           "disposeRunner": Runner {
             "_aliasCount": 0,
             "_name": "disposeBuffer",
-            "items": Array [],
+            "items": [],
           },
           "id": 1,
-          "index": true,
           "static": false,
+          "type": 34963,
         },
-        "indices": Array [],
+        "indices": [],
         "indicesUint16": null,
         "instanceCount": 1,
         "instanced": false,
-        "points": Array [],
+        "points": [],
         "refCount": 1,
         "shapeIndex": 0,
-        "textureIds": Array [],
-        "uvs": Array [],
+        "textureIds": [],
+        "uvs": [],
         "uvsFloat32": null,
       },
       "_holeMode": false,
@@ -1826,7 +1906,7 @@ TimeGraphArrowComponent {
         "miterLimit": 10,
         "native": false,
         "texture": Texture {
-          "_events": Object {},
+          "_events": {},
           "_eventsCount": 0,
           "_frame": Rectangle {
             "height": 16,
@@ -1857,10 +1937,10 @@ TimeGraphArrowComponent {
             "y2": 1,
             "y3": 1,
           },
-          "baseTexture": BaseTexture {
+          "baseTexture": _BaseTexture2 {
             "_batchEnabled": 0,
             "_batchLocation": 0,
-            "_events": Object {
+            "_events": {
               "update": EE {
                 "context": [Circular],
                 "fn": [Function],
@@ -1868,10 +1948,13 @@ TimeGraphArrowComponent {
               },
             },
             "_eventsCount": 1,
-            "_glTextures": Object {},
+            "_glTextures": {},
+            "_mipmap": 1,
+            "_scaleMode": 1,
+            "_wrapMode": 33071,
             "alphaMode": 1,
             "anisotropicLevel": 0,
-            "cacheId": null,
+            "cacheId": "pixiid_1",
             "destroy": [Function],
             "destroyed": false,
             "dirtyId": 0,
@@ -1880,7 +1963,6 @@ TimeGraphArrowComponent {
             "format": 6408,
             "height": 16,
             "isPowerOfTwo": true,
-            "mipmap": 1,
             "on": [Function],
             "once": [Function],
             "parentTextureArray": null,
@@ -1889,26 +1971,26 @@ TimeGraphArrowComponent {
               "_height": 16,
               "_width": 16,
               "destroyed": false,
-              "internal": false,
+              "internal": true,
               "noSubImage": false,
               "onError": Runner {
                 "_aliasCount": 0,
                 "_name": "onError",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
               "onResize": Runner {
                 "_aliasCount": 0,
                 "_name": "setRealSize",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
               "onUpdate": Runner {
                 "_aliasCount": 0,
                 "_name": "update",
-                "items": Array [
+                "items": [
                   [Circular],
                 ],
               },
@@ -1917,21 +1999,23 @@ TimeGraphArrowComponent {
                 width="16"
               />,
             },
-            "scaleMode": 1,
             "target": 3553,
-            "textureCacheIds": Array [],
+            "textureCacheIds": [
+              "pixiid_1",
+            ],
             "touched": 0,
             "type": 5121,
             "uid": 2,
             "valid": true,
             "width": 16,
-            "wrapMode": 33071,
           },
           "defaultAnchor": Point {
             "x": 0,
             "y": 0,
           },
+          "defaultBorders": undefined,
           "destroy": [Function],
+          "destroyed": false,
           "emit": [Function],
           "noFrame": true,
           "on": [Function],
@@ -1943,7 +2027,7 @@ TimeGraphArrowComponent {
             "x": 0,
             "y": 0,
           },
-          "textureCacheIds": Array [],
+          "textureCacheIds": [],
           "trim": undefined,
           "uvMatrix": null,
           "valid": true,
@@ -1954,17 +2038,29 @@ TimeGraphArrowComponent {
       "_localBounds": null,
       "_localBoundsRect": null,
       "_mask": null,
+      "_maskRefCount": 0,
       "_matrix": null,
-      "_tint": 16777215,
+      "_tintColor": _Color2 {
+        "_components": Float32Array [
+          1,
+          1,
+          1,
+          1,
+        ],
+        "_int": 16777215,
+        "_value": 16777215,
+      },
       "_transformID": -1,
       "_zIndex": 0,
       "alpha": 1,
       "batchDirty": -1,
       "batchTint": -1,
-      "batches": Array [],
-      "children": Array [
+      "batches": [],
+      "children": [
         [Circular],
       ],
+      "cullArea": null,
+      "cullable": false,
       "currentPath": null,
       "filterArea": null,
       "filters": null,
@@ -1979,10 +2075,10 @@ TimeGraphArrowComponent {
       "state": State {
         "_blendMode": 0,
         "_polygonOffset": 0,
-        "data": 1,
+        "data": 33,
       },
       "tempDisplayObjectParent": null,
-      "transform": Transform {
+      "transform": _Transform {
         "_currentLocalID": 0,
         "_cx": 1,
         "_cy": 0,
@@ -2047,10 +2143,10 @@ TimeGraphArrowComponent {
     "state": State {
       "_blendMode": 0,
       "_polygonOffset": 0,
-      "data": 1,
+      "data": 33,
     },
     "tempDisplayObjectParent": null,
-    "transform": Transform {
+    "transform": _Transform {
       "_currentLocalID": 0,
       "_cx": 1,
       "_cy": 0,

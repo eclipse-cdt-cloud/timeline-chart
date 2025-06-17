@@ -1,8 +1,8 @@
+import * as PIXI from "pixi.js-legacy";
 import { TimeGraphComponent, TimeGraphStyledRect, TimeGraphElementPosition } from "./time-graph-component";
 import { TimeGraphRow } from "./time-graph-row";
 import { TimelineChart } from "../time-graph-model";
 import { FontController } from "../time-graph-font-controller";
-import * as PIXI from "pixi.js-legacy";
 
 export interface TimeGraphStateStyle {
     color?: number

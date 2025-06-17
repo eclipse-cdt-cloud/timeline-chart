@@ -13,6 +13,12 @@ describe('TImeGraphChart performance test with labels', () => {
 
     });
 
+    afterEach(() => {
+        timeGraph.destroy();
+        const canvasCount = document.querySelectorAll('canvas').length;
+        expect(canvasCount).toBe(0);
+    });
+
 	it ('onScaleFactorChanged test', () => {
         // Making sure that the set up is good
         expect(timeGraph.getAbsoluteStart()).toEqual(WithLabelTestData.traceStart);
