@@ -82,7 +82,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
     constructor(protected rowController: TimeGraphRowController, protected stateController: TimeGraphStateController, protected factor: number) {
         super('vscroll_handle');
         const moveStart: TimeGraphInteractionHandler = event => {
-            this.mouseStartY = event.data.global.y;
+            this.mouseStartY = event.global.y;
             this.oldVerticalOffset = this.rowController.verticalOffset;
             this.mouseIsDown = true;
             this.stateController.snapped = false;
@@ -100,7 +100,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
         this.addEvent('mousedown', moveStart, this._displayObject);
         this.addEvent('mousemove', event => {
             if (this.mouseIsDown) {
-                const delta = (event.data.global.y - this.mouseStartY) / this.factor;
+                const delta = (event.global.y - this.mouseStartY) / this.factor;
                 const verticalOffset = this.oldVerticalOffset + delta;
                 this.rowController.verticalOffset = Math.max(0, Math.min(this.rowController.totalHeight - this.stateController.canvasDisplayHeight, verticalOffset));
             }
@@ -134,7 +134,7 @@ export class TimeGraphVerticalScrollbarBackground extends TimeGraphComponent<nul
         super("vscroll_background");
         this.addEvent("mousedown", event => {
             // Get y position of click (in pixels).
-            let y = event.data.getLocalPosition(this._displayObject).y;
+            let y = event.getLocalPosition(this._displayObject).y;
             // Convert to units used by rowController.
             let center = (y/this.stateController.canvasDisplayHeight) * this.rowController.totalHeight;
             // We have the center of the new scrollbar position, but need the starting pixel.
@@ -159,7 +159,7 @@ export class TimeGraphVerticalScrollbarBackground extends TimeGraphComponent<nul
         this.addEvent('mouseupoutside', endSnap, this._displayObject);
         this.addEvent('rightdown', event => {
             // Get y position of click (in raw pixels).
-            let y = event.data.getLocalPosition(this._displayObject).y;
+            let y = event.getLocalPosition(this._displayObject).y;
             // Convert y to correct units used by rowController.
             let clickPoint = (y / this.stateController.canvasDisplayHeight) * this.rowController.totalHeight;
             // Are we clicking above or below the current scrollbar position?

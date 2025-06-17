@@ -26,6 +26,16 @@
         "example"
     ],
     "dependencies": {
-        "pixi.js": "^5.0.0"
+        "@pixi/core": "^7.4.3",
+        "@pixi/display": "^7.4.3",
+        "@pixi/extract": "^7.4.3",
+        "@pixi/graphics": "^7.4.3",
+        "@pixi/mesh": "^7.4.3",
+        "@pixi/mesh-extras": "^7.4.3",
+        "@pixi/particle-container": "^7.4.3",
+        "@pixi/prepare": "^7.4.3",
+        "@pixi/sprite": "^7.4.3",
+        "@pixi/sprite-tiling": "^7.4.3",
+        "@pixi/text": "^7.4.3"
     }
 }

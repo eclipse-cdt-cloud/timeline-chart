@@ -15,6 +15,12 @@ describe('TImeGraphChart performance test with long states removal', () => {
         timeGraph.setViewRange(LongRemovalTestData.zoomRange.start, LongRemovalTestData.zoomRange.end);            
     });
 
+    afterEach(() => {
+        timeGraph.destroy();
+        const canvasCount = document.querySelectorAll('canvas').length;
+        expect(canvasCount).toBe(0);
+    });
+
     it ('addOrUpdateRow() test with long removal time', () => {
         const data = timeGraph.getData();
         const timeGraphChart = timeGraph.getTimeGraphChart();

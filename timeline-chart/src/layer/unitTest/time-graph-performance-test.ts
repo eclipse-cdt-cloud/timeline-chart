@@ -212,4 +212,16 @@ export class TimeGraphPerformanceTest {
         // Call the stub to fetch the test data
         return this.testDataProvider.fetchTimeGraphData({});
     }
+
+    destroy(): void {
+        // Destroy chart first
+        if (this.timeGraphChart) {
+            this.timeGraphChart.destroy();
+        }
+        // Destroy chart container and its layers
+        if (this.timeGraphChartContainer) {
+            this.timeGraphChartContainer.destroy();
+        }
+        document.body.innerHTML = '';
+    }
 }
