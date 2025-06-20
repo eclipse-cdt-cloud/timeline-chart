@@ -7,6 +7,10 @@ describe ('TimeGraphAxisCursor', () => {
     }
     const component = new TimeGraphAxisCursor(options);
 
+    afterAll(() => {
+        component.destroy();
+    });
+
     it ('Renders', () => {
         expect(component).toBeTruthy();
     })

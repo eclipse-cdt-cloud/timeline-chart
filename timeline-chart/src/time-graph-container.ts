@@ -1,4 +1,6 @@
 import * as PIXI from "pixi.js-legacy"
+import { utils } from '@pixi/core';
+
 import { TimeGraphUnitController } from "./time-graph-unit-controller";
 import { TimeGraphStateController } from "./time-graph-state-controller";
 import { TimeGraphLayer, TimeGraphLayerOptions } from "./layer/time-graph-layer";
@@ -17,7 +19,7 @@ export interface TimeGraphContainerOptions {
 export class TimeGraphContainer {
 
     protected stage: PIXI.Container;
-    protected renderer: PIXI.AbstractRenderer;
+    protected renderer: PIXI.IRenderer;
     protected application: PIXI.Application;
 
     protected _canvas: HTMLCanvasElement;
@@ -36,7 +38,8 @@ export class TimeGraphContainer {
             canvas = extCanvas;
         }
 
-        const noWebgl2 = !PIXI.utils.isWebGLSupported() || !canvas.getContext('webgl2');
+        const supported = utils.isWebGLSupported();
+        const noWebgl2 = !supported || !canvas.getContext('webgl2');
         canvas.style.width = config.width + 'px';
         canvas.style.height = config.height + 'px';
         canvas.width = config.width;
@@ -49,7 +52,7 @@ export class TimeGraphContainer {
             height: canvas.height,
             view: canvas,
             backgroundColor: config.backgroundColor,
-            transparent: config.transparent,
+            backgroundAlpha: config.transparent ? 0 : 1,
             sharedTicker: true,
             antialias: true,
             resolution: ratio,
@@ -59,7 +62,7 @@ export class TimeGraphContainer {
 
         this.stage = this.application.stage;
         this.renderer = this.application.renderer;
-        this._canvas = this.application.view;
+        this._canvas = this.application.view as HTMLCanvasElement;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
         this.unitController.onViewRangeChanged(this.calculatePositionOffset);
