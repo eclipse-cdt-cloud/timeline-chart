@@ -12,6 +12,7 @@ export interface TimeGraphContainerOptions {
     lineColor?: number;
     transparent?: boolean;
     classNames?: string;
+    forceCanvasRenderer?: boolean;
 }
 
 export class TimeGraphContainer {
@@ -36,7 +37,8 @@ export class TimeGraphContainer {
             canvas = extCanvas;
         }
 
-        const noWebgl2 = !PIXI.utils.isWebGLSupported() || !canvas.getContext('webgl2');
+        const supported = PIXI.utils.isWebGLSupported();
+        const noWebgl2 = !supported || config.forceCanvasRenderer || !canvas.getContext('webgl2');
         canvas.style.width = config.width + 'px';
         canvas.style.height = config.height + 'px';
         canvas.width = config.width;
