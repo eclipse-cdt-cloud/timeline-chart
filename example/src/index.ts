@@ -96,9 +96,9 @@ const providers = {
     rowStyleProvider: (row: TimelineChart.TimeGraphRowModel) => {
         return {
             backgroundColor: 0xe0ddcf,
-            backgroundOpacity: row.selected ? 0.6 : 0,
-            lineColor: row.data && row.data.hasStates ? 0xdddddd : 0xaa4444,
-            lineThickness: row.data && row.data.hasStates ? 1 : 3
+            backgroundOpacity: row?.selected ? 0.6 : 0,
+            lineColor: row?.data && row?.data.hasStates ? 0xdddddd : 0xaa4444,
+            lineThickness: row?.data && row?.data.hasStates ? 1 : 3
         }
     },
     rowAnnotationStyleProvider: (annotation: TimelineChart.TimeGraphAnnotation) => {
