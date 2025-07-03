@@ -12,11 +12,11 @@
         "module": "ESnext",
         "moduleResolution": "node10",
         "esModuleInterop": true,
-        "target": "es5",
+        "target": "es2017",
         "jsx": "react",
         "allowJs": true,
         "lib": [
-            "es6",
+            "es2017",
             "dom",
             "esnext.bigint"
         ],

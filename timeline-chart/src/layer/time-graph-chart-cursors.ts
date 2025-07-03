@@ -1,4 +1,4 @@
-import type { FederatedPointerEvent } from '@pixi/events';
+import * as PIXI from "pixi.js-legacy";
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";
 import { TimelineChart } from "../time-graph-model";
@@ -15,9 +15,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected secondCursor?: TimeGraphCursor;
     protected color: number = 0x0000ff;
 
-    private _stageMouseDownHandler: (event: FederatedPointerEvent) => void;
-    private _stageMouseMoveHandler: (event: FederatedPointerEvent) => void;
-    private _stageMouseUpHandler: (event: FederatedPointerEvent) => void;
+    private _stageMouseDownHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseMoveHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseUpHandler: (event: PIXI.FederatedPointerEvent) => void;
     
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
@@ -74,16 +74,15 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
         this.onCanvasEvent('keyup', this._cursorKeyUpHandler);
 
-        this._stageMouseDownHandler = (event: FederatedPointerEvent) => {
-            const orig = event.originalEvent;
-            if (orig instanceof MouseEvent || orig instanceof PointerEvent) {
+        this._stageMouseDownHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
                 this.mouseButtons = event.buttons;
                 // if only left button is pressed with or without Shift key
                 if (event.button !== 0 || event.buttons !== 1 ||
-                    orig.ctrlKey || orig.altKey) {
+                    event.ctrlKey || event.altKey) {
                     return;
                 }
-                const extendSelection = orig.shiftKey && this.stage.cursor === 'crosshair';
+                const extendSelection = event.shiftKey && this.stage.cursor === 'crosshair';
                 this.mouseSelecting = true;
                 this.stage.cursor = 'crosshair';
                 const mouseX = event.global.x;
@@ -104,15 +103,14 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
-        this._stageMouseMoveHandler = (event: FederatedPointerEvent) => {
-            const orig = event.originalEvent;
-            if (orig instanceof MouseEvent || orig instanceof PointerEvent) {
+        this._stageMouseMoveHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
                 this.mouseButtons = event.buttons;
                 if (this.mouseSelecting && this.unitController.selectionRange) {
                     if ((this.mouseButtons & 1) === 0) {
                         // handle missed button mouseup event
                         this.mouseSelecting = false;
-                        if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                        if (!event.shiftKey || event.ctrlKey || event.altKey) {
                             this.stage.cursor = 'default';
                         }
                         return;
@@ -130,13 +128,12 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         }
         this.stage.on('mousemove', this._stageMouseMoveHandler);
     
-        this._stageMouseUpHandler = (event: FederatedPointerEvent) => {
-            const orig = event.originalEvent;
-            if (orig instanceof MouseEvent || orig instanceof PointerEvent) {
+        this._stageMouseUpHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
                 this.mouseButtons = event.buttons;
                 if (this.mouseSelecting && event.button === 0) {
                     this.mouseSelecting = false;
-                    if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                    if (!event.shiftKey || event.ctrlKey || event.altKey) {
                         this.stage.cursor = 'default';
                     }
                 }

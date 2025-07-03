@@ -41,7 +41,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
             this.oldViewRange = this.unitController.viewRange;
             this.mouseIsDown = true;
         }, this._displayObject);
-        this.addEvent('mousemove', mouseMove, this._displayObject);
+        this.addEvent('globalmousemove', mouseMove, this._displayObject);
         const moveEnd: TimeGraphInteractionHandler = event => {
             this.mouseIsDown = false;
         }

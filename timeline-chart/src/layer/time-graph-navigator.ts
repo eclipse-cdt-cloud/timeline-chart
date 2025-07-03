@@ -97,7 +97,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             }
         }, this._displayObject);
         this.addEvent('mousedown', moveStart, this._displayObject);
-        this.addEvent('mousemove', event => {
+        this.addEvent('globalmousemove', event => {
             if (this.mouseIsDown) {
                 const delta = event.global.x - this.mouseStartX;
                 const start = BIMath.clamp(Number(this.oldViewStart) + (delta / this.stateController.absoluteResolution),
