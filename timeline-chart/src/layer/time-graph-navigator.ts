@@ -81,7 +81,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
     constructor(protected unitController: TimeGraphUnitController, protected stateController: TimeGraphStateController) {
         super('navigator_handle');
         const moveStart: TimeGraphInteractionHandler = event => {
-            this.mouseStartX = event.data.global.x;
+            this.mouseStartX = event.global.x;
             this.oldViewStart = this.unitController.viewRange.start;
             this.mouseIsDown = true;
             this.stateController.snapped = false;
@@ -97,9 +97,9 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
             }
         }, this._displayObject);
         this.addEvent('mousedown', moveStart, this._displayObject);
-        this.addEvent('mousemove', event => {
+        this.addEvent('globalmousemove', event => {
             if (this.mouseIsDown) {
-                const delta = event.data.global.x - this.mouseStartX;
+                const delta = event.global.x - this.mouseStartX;
                 const start = BIMath.clamp(Number(this.oldViewStart) + (delta / this.stateController.absoluteResolution),
                     BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
                 const end = start + this.unitController.viewRangeLength;
@@ -138,7 +138,7 @@ export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
         super("navigator_background");
         this.addEvent("mousedown", event => {
             // Get x position of click (in pixels).
-            let x = event.data.getLocalPosition(this._displayObject).x;
+            let x = event.getLocalPosition(this._displayObject).x;
             // Convert x to units of BigInt Time.
             let center = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
             // We have the center of the new scrollbar position, but need the start of new position.
@@ -169,7 +169,7 @@ export class TimeGraphNavigatorBackground extends TimeGraphComponent<null> {
         this.addEvent('mouseupoutside', endSnap, this._displayObject);
         this.addEvent('rightdown', event => {
             // Get x position of click (in pixels).
-            let x = event.data.getLocalPosition(this._displayObject).x;
+            let x = event.getLocalPosition(this._displayObject).x;
             // Convert x to units of BigInt time.
             let clickPoint = BIMath.round((x / this.stateController.canvasDisplayWidth) * Number(this.unitController.absoluteRange));
             // Are we clicking to the left or the right of the current scrollbar position?

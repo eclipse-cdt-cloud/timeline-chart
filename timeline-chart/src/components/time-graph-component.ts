@@ -1,8 +1,8 @@
 import * as PIXI from "pixi.js-legacy";
 import { RenderEvents } from "../time-graph-render-controller";
 
-export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'rightdown' | 'click';
-export type TimeGraphInteractionHandler = (event: PIXI.InteractionEvent) => void;
+export type TimeGraphInteractionType = 'mouseover' | 'mouseout' | 'mousemove'| 'globalmousemove' | 'mousedown' | 'mouseup' | 'mouseupoutside' | 'rightdown' | 'click';
+export type TimeGraphInteractionHandler = (event: PIXI.FederatedPointerEvent) => void;
 
 export type TimeGraphComponentOptions = {}
 
@@ -151,8 +151,8 @@ export abstract class TimeGraphComponent<T> {
     }
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
-        displayObject.interactive = true;
-        displayObject.on(event, ((e: PIXI.InteractionEvent) => {
+        displayObject.eventMode = 'dynamic';
+        displayObject.on(event, ((e: PIXI.FederatedPointerEvent) => {
             if (handler) {
                 handler(e);
             }

@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js-legacy"
+import * as PIXI from "pixi.js-legacy";
 
 import { TimeGraphCursor } from "../components/time-graph-cursor";
 import { TimelineChart } from "../time-graph-model";
@@ -15,9 +15,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected secondCursor?: TimeGraphCursor;
     protected color: number = 0x0000ff;
 
-    private _stageMouseDownHandler: Function;
-    private _stageMouseMoveHandler: Function;
-    private _stageMouseUpHandler: Function;
+    private _stageMouseDownHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseMoveHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseUpHandler: (event: PIXI.FederatedPointerEvent) => void;
     
     private _updateHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
@@ -36,7 +36,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected afterAddToContainer() {
         this.mouseSelecting = false;
         this.shiftKeyDown = false
-        this.stage.interactive = true;
+        this.stage.eventMode = 'dynamic'; 
 
         this._updateHandler = (): void => this.update();
 
@@ -74,64 +74,68 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
         this.onCanvasEvent('keyup', this._cursorKeyUpHandler);
 
-        this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            // if only left button is pressed with or without Shift key
-            if (event.data.button !== 0 || event.data.buttons !== 1 ||
-                event.data.originalEvent.ctrlKey || event.data.originalEvent.altKey) {
-                return;
-            }
-            const extendSelection = event.data.originalEvent.shiftKey && this.stage.cursor === 'crosshair';
-            this.mouseSelecting = true;
-            this.stage.cursor = 'crosshair';
-            const mouseX = event.data.global.x;
-            const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
-            this.chartLayer.selectState(undefined);
-            if (extendSelection) {
-                const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : BigInt(0);
-                this.unitController.selectionRange = {
-                    start,
-                    end
+        this._stageMouseDownHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                // if only left button is pressed with or without Shift key
+                if (event.button !== 0 || event.buttons !== 1 ||
+                    event.ctrlKey || event.altKey) {
+                    return;
                 }
-            } else {
-                this.unitController.selectionRange = {
-                    start: end,
-                    end: end
+                const extendSelection = event.shiftKey && this.stage.cursor === 'crosshair';
+                this.mouseSelecting = true;
+                this.stage.cursor = 'crosshair';
+                const mouseX = event.global.x;
+                const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
+                this.chartLayer.selectState(undefined);
+                if (extendSelection) {
+                    const start = this.unitController.selectionRange ? this.unitController.selectionRange.start : BigInt(0);
+                    this.unitController.selectionRange = {
+                        start,
+                        end
+                    }
+                } else {
+                    this.unitController.selectionRange = {
+                        start: end,
+                        end: end
+                    }
                 }
             }
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
-        this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            if (this.mouseSelecting && this.unitController.selectionRange) {
-                if ((this.mouseButtons & 1) === 0) {
-                    // handle missed button mouseup event
-                    this.mouseSelecting = false;
-                    const orig = event.data.originalEvent;
-                    if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
-                        this.stage.cursor = 'default';
+        this._stageMouseMoveHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                if (this.mouseSelecting && this.unitController.selectionRange) {
+                    if ((this.mouseButtons & 1) === 0) {
+                        // handle missed button mouseup event
+                        this.mouseSelecting = false;
+                        if (!event.shiftKey || event.ctrlKey || event.altKey) {
+                            this.stage.cursor = 'default';
+                        }
+                        return;
                     }
-                    return;
-                }
-                const mouseX = event.data.global.x;
-                const start = this.unitController.selectionRange.start;
-                const end = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
-                            BigInt(0), this.unitController.absoluteRange);
-                this.unitController.selectionRange = {
-                    start,
-                    end
+                    const mouseX = event.global.x;
+                    const start = this.unitController.selectionRange.start;
+                    const end = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
+                                BigInt(0), this.unitController.absoluteRange);
+                    this.unitController.selectionRange = {
+                        start,
+                        end
+                    }
                 }
             }
         }
         this.stage.on('mousemove', this._stageMouseMoveHandler);
     
-        this._stageMouseUpHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            if (this.mouseSelecting && event.data.button === 0) {
-                this.mouseSelecting = false;
-                const orig = event.data.originalEvent;
-                if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
-                    this.stage.cursor = 'default';
+        this._stageMouseUpHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                if (this.mouseSelecting && event.button === 0) {
+                    this.mouseSelecting = false;
+                    if (!event.shiftKey || event.ctrlKey || event.altKey) {
+                        this.stage.cursor = 'default';
+                    }
                 }
             }
         };

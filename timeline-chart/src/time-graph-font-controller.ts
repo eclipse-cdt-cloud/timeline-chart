@@ -6,7 +6,7 @@ const DEFAULT_FONT_STYLE = {
     fontFamily: "monospace",
     fontSize: 8,
     fill: "white",
-    fontWeight: "bold"
+    fontWeight: "bold" as PIXI.TextStyleFontWeight
 };
 
 export class FontController {
@@ -37,7 +37,7 @@ export class FontController {
             fontFamily: this.fontFamily,
             fontSize: fontSize,
             fill: fontColor === "White" ? "white" : "black",
-            fontWeight: "bold"
+            fontWeight: "bold" as PIXI.TextStyleFontWeight
         };
         PIXI.BitmapFont.from(fontName, fontStyle, { chars: this.getCharacterSet() });
 

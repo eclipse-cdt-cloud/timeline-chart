@@ -1,11 +1,12 @@
 {
-  "globals": {
-    "ts-jest": {
-      "tsconfig": "tsconfig.json"
-    }
-  },
+  "testTimeout": 10000,
   "transform": {
-    "^.+\\.tsx?$": "ts-jest"
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        "tsconfig": "tsconfig.json"
+      }
+    ]
   },
   "testEnvironment": "jsdom",
   "testPathIgnorePatterns": [

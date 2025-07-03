@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js-legacy";
+
 import { TimeGraphAnnotationComponent, TimeGraphAnnotationStyle } from "../components/time-graph-annotation";
 import { TimeGraphComponent } from "../components/time-graph-component";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
@@ -11,11 +12,11 @@ import { BIMath } from "../bigint-utils";
 import { debounce, cloneDeep, DebouncedFunc, isEqual } from 'lodash';
 
 export interface TimeGraphMouseInteractions {
-    click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent, clickCount: number) => void
-    mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
-    mouseout?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
-    mousedown?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
-    mouseup?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
+    click?: (el: TimeGraphComponent<any>, ev: PIXI.FederatedPointerEvent, clickCount: number) => void
+    mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.FederatedPointerEvent) => void
+    mouseout?: (el: TimeGraphComponent<any>, ev: PIXI.FederatedPointerEvent) => void
+    mousedown?: (el: TimeGraphComponent<any>, ev: PIXI.FederatedPointerEvent) => void
+    mouseup?: (el: TimeGraphComponent<any>, ev: PIXI.FederatedPointerEvent) => void
 }
 
 export interface TimeGraphChartProviders {
@@ -67,9 +68,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseZoomingStart: bigint;
     protected zoomingSelection?: TimeGraphRectangle;
 
-    private _stageMouseDownHandler: Function;
-    private _stageMouseMoveHandler: Function;
-    private _stageMouseUpHandler: Function;
+    private _stageMouseDownHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseMoveHandler: (event: PIXI.FederatedPointerEvent) => void;
+    private _stageMouseUpHandler: (event: PIXI.FederatedPointerEvent) => void;
 
     private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void };
     private _zoomRangeChangedHandler: (zoomFactor: number) => void;
@@ -230,55 +231,63 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         });
 
-        this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            // if only middle button or only Ctrl+left button is pressed
-            if ((event.data.button !== 1 || event.data.buttons !== 4) &&
-                (event.data.button !== 0 || event.data.buttons !== 1 ||
-                    !event.data.originalEvent.ctrlKey ||
-                    event.data.originalEvent.shiftKey ||
-                    event.data.originalEvent.altKey ||
-                    this.stage.cursor !== 'grabbing')) {
-                return;
+        this._stageMouseDownHandler = (event: PIXI.FederatedPointerEvent) => {
+            // const orig = event.originalEvent;
+            // if (orig instanceof PIXI.FederatedPointerEvent) {
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                // if only middle button or only Ctrl+left button is pressed
+                if ((event.button !== 1 || event.buttons !== 4) &&
+                    (event.button !== 0 || event.buttons !== 1 ||
+                        !event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey ||
+                        this.stage.cursor !== 'grabbing')) {
+                    return;
+                }
+                this.mousePanning = true;
+                this.mouseDownButton = event.button;
+                this.mouseStartX = event.global.x;
+                this.mousePanningStart = this.unitController.viewRange.start;
+                this.stage.cursor = 'grabbing';
             }
-            this.mousePanning = true;
-            this.mouseDownButton = event.data.button;
-            this.mouseStartX = event.data.global.x;
-            this.mousePanningStart = this.unitController.viewRange.start;
-            this.stage.cursor = 'grabbing';
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
 
-        this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            if (this.mousePanning) {
-                if ((this.mouseDownButton == 1 && (this.mouseButtons & 4) === 0) ||
-                    (this.mouseDownButton == 0 && (this.mouseButtons & 1) === 0)) {
-                    // handle missed button mouseup event
-                    this.mousePanning = false;
-                    const orig = event.data.originalEvent;
-                    if (!orig.ctrlKey || orig.shiftKey || orig.altKey) {
-                        this.stage.cursor = 'default';
+        this._stageMouseMoveHandler = (event: PIXI.FederatedPointerEvent) => {
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                if (this.mousePanning) {
+                    if ((this.mouseDownButton == 1 && (this.mouseButtons & 4) === 0) ||
+                        (this.mouseDownButton == 0 && (this.mouseButtons & 1) === 0)) {
+                        // handle missed button mouseup event
+                        this.mousePanning = false;
+                        if (!event.ctrlKey || event.shiftKey || event.altKey) {
+                            this.stage.cursor = 'default';
+                        }
+                        return;
                     }
-                    return;
+                    const horizontalDelta = event.global.x - this.mouseStartX;
+                    panHorizontally(horizontalDelta);
                 }
-                const horizontalDelta = event.data.global.x - this.mouseStartX;
-                panHorizontally(horizontalDelta);
-            }
-            if (this.mouseZooming) {
-                this.mouseEndX = event.data.global.x;
-                this.updateZoomingSelection();
+                if (this.mouseZooming) {
+                    this.mouseEndX = event.global.x;
+                    this.updateZoomingSelection();
+                }
             }
         };
         this.stage.on('mousemove', this._stageMouseMoveHandler);
 
-        this._stageMouseUpHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            if (event.data.button === this.mouseDownButton && this.mousePanning) {
-                this.mousePanning = false;
-                const orig = event.data.originalEvent;
-                if (!orig.ctrlKey || orig.shiftKey || orig.altKey) {
-                    this.stage.cursor = 'default';
+        this._stageMouseUpHandler = (event: PIXI.FederatedPointerEvent) => {
+            this.mouseButtons = event.buttons;
+
+            if (event.pointerType === 'mouse') {
+                this.mouseButtons = event.buttons;
+                if (event.button === this.mouseDownButton && this.mousePanning) {
+                    this.mousePanning = false;
+                    if (!event.ctrlKey || event.shiftKey || event.altKey) {
+                        this.stage.cursor = 'default';
+                    }
                 }
             }
         };
@@ -741,8 +750,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             width: this.rowWidth,
             height: this.rowController.rowHeight
         }, rowIndex, row, rowStyle);
-        rowComponent.displayObject.interactive = true;
-        rowComponent.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
+        rowComponent.displayObject.eventMode = 'dynamic';
+        rowComponent.displayObject.on('click', ((e: PIXI.FederatedPointerEvent) => {
             this.selectRow(row);
         }).bind(this));
         this.addChild(rowComponent);
@@ -837,7 +846,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected addElementInteractions(el: TimeGraphComponent<any>) {
-        el.displayObject.interactive = true;
+        el.displayObject.eventMode = 'dynamic';
 
         var self = this;
         this._multiClickTimer = debounce(function(){
@@ -845,13 +854,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             self._recentlyClickedGlobal = null;
         }, this._multiClickTime);
 
-        el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
+        el.displayObject.on('click', ((e: PIXI.FederatedPointerEvent) => {
             if (el instanceof TimeGraphStateComponent && !this.mousePanning && !this.mouseZooming) {
                 this.selectState(el.model);
             }
 
             // Mouse clicks count keeps increasing without limit as long as we keep clicking on the same coordinate.
-            if (this._recentlyClickedGlobal && this._recentlyClickedGlobal.equals(e.data.global)) {
+            if (this._recentlyClickedGlobal && this._recentlyClickedGlobal.equals(e.global)) {
                 this._mouseClicks++;
             } else {
                 // Only clear the timer and reset the click count if the global position is NOT 
@@ -860,7 +869,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this._mouseClicks = 1;
 
                 // Store the global position on first click
-                this._recentlyClickedGlobal = cloneDeep(e.data.global);
+                this._recentlyClickedGlobal = cloneDeep(e.global);
             }
 
             // We can use a debouncer to reset the count when no click occurs for a certain period.
@@ -871,22 +880,22 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 this.mouseInteractions.click(el, e, this._mouseClicks);
             }
         }).bind(this));
-        el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
+        el.displayObject.on('mouseover', ((e: PIXI.FederatedPointerEvent) => {
             if (this.mouseInteractions && this.mouseInteractions.mouseover) {
                 this.mouseInteractions.mouseover(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mouseout', ((e: PIXI.InteractionEvent) => {
+        el.displayObject.on('mouseout', ((e: PIXI.FederatedPointerEvent) => {
             if (this.mouseInteractions && this.mouseInteractions.mouseout) {
                 this.mouseInteractions.mouseout(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mousedown', ((e: PIXI.InteractionEvent) => {
+        el.displayObject.on('mousedown', ((e: PIXI.FederatedPointerEvent) => {
             if (this.mouseInteractions && this.mouseInteractions.mousedown) {
                 this.mouseInteractions.mousedown(el, e);
             }
         }).bind(this));
-        el.displayObject.on('mouseup', ((e: PIXI.InteractionEvent) => {
+        el.displayObject.on('mouseup', ((e: PIXI.FederatedPointerEvent) => {
             if (this.mouseInteractions && this.mouseInteractions.mouseup) {
                 this.mouseInteractions.mouseup(el, e);
             }

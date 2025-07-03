@@ -32,16 +32,16 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
     protected addEvents() {
         const mouseMove = _.throttle(event => {
             if (this.mouseIsDown) {
-                this.zoomAroundLeftViewBorder(event.data.global.x);
+                this.zoomAroundLeftViewBorder(event.global.x);
             }
         }, 40);
         this.addEvent('mousedown', event => {
-            this.mouseStartY = event.data.global.y;
-            this.mouseStartX = event.data.global.x;
+            this.mouseStartY = event.global.y;
+            this.mouseStartX = event.global.x;
             this.oldViewRange = this.unitController.viewRange;
             this.mouseIsDown = true;
         }, this._displayObject);
-        this.addEvent('mousemove', mouseMove, this._displayObject);
+        this.addEvent('globalmousemove', mouseMove, this._displayObject);
         const moveEnd: TimeGraphInteractionHandler = event => {
             this.mouseIsDown = false;
         }

@@ -16,6 +16,10 @@ describe('TimeGraphArrow', () => {
     }
     const component = new TimeGraphArrowComponent('Test', arrow, coords);
 
+    afterAll(() => {
+        component.destroy();
+    });
+
     it ('Renders', () => {
         expect(component).toBeTruthy();
     })
