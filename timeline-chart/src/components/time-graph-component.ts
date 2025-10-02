@@ -90,7 +90,7 @@ export abstract class TimeGraphComponent<T> {
     protected rect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
+        this.displayObject.beginFill((color || 0x000000), this.getPIXIOpacity(opacity));
         this.displayObject.drawRect(position.x, position.y, width, height);
         this.displayObject.endFill();
         this.startPixiRender();
@@ -99,7 +99,7 @@ export abstract class TimeGraphComponent<T> {
     protected rectTruncated(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
+        this.displayObject.beginFill((color || 0x000000), this.getPIXIOpacity(opacity));
         if (width > 20) {
             const xpos = position.x + 0.5;
             const ypos = position.y + 0.5;
@@ -117,7 +117,7 @@ export abstract class TimeGraphComponent<T> {
     protected roundedRect(opts: TimeGraphStyledRect) {
         const { position, width, height, color, opacity, borderColor, borderWidth, borderRadius } = opts;
         this.displayObject.lineStyle(borderWidth || 0, borderColor || 0x000000);
-        this.displayObject.beginFill((color || 0xffffff), this.getPIXIOpacity(opacity));
+        this.displayObject.beginFill((color || 0x000000), this.getPIXIOpacity(opacity));
 
         this.displayObject.drawRoundedRect(position.x + 0.5, position.y + 0.5, width, height, borderRadius || 0);
 
