@@ -1,6 +1,6 @@
 {
   "name": "timeline-chart",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A time graph / gantt chart library for large data (e.g. traces)",
   "keywords": [
     "gantt",
@@ -30,8 +30,8 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "jest": "^28.0.0",
-    "jest-environment-jsdom": "28.0.0",
     "jest-canvas-mock": "^2.3.1",
+    "jest-environment-jsdom": "28.0.0",
     "rimraf": "^5.0.0",
     "ts-jest": "^29.0.0"
   },
