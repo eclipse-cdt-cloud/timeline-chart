@@ -21,7 +21,7 @@
     "glob": "^7.1.6",
     "keyboard-key": "1.1.0",
     "lodash.throttle": "^4.1.1",
-    "pixi.js-legacy": "^5.3.3"
+    "pixi.js-legacy": "^7.3.2"
   },
   "devDependencies": {
     "@types/enzyme": "^3.10.10",
