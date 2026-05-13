@@ -2,7 +2,7 @@
 
 exports[`TimeGraphAxisCursor Matches snapshot 1`] = `
 TimeGraphAxisCursor {
-  "_displayObject": Graphics {
+  "_displayObject": _Graphics2 {
     "_bounds": Bounds {
       "maxX": -Infinity,
       "maxY": -Infinity,
@@ -53,7 +53,7 @@ TimeGraphAxisCursor {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
           "_events": Object {
@@ -65,9 +65,12 @@ TimeGraphAxisCursor {
           },
           "_eventsCount": 1,
           "_glTextures": Object {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -76,7 +79,6 @@ TimeGraphAxisCursor {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -85,7 +87,7 @@ TimeGraphAxisCursor {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
@@ -113,21 +115,23 @@ TimeGraphAxisCursor {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": Array [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -146,7 +150,7 @@ TimeGraphAxisCursor {
       },
       "visible": false,
     },
-    "_geometry": GraphicsGeometry {
+    "_geometry": _GraphicsGeometry2 {
       "_bounds": Bounds {
         "maxX": -Infinity,
         "maxY": -Infinity,
@@ -167,8 +171,8 @@ TimeGraphAxisCursor {
           "items": Array [],
         },
         "id": 0,
-        "index": false,
         "static": false,
+        "type": 34962,
       },
       "_indexBuffer": Buffer {
         "_glBuffers": Object {},
@@ -182,12 +186,13 @@ TimeGraphAxisCursor {
           "items": Array [],
         },
         "id": 1,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
       "attributes": Object {
         "aColor": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 4,
@@ -197,6 +202,7 @@ TimeGraphAxisCursor {
         },
         "aTextureCoord": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -206,6 +212,7 @@ TimeGraphAxisCursor {
         },
         "aTextureId": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": true,
           "size": 1,
@@ -215,6 +222,7 @@ TimeGraphAxisCursor {
         },
         "aVertexPosition": Attribute {
           "buffer": 0,
+          "divisor": 1,
           "instance": false,
           "normalized": false,
           "size": 2,
@@ -241,8 +249,8 @@ TimeGraphAxisCursor {
             "items": Array [],
           },
           "id": 0,
-          "index": false,
           "static": false,
+          "type": 34962,
         },
         Buffer {
           "_glBuffers": Object {},
@@ -256,8 +264,8 @@ TimeGraphAxisCursor {
             "items": Array [],
           },
           "id": 1,
-          "index": true,
           "static": false,
+          "type": 34963,
         },
       ],
       "cacheDirty": -1,
@@ -286,8 +294,8 @@ TimeGraphAxisCursor {
           "items": Array [],
         },
         "id": 1,
-        "index": true,
         "static": false,
+        "type": 34963,
       },
       "indices": Array [],
       "indicesUint16": null,
@@ -343,7 +351,7 @@ TimeGraphAxisCursor {
           "y2": 1,
           "y3": 1,
         },
-        "baseTexture": BaseTexture {
+        "baseTexture": _BaseTexture2 {
           "_batchEnabled": 0,
           "_batchLocation": 0,
           "_events": Object {
@@ -355,9 +363,12 @@ TimeGraphAxisCursor {
           },
           "_eventsCount": 1,
           "_glTextures": Object {},
+          "_mipmap": 1,
+          "_scaleMode": 1,
+          "_wrapMode": 33071,
           "alphaMode": 1,
           "anisotropicLevel": 0,
-          "cacheId": null,
+          "cacheId": "pixiid_1",
           "destroy": [Function],
           "destroyed": false,
           "dirtyId": 0,
@@ -366,7 +377,6 @@ TimeGraphAxisCursor {
           "format": 6408,
           "height": 16,
           "isPowerOfTwo": true,
-          "mipmap": 1,
           "on": [Function],
           "once": [Function],
           "parentTextureArray": null,
@@ -375,7 +385,7 @@ TimeGraphAxisCursor {
             "_height": 16,
             "_width": 16,
             "destroyed": false,
-            "internal": false,
+            "internal": true,
             "noSubImage": false,
             "onError": Runner {
               "_aliasCount": 0,
@@ -403,21 +413,23 @@ TimeGraphAxisCursor {
               width="16"
             />,
           },
-          "scaleMode": 1,
           "target": 3553,
-          "textureCacheIds": Array [],
+          "textureCacheIds": Array [
+            "pixiid_1",
+          ],
           "touched": 0,
           "type": 5121,
           "uid": 2,
           "valid": true,
           "width": 16,
-          "wrapMode": 33071,
         },
         "defaultAnchor": Point {
           "x": 0,
           "y": 0,
         },
+        "defaultBorders": undefined,
         "destroy": [Function],
+        "destroyed": false,
         "emit": [Function],
         "noFrame": true,
         "on": [Function],
@@ -440,8 +452,18 @@ TimeGraphAxisCursor {
     "_localBounds": null,
     "_localBoundsRect": null,
     "_mask": null,
+    "_maskRefCount": 0,
     "_matrix": null,
-    "_tint": 16777215,
+    "_tintColor": _Color2 {
+      "_components": Float32Array [
+        1,
+        1,
+        1,
+        1,
+      ],
+      "_int": 16777215,
+      "_value": 16777215,
+    },
     "_transformID": -1,
     "_zIndex": 0,
     "alpha": 1,
@@ -449,6 +471,8 @@ TimeGraphAxisCursor {
     "batchTint": -1,
     "batches": Array [],
     "children": Array [],
+    "cullArea": null,
+    "cullable": false,
     "currentPath": null,
     "filterArea": null,
     "filters": null,
@@ -463,10 +487,10 @@ TimeGraphAxisCursor {
     "state": State {
       "_blendMode": 0,
       "_polygonOffset": 0,
-      "data": 1,
+      "data": 33,
     },
     "tempDisplayObjectParent": null,
-    "transform": Transform {
+    "transform": _Transform {
       "_currentLocalID": 0,
       "_cx": 1,
       "_cy": 0,

@@ -74,17 +74,17 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
         this.onCanvasEvent('keyup', this._cursorKeyUpHandler);
 
-        this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
+        this._stageMouseDownHandler = (event: PIXI.FederatedPointerEvent) => {
+            this.mouseButtons = event.buttons;
             // if only left button is pressed with or without Shift key
-            if (event.data.button !== 0 || event.data.buttons !== 1 ||
-                event.data.originalEvent.ctrlKey || event.data.originalEvent.altKey) {
+            if (event.button !== 0 || event.buttons !== 1 ||
+                event.ctrlKey || event.altKey) {
                 return;
             }
-            const extendSelection = event.data.originalEvent.shiftKey && this.stage.cursor === 'crosshair';
+            const extendSelection = event.shiftKey && this.stage.cursor === 'crosshair';
             this.mouseSelecting = true;
             this.stage.cursor = 'crosshair';
-            const mouseX = event.data.global.x;
+            const mouseX = event.global.x;
             const end = this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor);
             this.chartLayer.selectState(undefined);
             if (extendSelection) {
@@ -101,19 +101,19 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             }
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
-        this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
+        this._stageMouseMoveHandler = (event: PIXI.FederatedPointerEvent) => {
+            this.mouseButtons = event.buttons;
             if (this.mouseSelecting && this.unitController.selectionRange) {
                 if ((this.mouseButtons & 1) === 0) {
                     // handle missed button mouseup event
                     this.mouseSelecting = false;
-                    const orig = event.data.originalEvent;
+                    const orig = event.nativeEvent as PointerEvent;
                     if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
                         this.stage.cursor = 'default';
                     }
                     return;
                 }
-                const mouseX = event.data.global.x;
+                const mouseX = event.global.x;
                 const start = this.unitController.selectionRange.start;
                 const end = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
                             BigInt(0), this.unitController.absoluteRange);
@@ -121,15 +121,23 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     start,
                     end
                 }
+            } else if (!this.mouseSelecting) {
+                const mouseX = event.global.x;
+                const pos = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
+                            BigInt(0), this.unitController.absoluteRange);
+                this.unitController.selectionRange = {
+                    start: pos,
+                    end: pos
+                }
             }
         }
-        this.stage.on('mousemove', this._stageMouseMoveHandler);
+        this.stage.on('globalmousemove', this._stageMouseMoveHandler);
     
-        this._stageMouseUpHandler = (event: PIXI.InteractionEvent) => {
-            this.mouseButtons = event.data.buttons;
-            if (this.mouseSelecting && event.data.button === 0) {
+        this._stageMouseUpHandler = (event: PIXI.FederatedPointerEvent) => {
+            this.mouseButtons = event.buttons;
+            if (this.mouseSelecting && event.button === 0) {
                 this.mouseSelecting = false;
-                const orig = event.data.originalEvent;
+                const orig = event.nativeEvent as PointerEvent;
                 if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
                     this.stage.cursor = 'default';
                 }
@@ -299,7 +307,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         }
         if (this.stage) {
             this.stage.off('mousedown', this._stageMouseDownHandler);
-            this.stage.off('mousemove', this._stageMouseMoveHandler);
+            this.stage.off('globalmousemove', this._stageMouseMoveHandler);
             this.stage.off('mouseup', this._stageMouseUpHandler);
             this.stage.off('mouseupoutside', this._stageMouseUpHandler);
         }
