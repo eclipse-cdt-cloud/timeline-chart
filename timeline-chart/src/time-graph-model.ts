@@ -19,6 +19,8 @@ export namespace TimelineChart {
         range: TimeGraphRange
         states: TimeGraphState[]
         annotations: TimeGraphAnnotation[]
+        /** Optional XY series to render as line plots within this row (values normalized 0-1) */
+        xySeries?: TimeGraphXYSeries[]
         selected?: boolean
         readonly data?: { [key: string]: any }
         prevPossibleState: bigint
@@ -55,5 +57,18 @@ export namespace TimelineChart {
         readonly label: string
         selected?: boolean
         readonly data?: { [key: string]: any }
+    }
+
+    export interface TimeGraphXYPoint {
+        readonly time: bigint
+        /** Normalized value between 0 and 1 */
+        readonly value: number
+    }
+
+    export interface TimeGraphXYSeries {
+        readonly id: string
+        readonly label?: string
+        readonly color?: number
+        readonly points: TimeGraphXYPoint[]
     }
 }

@@ -186,6 +186,8 @@ export class TestDataProvider {
         timeGraphEntries.model.entries.forEach(entry => {
             rowIds.push(entry.id);
         });
+        // Add XY plot row IDs
+        rowIds.push(-100, -101);
         return rowIds;
     }
 
@@ -292,6 +294,13 @@ export class TestDataProvider {
             });
         });
 
+        // Generate XY plot rows with fixed-time EKG-style data
+        const xyRows: TimelineChart.TimeGraphRowModel[] = [
+            this.createXYRow(-100, 'Heart Rate (EKG)', range, (t) => this.ekgWaveform(t)),
+            this.createXYRow(-101, 'Respiration (EKG)', range, (t) => this.ekgWaveform(t * 0.4 + 0.1))
+        ];
+        rows.push(...xyRows);
+
         return {
             id: "",
             arrows,
@@ -299,5 +308,64 @@ export class TestDataProvider {
             rangeEvents,
             totalLength: this.totalLength
         };
+    }
+
+    private createXYRow(id: number, name: string, range: TimelineChart.TimeGraphRange, fn: (t: number) => number): TimelineChart.TimeGraphRowModel {
+        // Generate points with fixed time positions spanning the full trace.
+        // Only emit points that fall within the requested range (with small buffer).
+        const totalLen = Number(this.totalLength);
+        const rangeStart = Number(range.start);
+        const rangeEnd = Number(range.end);
+        const rangeLen = rangeEnd - rangeStart;
+
+        // Use enough points to get ~1 point per 2 pixels at current resolution
+        const numPoints = Math.max(200, Math.min(2000, Math.round(rangeLen / (totalLen / 2000))));
+        const step = rangeLen / (numPoints - 1);
+
+        const points: TimelineChart.TimeGraphXYPoint[] = [];
+        for (let i = 0; i < numPoints; i++) {
+            const timeNum = rangeStart + i * step;
+            const t = timeNum / totalLen; // normalized position in full trace
+            const time = BigInt(Math.round(timeNum));
+            points.push({ time, value: Math.max(0, Math.min(1, fn(t))) });
+        }
+        return {
+            id,
+            name,
+            range: { start: range.start, end: range.end },
+            states: [],
+            annotations: [],
+            xySeries: [{ id: `xy_${id}`, label: name, color: id === -100 ? 0x22cc44 : 0x44aaff, points }],
+            prevPossibleState: range.start,
+            nextPossibleState: range.end
+        };
+    }
+
+    /** EKG-style waveform: flat baseline with periodic sharp QRS-like spikes */
+    private ekgWaveform(t: number): number {
+        // Repeat every cycle; ~20 beats across the full trace
+        const cycles = 20;
+        const phase = (t * cycles) % 1;
+
+        // P wave (small bump)
+        if (phase > 0.1 && phase < 0.2) {
+            const p = (phase - 0.1) / 0.1;
+            return 0.5 + 0.08 * Math.sin(p * Math.PI);
+        }
+        // QRS complex (sharp spike)
+        if (phase > 0.25 && phase < 0.45) {
+            const q = (phase - 0.25) / 0.2;
+            if (q < 0.2) return 0.5 - 0.1 * (q / 0.2); // Q dip
+            if (q < 0.5) return 0.5 - 0.1 + 0.9 * ((q - 0.2) / 0.3); // R spike up
+            if (q < 0.7) return 0.5 + 0.8 - 1.0 * ((q - 0.5) / 0.2); // R spike down
+            return 0.5 - 0.2 + 0.2 * ((q - 0.7) / 0.3); // S recovery
+        }
+        // T wave (broad bump)
+        if (phase > 0.55 && phase < 0.75) {
+            const tw = (phase - 0.55) / 0.2;
+            return 0.5 + 0.12 * Math.sin(tw * Math.PI);
+        }
+        // Baseline
+        return 0.5;
     }
 }

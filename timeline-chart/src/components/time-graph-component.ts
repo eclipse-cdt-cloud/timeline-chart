@@ -151,7 +151,7 @@ export abstract class TimeGraphComponent<T> {
     }
 
     addEvent(event: TimeGraphInteractionType, handler: TimeGraphInteractionHandler, displayObject: PIXI.DisplayObject) {
-        displayObject.interactive = true;
+        displayObject.eventMode = 'static';
         displayObject.on(event, ((e: PIXI.FederatedPointerEvent) => {
             if (handler) {
                 handler(e);

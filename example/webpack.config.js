@@ -19,8 +19,7 @@ module.exports = {
             {
                 enforce: "pre",
                 test: /\.js$/,
-                loader: "source-map-loader",
-                exclude: /node_modules\/@pixi/
+                loader: "source-map-loader"
             },
             {
                 test: /\.png$/,

@@ -4,6 +4,7 @@ import { TimeGraphComponent } from "../components/time-graph-component";
 import { TimeGraphRectangle } from "../components/time-graph-rectangle";
 import { TimeGraphRow, TimeGraphRowStyle } from "../components/time-graph-row";
 import { TimeGraphStateComponent, TimeGraphStateStyle } from "../components/time-graph-state";
+import { TimeGraphXYComponent } from "../components/time-graph-xy";
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphRowController } from "../time-graph-row-controller";
 import { TimeGraphChartLayer } from "./time-graph-chart-layer";
@@ -70,6 +71,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _stageMouseDownHandler: Function;
     private _stageMouseMoveHandler: Function;
     private _stageMouseUpHandler: Function;
+    private _stageMouseOverHandler: Function;
+    private _stageMouseOutHandler: Function;
 
     private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void };
     private _zoomRangeChangedHandler: (zoomFactor: number) => void;
@@ -219,16 +222,18 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
         };
 
-        this.stage.on('mouseover', () => {
+        this._stageMouseOverHandler = () => {
             triggerKeyEvent = true;
-        });
+        };
+        this.stage.on('mouseover', this._stageMouseOverHandler);
 
-        this.stage.on('mouseout', () => {
+        this._stageMouseOutHandler = () => {
             triggerKeyEvent = false;
             if (this.stage.cursor === 'grabbing' && !this.mousePanning) {
                 this.stage.cursor = 'default';
             }
-        });
+        };
+        this.stage.on('mouseout', this._stageMouseOutHandler);
 
         this._stageMouseDownHandler = (event: PIXI.FederatedPointerEvent) => {
             this.mouseButtons = event.buttons;
@@ -468,6 +473,8 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.stage.off('globalmousemove', this._stageMouseMoveHandler);
             this.stage.off('mouseup', this._stageMouseUpHandler);
             this.stage.off('mouseupoutside', this._stageMouseUpHandler);
+            this.stage.off('mouseover', this._stageMouseOverHandler);
+            this.stage.off('mouseout', this._stageMouseOutHandler);
         }
         this.rowComponents.clear();
         super.destroy();
@@ -741,7 +748,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             width: this.rowWidth,
             height: this.rowController.rowHeight
         }, rowIndex, row, rowStyle);
-        rowComponent.displayObject.interactive = true;
+        rowComponent.displayObject.eventMode = 'static';
         rowComponent.displayObject.on('click', ((e: PIXI.FederatedPointerEvent) => {
             this.selectRow(row);
         }).bind(this));
@@ -788,6 +795,20 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 rowComponent.addAnnotation(el);
             }
         });
+        if (row.xySeries && row.states.length === 0) {
+            row.xySeries.forEach((series: TimelineChart.TimeGraphXYSeries) => {
+                const xCoords = series.points.map(p => this.getWorldPixel(p.time));
+                const xy = new TimeGraphXYComponent(
+                    series.id,
+                    series,
+                    xCoords,
+                    rowComponent.height,
+                    rowComponent.position.y,
+                    { color: series.color }
+                );
+                rowComponent.addXYSeries(xy);
+            });
+        }
         rowComponent.providedModel = providedModel;
     }
 
@@ -837,7 +858,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected addElementInteractions(el: TimeGraphComponent<any>) {
-        el.displayObject.interactive = true;
+        el.displayObject.eventMode = 'static';
 
         var self = this;
         this._multiClickTimer = debounce(function(){
@@ -1117,12 +1138,20 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return Number(this.stateController.worldRangeLength) * this.stateController.zoomFactor;
     }
 
+    getRowComponent(rowId: number): TimeGraphRow | undefined {
+        return this.rowComponents.get(rowId);
+    }
+
+    getRowComponents(): ReadonlyMap<number, TimeGraphRow> {
+        return this.rowComponents;
+    }
+
     getStatesAtTimestamp(timestamp: bigint): { row: TimelineChart.TimeGraphRowModel, state: TimelineChart.TimeGraphState }[] {
         const results: { row: TimelineChart.TimeGraphRowModel, state: TimelineChart.TimeGraphState }[] = [];
         this.rowComponents.forEach((rowComponent) => {
             const row = rowComponent.model;
             if (row) {
-                const state = row.states.find(s => s.range.start <= timestamp && s.range.end >= timestamp && s.data?.style);
+                const state = row.states.find(s => s.range.start <= timestamp && s.range.end > timestamp && s.data?.style);
                 if (state) {
                     results.push({ row, state });
                 }

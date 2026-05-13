@@ -15,6 +15,7 @@ import { TimeGraphChartGrid } from "timeline-chart/lib/layer/time-graph-chart-gr
 import { TimeGraphVerticalScrollbar } from "timeline-chart/lib/layer/time-graph-vertical-scrollbar";
 import { TimeGraphChartArrows } from "timeline-chart/lib/layer/time-graph-chart-arrows";
 import { TimeGraphRangeEventsLayer } from "timeline-chart/lib/layer/time-graph-range-events-layer";
+import { TimeGraphChartRichCursor } from "timeline-chart/lib/layer/time-graph-chart-rich-cursor";
 
 const styleConfig = {
     mainWidth: 1000,
@@ -154,10 +155,11 @@ const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', ro
 const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', { color: styleConfig.cursorColor });
 const timeGraphChartCursors = new TimeGraphChartCursors('chart-cursors', timeGraphChart, rowController, { color: styleConfig.cursorColor });
 const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer('timeGraphChartRangeEvents', providers);
+const timeGraphRichCursor = new TimeGraphChartRichCursor('chart-rich-cursor', timeGraphChart, rowController);
 
 timeGraphChartContainer.addLayers([timeGraphChartGridLayer, timeGraphChart,
-    timeGraphChartArrows, timeGraphSelectionRange,
-    timeGraphChartCursors, timeGraphChartRangeEvents]);
+    timeGraphChartArrows, timeAxisCursors, timeGraphSelectionRange,
+    timeGraphChartCursors, timeGraphChartRangeEvents, timeGraphRichCursor]);
 
 timeGraphChart.registerMouseInteractions({
     click: el => {

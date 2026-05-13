@@ -37,7 +37,7 @@ export class FontController {
             fontFamily: this.fontFamily,
             fontSize: fontSize,
             fill: fontColor === "White" ? "white" : "black",
-            fontWeight: '900' as const
+            fontWeight: 'bold' as const
         };
         PIXI.BitmapFont.from(fontName, fontStyle, { chars: this.getCharacterSet() });
 
