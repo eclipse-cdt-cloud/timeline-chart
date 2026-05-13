@@ -2,6 +2,7 @@ import { TimeGraphComponent, TimeGraphElementPosition, TimeGraphParentComponent,
 import { TimelineChart } from "../time-graph-model";
 import { TimeGraphStateComponent } from "./time-graph-state";
 import { TimeGraphAnnotationComponent } from "./time-graph-annotation";
+import { TimeGraphXYComponent } from "./time-graph-xy";
 
 export interface TimeGraphRowStyle {
     backgroundColor?: number
@@ -16,6 +17,7 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
     protected _providedModel: { range: TimelineChart.TimeGraphRange, resolution: number, filterExpressionsMap?: {[key: number]: string[]} } | undefined;
     protected _rowStateComponents: Map<string, TimeGraphStateComponent> = new Map();
     protected _rowAnnotationComponents: Map<string, TimeGraphAnnotationComponent> = new Map();
+    protected _rowXYComponents: Map<string, TimeGraphXYComponent> = new Map();
 
     constructor(
         id: string,
@@ -94,6 +96,16 @@ export class TimeGraphRow extends TimeGraphComponent<TimelineChart.TimeGraphRowM
 
     getAnnotationById(id: string) {
         return this._rowAnnotationComponents.get(id);
+    }
+
+    addXYSeries(xyComponent: TimeGraphXYComponent) {
+        this._rowXYComponents.set(xyComponent.id, xyComponent);
+        this.addChild(xyComponent);
+    }
+
+    removeXYSeries(xyComponent: TimeGraphXYComponent) {
+        this._rowXYComponents.delete(xyComponent.id);
+        this.removeChild(xyComponent);
     }
 
     get style() {

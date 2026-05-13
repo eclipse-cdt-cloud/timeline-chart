@@ -36,7 +36,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
     protected afterAddToContainer() {
         this.mouseSelecting = false;
         this.shiftKeyDown = false
-        this.stage.interactive = true;
+        this.stage.eventMode = 'static';
 
         this._updateHandler = (): void => this.update();
 
@@ -107,8 +107,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 if ((this.mouseButtons & 1) === 0) {
                     // handle missed button mouseup event
                     this.mouseSelecting = false;
-                    const orig = event.nativeEvent as PointerEvent;
-                    if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                    if (!event.shiftKey || event.ctrlKey || event.altKey) {
                         this.stage.cursor = 'default';
                     }
                     return;
@@ -121,14 +120,6 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                     start,
                     end
                 }
-            } else if (!this.mouseSelecting) {
-                const mouseX = event.global.x;
-                const pos = BIMath.clamp(this.unitController.viewRange.start + BIMath.round(mouseX / this.stateController.zoomFactor),
-                            BigInt(0), this.unitController.absoluteRange);
-                this.unitController.selectionRange = {
-                    start: pos,
-                    end: pos
-                }
             }
         }
         this.stage.on('globalmousemove', this._stageMouseMoveHandler);
@@ -137,8 +128,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             this.mouseButtons = event.buttons;
             if (this.mouseSelecting && event.button === 0) {
                 this.mouseSelecting = false;
-                const orig = event.nativeEvent as PointerEvent;
-                if (!orig.shiftKey || orig.ctrlKey || orig.altKey) {
+                if (!event.shiftKey || event.ctrlKey || event.altKey) {
                     this.stage.cursor = 'default';
                 }
             }
@@ -248,21 +238,21 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
              */
             const firstCursorPosition = this.getWorldPixel(this.unitController.selectionRange.start);
             const secondCursorPosition = this.getWorldPixel(this.unitController.selectionRange.end);
-            const firstCursorOptions = {
-                color: this.color,
-                height: this.stateController.canvasDisplayHeight,
-                position: {
-                    x: firstCursorPosition,
-                    y: 0
-                }
-            };
-            if (!this.firstCursor) {
-                this.firstCursor = new TimeGraphCursor(firstCursorOptions);
-                this.addChild(this.firstCursor);
-            } else {
-                this.firstCursor.update(firstCursorOptions);
-            }
             if (secondCursorPosition !== firstCursorPosition) {
+                const firstCursorOptions = {
+                    color: this.color,
+                    height: this.stateController.canvasDisplayHeight,
+                    position: {
+                        x: firstCursorPosition,
+                        y: 0
+                    }
+                };
+                if (!this.firstCursor) {
+                    this.firstCursor = new TimeGraphCursor(firstCursorOptions);
+                    this.addChild(this.firstCursor);
+                } else {
+                    this.firstCursor.update(firstCursorOptions);
+                }
                 const secondCursorOptions = {
                     color: this.color,
                     height: this.stateController.canvasDisplayHeight,
@@ -277,8 +267,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
                 } else {
                     this.secondCursor.update(secondCursorOptions);
                 }
-            } else if (!!this.secondCursor) {
-                this.removeChild(this.secondCursor);
+            } else {
+                this.removeChildren();
+                delete this.firstCursor;
                 delete this.secondCursor;
             }
         } else {
@@ -303,7 +294,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
             this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler);
         }
         if (this._cursorKeyUpHandler) {
-            this.removeOnCanvasEvent('mousedown', this._cursorKeyUpHandler);
+            this.removeOnCanvasEvent('keyup', this._cursorKeyUpHandler);
         }
         if (this.stage) {
             this.stage.off('mousedown', this._stageMouseDownHandler);
